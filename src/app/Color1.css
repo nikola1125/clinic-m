@@ -1,0 +1,35 @@
+/* Color1 - Original Palette before green/white changes */
+
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  
+  /* Primary Colors - Modern Medical Blues */
+  --primary: #2563eb;
+  --primary-foreground: #ffffff;
+  
+  /* Accent Colors - Fresh Mint/Teal */
+  --accent: #10b981;
+  --accent-foreground: #042f2e;
+  
+  /* Glassmorphism Tokens */
+  --glass: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.3);
+}
+
+/* Dark Mode */
+.dark {
+  --background: #020617;
+  --foreground: #f1f5f9;
+  --glass: rgba(15, 23, 42, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --background: #020617;
+    --foreground: #f1f5f9;
+    --glass: rgba(15, 23, 42, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.1);
+  }
+}

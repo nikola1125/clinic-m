@@ -2,25 +2,86 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #064e3b; /* emerald-900 */
+  
+  /* Primary Colors - Dark Green */
+  --primary: #15803d; /* green-700 */
+  --primary-foreground: #ffffff;
+  
+  /* Accent Colors - Light Green */
+  --accent: #4ade80; /* green-400 */
+  --accent-foreground: #022c22; /* emerald-950 */
+  
+  /* Glassmorphism Tokens */
+  --glass: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.3);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  
+  --font-sans: "Outfit", "Inter", var(--font-geist-sans), sans-serif;
+  --font-heading: "Outfit", sans-serif;
+  
+  --shadow-premium: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+  --shadow-glass: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+/* Dark Mode Support via class */
+.dark {
+  --background: #022c22; /* emerald-950 */
+  --foreground: #ecfdf5; /* emerald-50 */
+  --primary: #22c55e; /* green-500 */
+  --primary-foreground: #022c22;
+  --accent: #86efac; /* green-300 */
+  --accent-foreground: #064e3b; 
+  --glass: rgba(2, 44, 34, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.1);
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not(.light) {
+    --background: #022c22;
+    --foreground: #ecfdf5;
+    --primary: #22c55e;
+    --primary-foreground: #022c22;
+    --accent: #86efac;
+    --accent-foreground: #064e3b; 
+    --glass: rgba(2, 44, 34, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.1);
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Glassmorphism Utility */
+.glass {
+  background: var(--glass);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+}
+
+/* Gradient Text */
+.text-gradient {
+  background: linear-gradient(to right, var(--primary), var(--accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+

@@ -1,0 +1,407 @@
+"use client";
+
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { uid } from "@/lib/ids";
+import { api } from "@/lib/api";
+
+export type Consult = {
+  id: string;
+  title: string;
+  price: number;
+};
+
+export type Doctor = {
+  id: string;
+  name: string;
+  email: string;
+  specialty: string;
+  bio: string;
+  consults: Consult[];
+};
+
+export type AppointmentStatus = "pending" | "accepted" | "rejected" | "completed";
+
+export type Appointment = {
+  id: string;
+  doctorId: string;
+  patientId: string;
+  consultId: string;
+  scheduledAt: string;
+  status: AppointmentStatus;
+  price: number;
+};
+
+export type Patient = {
+  id: string;
+  doctorId: string;
+  fullName: string;
+  email: string;
+  phone?: string;
+  notes: string[];
+  medicines: string[];
+  prescriptions: string[];
+  createdAt: string;
+};
+
+export type ChatMessage = {
+  id: string;
+  appointmentId: string;
+  sender: "doctor" | "patient";
+  text?: string;
+  imageDataUrl?: string;
+  createdAt: string;
+};
+
+type Session =
+  | { role: "admin" }
+  | { role: "doctor"; doctorId: string }
+  | { role: "patient"; patientId: string }
+  | null;
+
+// Helper to map API response to frontend types
+const mapApiDoctor = (d: any): Doctor => ({
+  id: d.id,
+  name: d.name,
+  email: d.email,
+  specialty: d.specialty,
+  bio: d.bio,
+  consults: [], // will be fetched separately
+});
+
+const mapApiConsult = (c: any): Consult => ({
+  id: c.id,
+  title: c.title,
+  price: c.price_cents / 100,
+});
+
+const mapApiPatient = (p: any): Patient => ({
+  id: p.id,
+  doctorId: p.doctor_id,
+  fullName: p.full_name,
+  email: p.email,
+  phone: p.phone,
+  notes: p.notes,
+  medicines: p.medicines,
+  prescriptions: p.prescriptions,
+  createdAt: p.created_at,
+});
+
+const mapApiAppointment = (a: any): Appointment => ({
+  id: a.id,
+  doctorId: a.doctor_id,
+  patientId: a.patient_id,
+  consultId: a.consult_id,
+  scheduledAt: a.scheduled_at,
+  status: a.status,
+  price: a.price_cents / 100,
+});
+
+const mapApiChatMessage = (m: any): ChatMessage => ({
+  id: m.id,
+  appointmentId: m.appointment_id,
+  sender: m.sender,
+  text: m.message,
+  imageDataUrl: m.image_url,
+  createdAt: m.created_at,
+});
+
+type ClinicState = {
+  session: Session;
+  doctors: Doctor[];
+  patients: Patient[];
+  appointments: Appointment[];
+  chat: ChatMessage[];
+
+  setSession: (session: Session) => void;
+  logout: () => void;
+  loginPatient: (email: string) => Promise<boolean>;
+
+  seedIfEmpty: () => void;
+
+  // API-backed actions
+  refreshDoctors: () => Promise<void>;
+  refreshDoctorConsults: (doctorId: string) => Promise<void>;
+  refreshPatients: () => Promise<void>;
+  refreshAppointments: () => Promise<void>;
+  refreshChat: (appointmentId: string) => Promise<void>;
+
+  addDoctor: (input: Omit<Doctor, "id">) => Promise<void>;
+  updateDoctor: (doctorId: string, patch: Partial<Omit<Doctor, "id">>) => Promise<void>;
+  removeDoctor: (doctorId: string) => Promise<void>;
+
+  addAppointment: (input: Omit<Appointment, "id">) => Promise<void>;
+  setAppointmentStatus: (appointmentId: string, status: AppointmentStatus) => Promise<void>;
+
+  upsertPatient: (
+    patient: Omit<
+      Patient,
+      "id" | "createdAt" | "notes" | "medicines" | "prescriptions"
+    > & { id?: string }
+  ) => Promise<string>;
+  addPatientEntry: (
+    patientId: string,
+    kind: "notes" | "medicines" | "prescriptions",
+    value: string
+  ) => Promise<void>;
+
+  addChatMessage: (msg: Omit<ChatMessage, "id" | "createdAt">) => Promise<void>;
+
+  // Admin revenue
+  getRevenue: (year?: number, month?: number) => Promise<{ total_usd: number; year?: number; month?: number }>;
+};
+
+const demoSeed = () => {
+  const dr1: Doctor = {
+    id: uid("doc"),
+    name: "Dr. Lina Hassan",
+    email: "lina@clinic.demo",
+    specialty: "Dermatology",
+    bio: "Skin care, acne, eczema, and aesthetic dermatology.",
+    consults: [
+      { id: uid("c"), title: "Quick consult (10 min)", price: 15 },
+      { id: uid("c"), title: "Standard consult (20 min)", price: 25 },
+    ],
+  };
+
+  const patient1: Patient = {
+    id: uid("pat"),
+    doctorId: dr1.id,
+    fullName: "Omar Ali",
+    email: "omar.patient@demo",
+    phone: "+20 100 000 0000",
+    notes: ["Initial intake: mild acne"],
+    medicines: [],
+    prescriptions: [],
+    createdAt: new Date().toISOString(),
+  };
+
+  const appt1: Appointment = {
+    id: uid("apt"),
+    doctorId: dr1.id,
+    patientId: patient1.id,
+    consultId: dr1.consults[1]!.id,
+    scheduledAt: new Date(Date.now() + 1000 * 60 * 60 * 5).toISOString(),
+    status: "pending",
+    price: dr1.consults[1]!.price,
+  };
+
+  return {
+    doctors: [dr1],
+    patients: [patient1],
+    appointments: [appt1],
+    chat: [] as ChatMessage[],
+  };
+};
+
+export const useClinicStore = create<ClinicState>()(
+  persist(
+    (set, get) => ({
+      session: null,
+      doctors: [],
+      patients: [],
+      appointments: [],
+      chat: [],
+
+      setSession: (session) => {
+        set({ session });
+        if (typeof window !== "undefined") {
+          if (session?.role === "admin") {
+            localStorage.setItem("dev-role", "admin");
+            localStorage.removeItem("dev-doctor-id");
+            localStorage.removeItem("dev-patient-id");
+          } else if (session?.role === "doctor") {
+            localStorage.setItem("dev-role", "doctor");
+            localStorage.setItem("dev-doctor-id", session.doctorId);
+            localStorage.removeItem("dev-patient-id");
+          } else if (session?.role === "patient") {
+            localStorage.setItem("dev-role", "patient");
+            localStorage.setItem("dev-patient-id", session.patientId);
+            localStorage.removeItem("dev-doctor-id");
+          } else {
+            localStorage.removeItem("dev-role");
+            localStorage.removeItem("dev-doctor-id");
+            localStorage.removeItem("dev-patient-id");
+          }
+        }
+      },
+      logout: () => {
+        set({ session: null });
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("dev-role");
+          localStorage.removeItem("dev-doctor-id");
+          localStorage.removeItem("dev-patient-id");
+        }
+      },
+
+      loginPatient: async (email: string) => {
+        await get().refreshPatients();
+        const patients = get().patients;
+        const patient = patients.find((p) => p.email === email);
+        if (patient) {
+          get().setSession({ role: "patient", patientId: patient.id });
+          return true;
+        }
+        return false;
+      },
+
+      seedIfEmpty: () => {
+        const { doctors } = get();
+        if (doctors.length > 0) return;
+        // No-op for API mode; data will be fetched
+      },
+
+      // Refresh methods
+      refreshDoctors: async () => {
+        try {
+          const apiDocs = await api.listDoctors();
+          const docs = apiDocs.map(mapApiDoctor);
+          set({ doctors: docs });
+        } catch (e) {
+          console.error("Failed to refresh doctors", e);
+        }
+      },
+
+      refreshDoctorConsults: async (doctorId: string) => {
+        try {
+          const apiConsults = await api.listConsults(doctorId);
+          const consults = apiConsults.map(mapApiConsult);
+          set((s) => ({
+            doctors: s.doctors.map((d) =>
+              d.id === doctorId ? { ...d, consults } : d
+            ),
+          }));
+        } catch (e) {
+          console.error("Failed to refresh consults", e);
+        }
+      },
+
+      refreshPatients: async () => {
+        try {
+          const apiPatients = await api.listPatients();
+          set({ patients: apiPatients.map(mapApiPatient) });
+        } catch (e) {
+          console.error("Failed to refresh patients", e);
+        }
+      },
+
+      refreshAppointments: async () => {
+        try {
+          const apiAppts = await api.listAppointments();
+          set({ appointments: apiAppts.map(mapApiAppointment) });
+        } catch (e) {
+          console.error("Failed to refresh appointments", e);
+        }
+      },
+
+      refreshChat: async (appointmentId: string) => {
+        try {
+          const apiMessages = await api.getChat(appointmentId);
+          set({ chat: apiMessages.map(mapApiChatMessage) });
+        } catch (e) {
+          console.error("Failed to refresh chat", e);
+        }
+      },
+
+      // CRUD actions
+      addDoctor: async (input) => {
+        await api.createDoctor({
+          email: input.email,
+          name: input.name,
+          specialty: input.specialty,
+          bio: input.bio,
+        });
+        await get().refreshDoctors();
+      },
+
+      updateDoctor: async (doctorId, patch) => {
+        await api.updateDoctor(doctorId, {
+          email: patch.email ?? "",
+          name: patch.name ?? "",
+          specialty: patch.specialty ?? "",
+          bio: patch.bio ?? "",
+        });
+        await get().refreshDoctors();
+      },
+
+      removeDoctor: async (doctorId) => {
+        await api.deleteDoctor(doctorId);
+        await get().refreshDoctors();
+      },
+
+      addAppointment: async (input) => {
+        // For doctor: use doctor endpoint; for public: use public endpoint
+        const session = get().session;
+        if (session?.role === "doctor") {
+          await api.createAppointment({
+            patient_id: input.patientId,
+            consult_id: input.consultId,
+            scheduled_at: input.scheduledAt,
+          });
+        } else {
+          await api.bookAppointment({
+            doctor_id: input.doctorId,
+            patient_id: input.patientId,
+            consult_id: input.consultId,
+            scheduled_at: input.scheduledAt,
+          });
+        }
+        await get().refreshAppointments();
+      },
+
+      setAppointmentStatus: async (appointmentId, status) => {
+        await api.setAppointmentStatus(appointmentId, status);
+        await get().refreshAppointments();
+      },
+
+      upsertPatient: async (patient) => {
+        const session = get().session;
+        if (!session || session.role !== "doctor") {
+          throw new Error("Only doctors can upsert patients");
+        }
+        const payload = {
+          doctor_id: session.doctorId,
+          full_name: patient.fullName,
+          email: patient.email,
+          phone: patient.phone,
+        };
+        let id = patient.id;
+        if (!id) {
+          const created = await api.createPatient(payload);
+          id = created.id;
+          if (!id) throw new Error("Failed to create patient: no ID returned");
+        } else {
+          // Update not supported by API; assume frontend only creates
+        }
+        await get().refreshPatients();
+        return id; // guaranteed string
+      },
+
+      addPatientEntry: async (patientId, kind, value) => {
+        await api.addPatientEntry(patientId, kind, value);
+        await get().refreshPatients();
+      },
+
+      addChatMessage: async (msg) => {
+        await api.sendChat(msg.appointmentId, {
+          message: msg.text ?? "",
+          image_url: msg.imageDataUrl,
+        });
+        await get().refreshChat(msg.appointmentId);
+      },
+
+      getRevenue: async (year?: number, month?: number) => {
+        return api.getRevenue(year, month);
+      },
+    }),
+    {
+      name: "clinic_store_v1",
+      partialize: (s) => ({
+        session: s.session,
+        // Do not persist API data; always fetch fresh
+      }),
+    }
+  )
+);
+
+export const DOCTOR_PASSWORD = "doctor123";
