@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Award, Star, Mail, Calendar } from "lucide-react";
+import { Award, Star, Mail, Calendar, Users } from "lucide-react";
 
 const doctors = [
   {
@@ -32,8 +32,11 @@ export function DoctorSpotlight() {
   return (
     <section id="doctors" className="py-24 bg-foreground/2">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 md:gap-8">
           <div className="max-w-2xl">
+            <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-2xl bg-accent shadow-premium mb-6">
+              <Users className="h-5 w-5 sm:h-6 text-white" />
+            </div>
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -56,7 +59,7 @@ export function DoctorSpotlight() {
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="flex items-center gap-4"
+            className="flex items-center gap-4 bg-foreground/5 p-4 rounded-2xl md:bg-transparent md:p-0"
           >
             <div className="flex -space-x-3 overflow-hidden">
                {[1,2,3,4,5].map(i => (

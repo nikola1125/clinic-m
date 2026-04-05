@@ -33,9 +33,9 @@ export default function AdminRevenuePage() {
     <AppShell
       title="Admin Dashboard"
       nav={[
-        { label: "Overview", href: "/admin" },
-        { label: "Doctors", href: "/admin/doctors" },
-        { label: "Revenue", href: "/admin/revenue" },
+        { label: "Overview", href: "/hq-command" },
+        { label: "Doctors", href: "/hq-command/doctors" },
+        { label: "Revenue", href: "/hq-command/revenue" },
       ]}
     >
       <AutoSeed />

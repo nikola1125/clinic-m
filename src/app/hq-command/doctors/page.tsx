@@ -5,7 +5,7 @@ import { AppShell } from "@/components/AppShell";
 import { AutoSeed, RequireRole } from "@/components/RequireRole";
 import { uid } from "@/lib/ids";
 import { useClinicStore, type Consult, type Doctor } from "@/store/clinicStore";
-import { Edit2, Trash2, Plus, X, Save, Stethoscope, Mail, Activity, AlignLeft } from "lucide-react";
+import { Edit2, Trash2, Plus, X, Save, Stethoscope, Mail, Activity, AlignLeft, Key, UserCheck } from "lucide-react";
 
 function DoctorCard({
   doctor,
@@ -96,6 +96,8 @@ export default function AdminDoctorsPage() {
   const [form, setForm] = useState({
     name: "",
     email: "",
+    username: "",
+    password: "",
     specialty: "",
     bio: "",
   });
@@ -105,7 +107,7 @@ export default function AdminDoctorsPage() {
   ]);
 
   const startCreate = () => {
-    setForm({ name: "", email: "", specialty: "", bio: "" });
+    setForm({ name: "", email: "", username: "", password: "", specialty: "", bio: "" });
     setConsults([{ id: uid("c"), title: "Standard consult (20 min)", price: 20 }]);
     setMode({ type: "create" });
   };
@@ -114,6 +116,8 @@ export default function AdminDoctorsPage() {
     setForm({
       name: doctor.name,
       email: doctor.email,
+      username: doctor.username || "",
+      password: "", // Don't show existing password
       specialty: doctor.specialty,
       bio: doctor.bio,
     });
@@ -122,7 +126,8 @@ export default function AdminDoctorsPage() {
   };
 
   const save = () => {
-    if (!form.name || !form.email) return;
+    if (!form.name || !form.email || !form.username) return;
+    if (mode?.type === "create" && !form.password) return;
 
     if (mode?.type === "create") {
       addDoctor({
@@ -142,9 +147,9 @@ export default function AdminDoctorsPage() {
     <AppShell
       title="Admin Dashboard"
       nav={[
-        { label: "Overview", href: "/admin" },
-        { label: "Doctors", href: "/admin/doctors" },
-        { label: "Revenue", href: "/admin/revenue" },
+        { label: "Overview", href: "/hq-command" },
+        { label: "Doctors", href: "/hq-command/doctors" },
+        { label: "Revenue", href: "/hq-command/revenue" },
       ]}
     >
       <AutoSeed />
@@ -194,6 +199,7 @@ export default function AdminDoctorsPage() {
                     onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                     className="w-full rounded-2xl border-none bg-white p-4 pl-12 text-sm focus:ring-2 focus:ring-primary shadow-sm outline-none transition-all"
                     placeholder="Dr. John Doe"
+                    autoComplete="off"
                   />
                 </div>
               </div>
@@ -207,6 +213,7 @@ export default function AdminDoctorsPage() {
                     onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
                     className="w-full rounded-2xl border-none bg-white p-4 pl-12 text-sm focus:ring-2 focus:ring-primary shadow-sm outline-none transition-all"
                     placeholder="doctor@clinic.com"
+                    autoComplete="off"
                   />
                 </div>
               </div>
@@ -220,11 +227,12 @@ export default function AdminDoctorsPage() {
                     onChange={(e) => setForm((f) => ({ ...f, specialty: e.target.value }))}
                     className="w-full rounded-2xl border-none bg-white p-4 pl-12 text-sm focus:ring-2 focus:ring-primary shadow-sm outline-none transition-all"
                     placeholder="Cardiology, General Practice..."
+                    autoComplete="off"
                   />
                 </div>
               </div>
               
-              <div className="sm:col-span-2 lg:col-span-3">
+                <div className="sm:col-span-2 lg:col-span-3">
                 <label className="block text-xs font-bold uppercase tracking-wide text-foreground/50 mb-2">Professional Biography</label>
                 <div className="relative">
                   <AlignLeft className="absolute left-4 top-4 h-5 w-5 text-foreground/30" />
@@ -234,6 +242,51 @@ export default function AdminDoctorsPage() {
                     className="w-full min-h-[120px] rounded-2xl border-none bg-white p-4 pl-12 text-sm focus:ring-2 focus:ring-primary shadow-sm outline-none transition-all resize-y"
                     placeholder="Enter professional background, achievements, etc."
                   />
+                </div>
+              </div>
+            </div>
+
+            {/* Account Credentials Section */}
+            <div className="mt-8 pt-8 border-t-2 border-dashed border-foreground/10">
+              <div className="flex items-center gap-2 mb-6">
+                <div className="h-8 w-1 bg-primary rounded-full"></div>
+                <h3 className="text-lg font-bold text-foreground">Account Credentials</h3>
+                <span className="text-xs font-medium text-foreground/40 bg-foreground/5 px-2 py-1 rounded-md uppercase tracking-wider">Internal Use Only</span>
+              </div>
+              
+              <div className="grid gap-6 sm:grid-cols-2">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wide text-foreground/50 mb-2">Login Username</label>
+                  <div className="relative">
+                    <UserCheck className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-foreground/30" />
+                    <input
+                      value={form.username}
+                      onChange={(e) => setForm((f) => ({ ...f, username: e.target.value }))}
+                      className="w-full rounded-2xl border-none bg-white p-4 pl-12 text-sm focus:ring-2 focus:ring-primary shadow-sm outline-none transition-all"
+                      placeholder="e.g. dr_smith"
+                      required
+                      autoComplete="off"
+                    />
+                  </div>
+                  <p className="mt-2 text-[10px] text-foreground/40 italic">This is what the doctor will use to log in to the portal.</p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wide text-foreground/50 mb-2">
+                    {mode.type === "edit" ? "Reset Password" : "Login Password"}
+                  </label>
+                  <div className="relative">
+                    <Key className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-foreground/30" />
+                    <input
+                      value={form.password}
+                      onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+                      type="password"
+                      className="w-full rounded-2xl border-none bg-white p-4 pl-12 text-sm focus:ring-2 focus:ring-primary shadow-sm outline-none transition-all"
+                      placeholder={mode.type === "edit" ? "Leave blank to keep current" : "Set a secure password"}
+                      required={mode.type === "create"}
+                      autoComplete="new-password"
+                    />
+                  </div>
                 </div>
               </div>
             </div>

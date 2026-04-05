@@ -18,18 +18,23 @@ export default function DoctorLoginPage() {
     [doctors, email]
   );
 
-  const login = () => {
+  const login = async () => {
     setError(null);
-    if (!matching) {
-      setError("No doctor with that email.");
-      return;
+    try {
+      const { api } = await import("@/lib/api");
+      const result = await api.login({ email, password });
+      
+      if (result.role !== "doctor") {
+        throw new Error("Invalid credentials or not a doctor.");
+      }
+      
+      sessionStorage.setItem("access_token", result.access_token);
+      setSession({ role: "doctor", doctorId: result.doctor_id });
+      
+      window.location.href = "/portal";
+    } catch (err: any) {
+      setError(err.message || "An error occurred during login.");
     }
-    if (password !== DOCTOR_PASSWORD) {
-      setError("Wrong password.");
-      return;
-    }
-    setSession({ role: "doctor", doctorId: matching.id });
-    window.location.href = "/doctor";
   };
 
   return (
@@ -41,17 +46,17 @@ export default function DoctorLoginPage() {
             Doctor login
           </div>
           <div className="mt-2 text-sm text-zinc-600">
-            Use your doctor email created in Admin. Password is <code>doctor123</code>.
+            Enter your credentials as managed in the Admin Dashboard.
           </div>
-
+ 
           <div className="mt-6 grid gap-4">
             <label className="grid gap-1">
-              <span className="text-xs font-semibold text-zinc-700">Email</span>
+              <span className="text-xs font-semibold text-zinc-700">Username or Email</span>
               <input
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="h-10 rounded-xl border border-zinc-200 px-3 text-sm"
-                placeholder="doctor@clinic.com"
+                placeholder="dr_smith or doctor@clinic.com"
               />
             </label>
             <label className="grid gap-1">
@@ -61,7 +66,7 @@ export default function DoctorLoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 type="password"
                 className="h-10 rounded-xl border border-zinc-200 px-3 text-sm"
-                placeholder="doctor123"
+                placeholder="••••••••"
               />
             </label>
 

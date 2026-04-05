@@ -1,27 +1,18 @@
 "use client";
 
-import { useEffect } from "react";
 import { AppShell } from "@/components/AppShell";
 import { RequireRole, DataLoader } from "@/components/RequireRole";
-import { useClinicStore } from "@/store/clinicStore";
-import { Users, DollarSign, LayoutDashboard, ChevronRight } from "lucide-react";
+import { LayoutDashboard, Users, DollarSign, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 export default function AdminHomePage() {
-  const setSession = useClinicStore((s) => s.setSession);
-  const session = useClinicStore((s) => s.session);
-
-  useEffect(() => {
-    if (!session) setSession({ role: "admin" });
-  }, [session, setSession]);
-
   return (
     <AppShell
       title="Admin Dashboard"
       nav={[
-        { label: "Overview", href: "/admin" },
-        { label: "Doctors", href: "/admin/doctors" },
-        { label: "Revenue", href: "/admin/revenue" },
+        { label: "Overview", href: "/hq-command" },
+        { label: "Doctors", href: "/hq-command/doctors" },
+        { label: "Revenue", href: "/hq-command/revenue" },
       ]}
     >
       <RequireRole role="admin">
@@ -42,7 +33,7 @@ export default function AdminHomePage() {
               
               <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Link
-                  href="/admin/doctors"
+                  href="/hq-command/doctors"
                   className="group flex flex-col gap-2 rounded-2xl border border-foreground/5 bg-white p-6 transition-all hover:border-primary/30 hover:shadow-md"
                 >
                   <div className="flex items-center justify-between">
@@ -56,7 +47,7 @@ export default function AdminHomePage() {
                 </Link>
                 
                 <Link
-                  href="/admin/revenue"
+                  href="/hq-command/revenue"
                   className="group flex flex-col gap-2 rounded-2xl border border-foreground/5 bg-white p-6 transition-all hover:border-primary/30 hover:shadow-md"
                 >
                   <div className="flex items-center justify-between">

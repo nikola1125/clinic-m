@@ -43,6 +43,12 @@ export default function BookPage() {
     refreshDoctors();
   }, [refreshDoctors]);
 
+  useEffect(() => {
+    if (doctorId) {
+      useClinicStore.getState().refreshDoctorConsults(doctorId);
+    }
+  }, [doctorId]);
+
   const doctor = doctors.find((d) => d.id === doctorId) ?? null;
   const consult = doctor?.consults.find((c) => c.id === consultId) ?? null;
   const me = session?.role === "patient" ? patients.find((p) => p.id === session.patientId) : undefined;
@@ -94,9 +100,9 @@ export default function BookPage() {
 
           {/* Header */}
           <div className="mb-12 relative overflow-hidden rounded-3xl bg-primary/10 px-8 py-16 text-center shadow-premium">
-            <img 
-              src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=2000&auto=format&fit=crop" 
-              alt="Hospital Reception" 
+            <img
+              src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=2000&auto=format&fit=crop"
+              alt="Hospital Reception"
               className="absolute inset-0 h-full w-full object-cover opacity-20"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />

@@ -15,7 +15,6 @@ const signupSchema = z.object({
   email: z.string().email("Invalid email address"),
   phone: z.string().optional(),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  doctorId: z.string().min(1, "Please select a doctor"),
   terms: z.boolean().refine(val => val === true, "You must agree to terms"),
 });
 
@@ -26,11 +25,7 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   
-  const { doctors, refreshDoctors, upsertPatient, setSession } = useClinicStore();
-
-  useEffect(() => {
-    refreshDoctors();
-  }, [refreshDoctors]);
+  const { setSession } = useClinicStore();
 
   const { register, handleSubmit, formState: { errors } } = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
@@ -39,7 +34,6 @@ export default function SignupPage() {
       email: "",
       phone: "",
       password: "",
-      doctorId: "",
       terms: false,
     }
   });
@@ -48,19 +42,16 @@ export default function SignupPage() {
     setErrorMsg("");
     setLoading(true);
     try {
-      // Mocking patient creation for now by temporarily becoming the selected doctor
-      // to pass backend constraints, then switching to patient role.
-      setSession({ role: "doctor", doctorId: data.doctorId });
-      
-      const patientId = await upsertPatient({
-        doctorId: data.doctorId,
-        fullName: data.fullName,
+      const { api } = await import("@/lib/api");
+      const result = await api.register({
+        full_name: data.fullName,
         email: data.email,
         phone: data.phone,
+        password: data.password,
       });
-
-      // Now set the actual patient session
-      setSession({ role: "patient", patientId });
+      
+      sessionStorage.setItem("access_token", result.access_token);
+      setSession({ role: result.role, patientId: result.patient_id });
       router.push("/patient/dashboard");
     } catch (e: any) {
       setErrorMsg(e.message || "Failed to create account. Please try again.");
@@ -151,29 +142,7 @@ export default function SignupPage() {
               {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
             </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-foreground mb-2">
-                Primary Doctor
-              </label>
-              <div className="relative">
-                <Stethoscope className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-foreground/30" />
-                <select
-                  {...register("doctorId")}
-                  className="w-full appearance-none rounded-2xl border-none bg-foreground/5 py-4 pl-12 pr-10 text-sm focus:ring-2 focus:ring-primary focus:bg-white transition-all outline-none"
-                >
-                  <option value="" disabled>Select a doctor...</option>
-                  {doctors.map(doc => (
-                    <option key={doc.id} value={doc.id}>
-                      {doc.name} - {doc.specialty}
-                    </option>
-                  ))}
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center">
-                  <ChevronRight className="h-4 w-4 text-foreground/30 rotate-90" />
-                </div>
-              </div>
-              {errors.doctorId && <p className="text-red-500 text-xs mt-1">{errors.doctorId.message}</p>}
-            </div>
+
 
             <div>
               <label className="text-sm font-semibold text-foreground block mb-2">

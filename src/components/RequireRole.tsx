@@ -27,7 +27,7 @@ export function RequireRole({
           <div className="mt-6">
             <a
               className="inline-flex rounded-full bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-800"
-              href={role === "doctor" ? "/doctor/login" : "/"}
+              href={role === "doctor" ? "/portal/login" : "/hq-command/login"}
             >
               Go to login
             </a>

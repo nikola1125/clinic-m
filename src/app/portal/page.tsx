@@ -31,9 +31,9 @@ export default function DoctorHomePage() {
     <AppShell
       title="Doctor Portal"
       nav={[
-        { label: "Dashboard", href: "/doctor" },
-        { label: "Appointments", href: "/doctor/appointments" },
-        { label: "Patients", href: "/doctor/patients" },
+        { label: "Dashboard", href: "/portal" },
+        { label: "Appointments", href: "/portal/appointments" },
+        { label: "Patients", href: "/portal/patients" },
       ]}
     >
       <RequireRole role="doctor">
@@ -98,14 +98,14 @@ export default function DoctorHomePage() {
 
               <div className="mt-8 flex flex-wrap gap-4">
                 <Link
-                  href="/doctor/appointments"
+                  href="/portal/appointments"
                   className="flex items-center gap-2 rounded-2xl bg-primary px-8 py-4 text-sm font-bold text-white shadow-premium transition-all hover:bg-primary/90 hover:scale-105 active:scale-100"
                 >
                   <Calendar className="h-5 w-5" />
                   View Schedule
                 </Link>
                 <Link
-                  href="/doctor/patients"
+                  href="/portal/patients"
                   className="flex items-center gap-2 rounded-2xl border border-foreground/10 bg-white px-8 py-4 text-sm font-bold text-foreground transition-all hover:bg-foreground/5"
                 >
                   <Users className="h-5 w-5" />
@@ -124,7 +124,7 @@ export default function DoctorHomePage() {
                   <Clock className="h-5 w-5 text-amber-500" /> Pending Requests
                 </div>
                 {pending.length > 0 && (
-                  <Link href="/doctor/appointments" className="text-sm font-bold text-primary hover:underline">
+                  <Link href="/portal/appointments" className="text-sm font-bold text-primary hover:underline">
                     View All
                   </Link>
                 )}
@@ -176,7 +176,7 @@ export default function DoctorHomePage() {
                   <CalendarCheck className="h-5 w-5 text-emerald-500" /> Upcoming Meetings
                 </div>
                  {upcoming.length > 0 && (
-                  <Link href="/doctor/appointments" className="text-sm font-bold text-primary hover:underline">
+                  <Link href="/portal/appointments" className="text-sm font-bold text-primary hover:underline">
                     View All
                   </Link>
                 )}

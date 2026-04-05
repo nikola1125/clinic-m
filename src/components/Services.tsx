@@ -94,7 +94,7 @@ export function Services() {
               viewport={{ once: true }}
               transition={{ delay: idx * 0.1 }}
               whileHover={{ y: -8 }}
-              className="group relative rounded-3xl border border-foreground/5 bg-white p-8 shadow-sm transition-all hover:shadow-premium dark:bg-slate-900/50 dark:backdrop-blur-xl"
+              className="group relative rounded-3xl border border-foreground/5 bg-card p-8 shadow-sm transition-all hover:shadow-premium dark:bg-zinc-900/50 dark:backdrop-blur-xl"
             >
               <div className={`inline-flex h-12 w-12 items-center justify-center rounded-2xl ${service.color} bg-opacity-10 text-white shadow-sm ring-1 ring-inset ring-foreground/5`}>
                 <service.icon className={`h-6 w-6 ${service.color.replace('bg-', 'text-')}`} />

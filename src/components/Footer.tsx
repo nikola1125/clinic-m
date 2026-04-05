@@ -63,9 +63,9 @@ export function Footer() {
           <div>
             <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">Get in touch</h3>
             <ul className="mt-6 space-y-4">
-              <li className="flex items-center gap-3 text-sm text-foreground/60">
+              <li className="flex items-center gap-3 text-sm text-foreground/60 transition-colors hover:text-primary">
                 <Phone className="h-4 w-4 text-primary" />
-                +1 (555) 000-0000
+                <a href="tel:+15550000000">+1 (555) 000-0000</a>
               </li>
               <li className="flex items-center gap-3 text-sm text-foreground/60">
                 <Mail className="h-4 w-4 text-primary" />

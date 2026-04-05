@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { SessionWrapper } from "@/components/SessionWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,26 +28,25 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
+      data-scroll-behavior="smooth"
     >
       <head>
+        <meta name="format-detection" content="telephone=no" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              try {
-                if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                  document.documentElement.classList.add('dark')
-                  document.documentElement.classList.remove('light')
-                } else {
-                  document.documentElement.classList.remove('dark')
-                  document.documentElement.classList.add('light')
-                }
-              } catch (_) {}
+              (function() {
+                try {
+                  var theme = localStorage.theme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                  document.documentElement.classList.toggle('dark', theme === 'dark');
+                } catch (_) {}
+              })();
             `,
           }}
         />
       </head>
       <body className="min-h-full flex flex-col transition-colors duration-300">
-        {children}
+        <SessionWrapper>{children}</SessionWrapper>
       </body>
     </html>
   );

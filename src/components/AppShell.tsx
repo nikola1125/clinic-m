@@ -27,9 +27,9 @@ export function AppShell({
   const logout = useClinicStore((s) => s.logout);
 
   return (
-    <div className="min-h-screen bg-zinc-50 flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col transition-colors duration-300">
       {/* Top Header */}
-      <header className="sticky top-0 z-40 w-full border-b border-foreground/5 bg-white/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 w-full border-b border-foreground/5 bg-background/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center gap-2 group">
@@ -49,7 +49,7 @@ export function AppShell({
             
             {session?.role === "doctor" && (
               <Link
-                href="/doctor"
+                href="/portal"
                 className="flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-xs font-bold text-primary transition-colors hover:bg-primary/10"
               >
                 <Briefcase className="h-4 w-4" />
@@ -58,7 +58,7 @@ export function AppShell({
             )}
             {session?.role === "admin" && (
               <Link
-                href="/admin"
+                href="/hq-command"
                 className="flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-xs font-bold text-primary transition-colors hover:bg-primary/10"
               >
                 <LayoutDashboard className="h-4 w-4" />
@@ -91,11 +91,11 @@ export function AppShell({
       <div className="flex-1 mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row gap-8">
           
-          {/* Sidebar Navigation */}
+          {/* Sidebar/Mobile Nav */}
           {nav.length > 0 && (
-            <aside className="w-full md:w-64 shrink-0">
-              <nav className="glass rounded-4xl p-4 shadow-premium sticky top-24">
-                <div className="space-y-2">
+            <aside className="w-full md:w-64 shrink-0 overflow-x-auto md:overflow-visible pb-4 md:pb-0 scrollbar-hide">
+              <nav className="glass rounded-2xl md:rounded-4xl p-2 md:p-4 shadow-premium sticky top-24 inline-flex md:block w-fit md:w-auto min-w-full bg-card dark:bg-zinc-900/50">
+                <div className="flex md:flex-col gap-2 w-full">
                   {nav.map((item) => {
                     const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
                     return (
@@ -103,7 +103,7 @@ export function AppShell({
                         key={item.href}
                         href={item.href}
                         className={cn(
-                          "block rounded-2xl px-4 py-3 text-sm font-bold transition-all",
+                          "block rounded-xl md:rounded-2xl px-4 py-2 md:py-3 text-xs md:text-sm font-bold transition-all whitespace-nowrap md:whitespace-normal",
                           isActive 
                             ? "bg-primary text-white shadow-premium" 
                             : "text-foreground/60 hover:bg-foreground/5 hover:text-foreground"

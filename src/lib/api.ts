@@ -15,15 +15,17 @@ export class ApiClient {
     };
   }
 
-  // For dev bypass: set X-Dev-Role and X-Dev-Doctor-Id headers if localStorage has them
-  private withDevAuth(): Record<string, string> {
+  private async getAuthHeaders(): Promise<Record<string, string>> {
     const h = { ...this.headers };
-    const devRole = typeof window !== "undefined" ? window.localStorage.getItem("dev-role") : null;
-    const devDoctorId = typeof window !== "undefined" ? window.localStorage.getItem("dev-doctor-id") : null;
-    const devPatientId = typeof window !== "undefined" ? window.localStorage.getItem("dev-patient-id") : null;
-    if (devRole) h["X-Dev-Role"] = devRole;
-    if (devDoctorId) h["X-Dev-Doctor-Id"] = devDoctorId;
-    if (devPatientId) h["X-Dev-Patient-Id"] = devPatientId;
+    
+    // Attempt to get token from sessionStorage (client-side only)
+    if (typeof window !== "undefined") {
+      const token = sessionStorage.getItem("access_token");
+      if (token) {
+        h["Authorization"] = `Bearer ${token}`;
+      }
+    }
+    
     return h;
   }
 
@@ -32,23 +34,46 @@ export class ApiClient {
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${this.baseUrl}${path}`;
+    const authHeaders = await this.getAuthHeaders();
     const response = await fetch(url, {
+      cache: "no-store",
       ...options,
-      headers: { ...this.withDevAuth(), ...options.headers },
+      headers: { ...authHeaders, ...options.headers },
     });
+
     if (!response.ok) {
       const err: ApiError = await response.json().catch(() => ({ detail: response.statusText }));
       throw new Error(err.detail || `API error: ${response.status}`);
     }
-    return response.json();
+
+    if (response.status === 204) {
+      return {} as T;
+    }
+
+    const text = await response.text();
+    return text ? JSON.parse(text) : ({} as T);
   }
 
   // Public endpoints
-  async getMe() {
-    return this.request<{ sub: string; role: string; doctor_id?: string }>("/me");
+  public async login(payload: any) {
+    return this.request<any>("/auth/login", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
   }
 
-  async bookAppointment(payload: {
+  public async register(payload: any) {
+    return this.request<any>("/auth/register", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  }
+
+  public async getMe() {
+    return this.request<{ id: string; email: string; role: string; doctor_id?: string; patient_id?: string }>("/auth/me");
+  }
+
+  public async bookAppointment(payload: {
     doctor_id: string;
     patient_id: string;
     consult_id: string;
@@ -60,7 +85,7 @@ export class ApiClient {
     });
   }
 
-  async createPatient(payload: {
+  public async createPatient(payload: {
     doctor_id: string;
     full_name: string;
     email: string;
@@ -72,14 +97,15 @@ export class ApiClient {
     });
   }
 
-  // Admin endpoints
-  async listDoctors() {
-    return this.request<any[]>("/admin/doctors");
+  public async listDoctors() {
+    return this.request<any[]>("/doctors");
   }
 
-  async createDoctor(payload: {
+  public async createDoctor(payload: {
     email: string;
     name: string;
+    username?: string;
+    password?: string;
     specialty?: string;
     bio?: string;
   }) {
@@ -89,9 +115,11 @@ export class ApiClient {
     });
   }
 
-  async updateDoctor(doctorId: string, payload: {
+  public async updateDoctor(doctorId: string, payload: {
     email: string;
     name: string;
+    username?: string;
+    password?: string;
     specialty?: string;
     bio?: string;
   }) {
@@ -101,65 +129,72 @@ export class ApiClient {
     });
   }
 
-  async deleteDoctor(doctorId: string) {
+  public async deleteDoctor(doctorId: string) {
     return this.request<void>(`/admin/doctors/${doctorId}`, { method: "DELETE" });
   }
 
-  async listConsults(doctorId: string) {
-    return this.request<any[]>(`/admin/doctors/${doctorId}/consults`);
+  public async listConsults(doctorId: string) {
+    return this.request<any[]>(`/doctors/${doctorId}/consults`);
   }
 
-  async createConsult(doctorId: string, payload: { title: string; price_cents: number }) {
+  public async createConsult(doctorId: string, payload: { title: string; price_cents: number }) {
     return this.request<any>(`/admin/doctors/${doctorId}/consults`, {
       method: "POST",
       body: JSON.stringify(payload),
     });
   }
 
-  async updateConsult(consultId: string, payload: { title: string; price_cents: number }) {
+  public async updateConsult(consultId: string, payload: { title: string; price_cents: number }) {
     return this.request<any>(`/admin/consults/${consultId}`, {
       method: "PUT",
       body: JSON.stringify(payload),
     });
   }
 
-  async deleteConsult(consultId: string) {
+  public async deleteConsult(consultId: string) {
     return this.request<void>(`/admin/consults/${consultId}`, { method: "DELETE" });
   }
 
-  async getRevenue(year?: number, month?: number) {
+  public async getRevenue(year?: number, month?: number) {
     const qs = new URLSearchParams({ year: String(year || ""), month: String(month || "") });
     return this.request<{ total_usd: number; year?: number; month?: number }>(`/admin/revenue?${qs}`);
   }
 
-  // Doctor endpoints
-  async listPatients() {
+  public async getMyPatientProfile() {
+    return this.request<any[]>("/patient/me");
+  }
+
+  public async getMyAppointments() {
+    return this.request<any[]>("/patient/appointments");
+  }
+
+  public async listPatients() {
     return this.request<any[]>("/doctor/patients");
   }
 
-  async addPatientEntry(patientId: string, kind: "notes" | "medicines" | "prescriptions", value: string) {
+  public async addPatientEntry(patientId: string, kind: "notes" | "medicines" | "prescriptions", value: string) {
     return this.request<any>(`/doctor/patients/${patientId}/entries`, {
       method: "POST",
       body: JSON.stringify({ kind, value }),
     });
   }
 
-  async listAppointments() {
+  public async listAppointments() {
     return this.request<any[]>("/doctor/appointments");
   }
 
-  async setAppointmentStatus(appointmentId: string, status: "pending" | "accepted" | "rejected" | "completed") {
+  public async setAppointmentStatus(appointmentId: string, status: "pending" | "accepted" | "rejected" | "completed") {
     return this.request<any>(`/doctor/appointments/${appointmentId}/status`, {
       method: "PATCH",
       body: JSON.stringify({ status }),
     });
   }
 
-  async myConsults() {
+  public async myConsults() {
     return this.request<any[]>("/doctor/consults");
   }
 
-  async createAppointment(payload: {
+  public async createAppointment(payload: {
     patient_id: string;
     consult_id: string;
     scheduled_at: string;
@@ -170,11 +205,11 @@ export class ApiClient {
     });
   }
 
-  async getChat(appointmentId: string) {
+  public async getChat(appointmentId: string) {
     return this.request<any[]>(`/doctor/appointments/${appointmentId}/chat`);
   }
 
-  async sendChat(appointmentId: string, payload: { message: string; image_url?: string }) {
+  public async sendChat(appointmentId: string, payload: { message: string; image_url?: string }) {
     return this.request<any>(`/doctor/appointments/${appointmentId}/chat`, {
       method: "POST",
       body: JSON.stringify(payload),

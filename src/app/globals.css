@@ -12,6 +12,9 @@
   --accent: #4ade80; /* green-400 */
   --accent-foreground: #022c22; /* emerald-950 */
   
+  /* Backgrounds */
+  --card: #ffffff;
+  
   /* Glassmorphism Tokens */
   --glass: rgba(255, 255, 255, 0.7);
   --glass-border: rgba(255, 255, 255, 0.3);
@@ -24,6 +27,7 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-card: var(--card);
   
   --font-sans: "Outfit", "Inter", var(--font-geist-sans), sans-serif;
   --font-heading: "Outfit", sans-serif;
@@ -34,13 +38,14 @@
 
 /* Dark Mode Support via class */
 .dark {
-  --background: #022c22; /* emerald-950 */
-  --foreground: #ecfdf5; /* emerald-50 */
+  --background: #022c22; /* emerald-950 - very dark green */
+  --foreground: #f0fdf4; /* emerald-50 - almost white */
   --primary: #22c55e; /* green-500 */
   --primary-foreground: #022c22;
   --accent: #86efac; /* green-300 */
   --accent-foreground: #064e3b; 
-  --glass: rgba(2, 44, 34, 0.7);
+  --card: #064e3b; /* Slightly lighter than background for depth */
+  --glass: rgba(2, 44, 34, 0.85); /* More opaque for readability */
   --glass-border: rgba(255, 255, 255, 0.1);
 }
 
@@ -85,3 +90,11 @@ html {
   -webkit-text-fill-color: transparent;
 }
 
+/* Scrollbar Hide Utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

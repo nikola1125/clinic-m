@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 import { uid } from "@/lib/ids";
 import { api } from "@/lib/api";
 
@@ -15,6 +15,7 @@ export type Doctor = {
   id: string;
   name: string;
   email: string;
+  username: string;
   specialty: string;
   bio: string;
   consults: Consult[];
@@ -64,6 +65,7 @@ const mapApiDoctor = (d: any): Doctor => ({
   id: d.id,
   name: d.name,
   email: d.email,
+  username: d.username,
   specialty: d.specialty,
   bio: d.bio,
   consults: [], // will be fetched separately
@@ -126,8 +128,8 @@ type ClinicState = {
   refreshAppointments: () => Promise<void>;
   refreshChat: (appointmentId: string) => Promise<void>;
 
-  addDoctor: (input: Omit<Doctor, "id">) => Promise<void>;
-  updateDoctor: (doctorId: string, patch: Partial<Omit<Doctor, "id">>) => Promise<void>;
+  addDoctor: (input: Omit<Doctor, "id" | "consults"> & { consults?: Consult[]; password?: string }) => Promise<void>;
+  updateDoctor: (doctorId: string, patch: Partial<Omit<Doctor, "id" | "consults">> & { consults?: Consult[]; password?: string }) => Promise<void>;
   removeDoctor: (doctorId: string) => Promise<void>;
 
   addAppointment: (input: Omit<Appointment, "id">) => Promise<void>;
@@ -156,6 +158,7 @@ const demoSeed = () => {
     id: uid("doc"),
     name: "Dr. Lina Hassan",
     email: "lina@clinic.demo",
+    username: "dr_lina",
     specialty: "Dermatology",
     bio: "Skin care, acne, eczema, and aesthetic dermatology.",
     consults: [
@@ -205,33 +208,10 @@ export const useClinicStore = create<ClinicState>()(
 
       setSession: (session) => {
         set({ session });
-        if (typeof window !== "undefined") {
-          if (session?.role === "admin") {
-            localStorage.setItem("dev-role", "admin");
-            localStorage.removeItem("dev-doctor-id");
-            localStorage.removeItem("dev-patient-id");
-          } else if (session?.role === "doctor") {
-            localStorage.setItem("dev-role", "doctor");
-            localStorage.setItem("dev-doctor-id", session.doctorId);
-            localStorage.removeItem("dev-patient-id");
-          } else if (session?.role === "patient") {
-            localStorage.setItem("dev-role", "patient");
-            localStorage.setItem("dev-patient-id", session.patientId);
-            localStorage.removeItem("dev-doctor-id");
-          } else {
-            localStorage.removeItem("dev-role");
-            localStorage.removeItem("dev-doctor-id");
-            localStorage.removeItem("dev-patient-id");
-          }
-        }
       },
       logout: () => {
         set({ session: null });
-        if (typeof window !== "undefined") {
-          localStorage.removeItem("dev-role");
-          localStorage.removeItem("dev-doctor-id");
-          localStorage.removeItem("dev-patient-id");
-        }
+        // NextAuth signOut should be called by the component triggering this
       },
 
       loginPatient: async (email: string) => {
@@ -278,7 +258,13 @@ export const useClinicStore = create<ClinicState>()(
 
       refreshPatients: async () => {
         try {
-          const apiPatients = await api.listPatients();
+          const session = get().session;
+          let apiPatients;
+          if (session?.role === "patient") {
+            apiPatients = await api.getMyPatientProfile();
+          } else {
+            apiPatients = await api.listPatients();
+          }
           set({ patients: apiPatients.map(mapApiPatient) });
         } catch (e) {
           console.error("Failed to refresh patients", e);
@@ -287,7 +273,13 @@ export const useClinicStore = create<ClinicState>()(
 
       refreshAppointments: async () => {
         try {
-          const apiAppts = await api.listAppointments();
+          const session = get().session;
+          let apiAppts;
+          if (session?.role === "patient") {
+            apiAppts = await api.getMyAppointments();
+          } else {
+            apiAppts = await api.listAppointments();
+          }
           set({ appointments: apiAppts.map(mapApiAppointment) });
         } catch (e) {
           console.error("Failed to refresh appointments", e);
@@ -305,23 +297,56 @@ export const useClinicStore = create<ClinicState>()(
 
       // CRUD actions
       addDoctor: async (input) => {
-        await api.createDoctor({
+        const d = await api.createDoctor({
           email: input.email,
           name: input.name,
+          username: input.username,
+          password: input.password,
           specialty: input.specialty,
           bio: input.bio,
         });
+        if (input.consults) {
+          for (const c of input.consults) {
+            await api.createConsult(d.id, { title: c.title, price_cents: Math.round(c.price * 100) });
+          }
+        }
         await get().refreshDoctors();
+        if (d.id) {
+          await get().refreshDoctorConsults(d.id);
+        }
       },
 
       updateDoctor: async (doctorId, patch) => {
         await api.updateDoctor(doctorId, {
           email: patch.email ?? "",
           name: patch.name ?? "",
+          username: patch.username,
+          password: patch.password,
           specialty: patch.specialty ?? "",
           bio: patch.bio ?? "",
         });
+        
+        if (patch.consults) {
+          const existingConsults = await api.listConsults(doctorId);
+          const existingIds = new Set(existingConsults.map((c: any) => c.id));
+          const newConsultsMap = new Map(patch.consults.map((c) => [c.id, c]));
+
+          for (const nc of patch.consults) {
+            if (existingIds.has(nc.id)) {
+              await api.updateConsult(nc.id, { title: nc.title, price_cents: Math.round(nc.price * 100) });
+            } else {
+              await api.createConsult(doctorId, { title: nc.title, price_cents: Math.round(nc.price * 100) });
+            }
+          }
+          for (const ec of existingConsults) {
+            if (!newConsultsMap.has(ec.id)) {
+              await api.deleteConsult(ec.id);
+            }
+          }
+        }
+        
         await get().refreshDoctors();
+        await get().refreshDoctorConsults(doctorId);
       },
 
       removeDoctor: async (doctorId) => {
@@ -396,6 +421,7 @@ export const useClinicStore = create<ClinicState>()(
     }),
     {
       name: "clinic_store_v1",
+      storage: createJSONStorage(() => sessionStorage),
       partialize: (s) => ({
         session: s.session,
         // Do not persist API data; always fetch fresh

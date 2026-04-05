@@ -21,7 +21,7 @@ export default function LoginPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  const loginPatient = useClinicStore((s) => s.loginPatient);
+  const setSession = useClinicStore((s) => s.setSession);
 
   const { register, handleSubmit, formState: { errors } } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -32,15 +32,22 @@ export default function LoginPage() {
     setErrorMsg("");
     setLoading(true);
     try {
-      const success = await loginPatient(data.email);
-      if (success) {
-        router.push("/patient/dashboard");
+      const { api } = await import("@/lib/api");
+      const result = await api.login(data);
+      sessionStorage.setItem("access_token", result.access_token);
+      
+      const session = { role: result.role, doctorId: result.doctor_id, patientId: result.patient_id };
+      setSession(session);
+      
+      if (result.role === "admin") {
+        router.push("/hq-command");
+      } else if (result.role === "doctor") {
+        router.push("/portal");
       } else {
-        setErrorMsg("Invalid email or password. Please try again.");
+        router.push("/patient/dashboard");
       }
     } catch (err: any) {
-      setErrorMsg("An error occurred during login.");
-    } finally {
+      setErrorMsg(err.message || "An error occurred during login.");
       setLoading(false);
     }
   };
@@ -135,7 +142,7 @@ export default function LoginPage() {
         
         {/* Subtle Staff Link - Hidden but exists */}
         <div className="mt-12 text-center opacity-0 hover:opacity-100 transition-opacity">
-          <Link href="/doctor/login" className="text-xs text-foreground/20 hover:text-primary underline">
+          <Link href="/portal/login" className="text-xs text-foreground/20 hover:text-primary underline">
             Staff Portal
           </Link>
         </div>
