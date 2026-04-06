@@ -4,9 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useClinicStore } from "@/store/clinicStore";
-import { LogOut, LayoutDashboard, UserCircle, Briefcase, Activity, Moon, Sun } from "lucide-react";
-import { useEffect, useState } from "react";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { LogOut, LayoutDashboard, UserCircle, Briefcase, Activity } from "lucide-react";
 
 type NavItem = {
   label: string;
@@ -37,7 +35,7 @@ export function AppShell({
                 <Activity className="h-6 w-6" />
               </div>
               <span className="text-xl font-bold tracking-tight text-foreground hidden sm:block">
-                Online Clinic
+                Zenith Health
               </span>
             </Link>
             <div className="h-6 w-px bg-foreground/10 mx-2 hidden sm:block" />
@@ -45,8 +43,6 @@ export function AppShell({
           </div>
           
           <div className="flex items-center gap-3">
-            <ThemeToggle />
-            
             {session?.role === "doctor" && (
               <Link
                 href="/portal"
@@ -94,7 +90,7 @@ export function AppShell({
           {/* Sidebar/Mobile Nav */}
           {nav.length > 0 && (
             <aside className="w-full md:w-64 shrink-0 overflow-x-auto md:overflow-visible pb-4 md:pb-0 scrollbar-hide">
-              <nav className="glass rounded-2xl md:rounded-4xl p-2 md:p-4 shadow-premium sticky top-24 inline-flex md:block w-fit md:w-auto min-w-full bg-card dark:bg-zinc-900/50">
+              <nav className="glass rounded-2xl md:rounded-4xl p-2 md:p-4 shadow-premium sticky top-24 inline-flex md:block w-fit md:w-auto min-w-full bg-card">
                 <div className="flex md:flex-col gap-2 w-full">
                   {nav.map((item) => {
                     const isActive = pathname === item.href || pathname.startsWith(item.href + "/");

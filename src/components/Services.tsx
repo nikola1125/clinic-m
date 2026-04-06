@@ -1,91 +1,71 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { 
-  HeartPulse, 
-  Stethoscope, 
-  Baby, 
-  Brain, 
-  Dna, 
-  Eye, 
-  Search, 
-  ChevronRight 
-} from "lucide-react";
+import { Scissors, Eye, Microscope, Users, ChevronRight } from "lucide-react";
 
 const services = [
   {
-    title: "General Medicine",
-    desc: "Comprehensive health checkups and treatments for all ages.",
-    icon: Stethoscope,
-    color: "bg-blue-500",
+    title: "Tumor Surgery",
+    desc: "Expert oncological resection and reconstruction, guided by precision imaging and minimally invasive techniques.",
+    icon: Scissors,
   },
   {
-    title: "Cardiology",
-    desc: "Advanced heart care and diagnostic testing for cardiovascular health.",
-    icon: HeartPulse,
-    color: "bg-red-500",
-  },
-  {
-    title: "Pediatrics",
-    desc: "Specialized medical care and wellness support for children.",
-    icon: Baby,
-    color: "bg-amber-500",
-  },
-  {
-    title: "Neurology",
-    desc: "Expert treatment for brain, spine, and nervous system disorders.",
-    icon: Brain,
-    color: "bg-purple-500",
-  },
-  {
-    title: "Genetics",
-    desc: "Modern genetic testing and personalized health risk assessment.",
-    icon: Dna,
-    color: "bg-emerald-500",
-  },
-  {
-    title: "Ophthalmology",
-    desc: "Complete eye care including vision testing and surgical options.",
+    title: "Minimally Invasive Procedures",
+    desc: "Laparoscopic and robotic-assisted interventions that reduce recovery time and improve patient comfort.",
     icon: Eye,
-    color: "bg-sky-500",
+  },
+  {
+    title: "Follow-up Care",
+    desc: "Structured long-term monitoring plans that give patients confidence and catch recurrence early.",
+    icon: Microscope,
+  },
+  {
+    title: "Multidisciplinary Evaluation",
+    desc: "Cross-specialty tumor boards review every case together — surgeons, oncologists, radiologists, and more.",
+    icon: Users,
   },
 ];
 
 export function Services() {
   return (
-    <section id="services" className="py-24 relative overflow-hidden">
+    <section
+      id="services"
+      className="py-24 lg:py-32"
+      style={{ background: "rgba(207, 232, 216, 0.15)" }}
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <motion.h2 
-            initial={{ opacity: 0, y: 20 }}
+        <div className="max-w-3xl mx-auto text-center mb-20">
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-base font-semibold uppercase tracking-wider text-primary"
+            className="text-sm font-semibold uppercase tracking-widest text-primary"
           >
             Our Expertise
-          </motion.h2>
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
+          </motion.p>
+          <motion.h2
+            initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
             className="mt-4 text-4xl font-bold tracking-tight text-foreground lg:text-5xl"
           >
-            Specialized Care for <span className="text-gradient">Every Patient</span>
-          </motion.p>
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
+            Specialized Care for{" "}
+            <span className="text-gradient">Every Patient</span>
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
             className="mt-6 text-lg text-foreground/60 max-w-2xl mx-auto"
           >
-            We offer a wide range of medical services provided by world-class specialists using 
-            the latest clinical technologies.
+            Our oncology team combines surgical excellence with compassionate
+            care at every stage of your treatment journey.
           </motion.p>
         </div>
 
-        <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {services.map((service, idx) => (
             <motion.div
               key={service.title}
@@ -93,25 +73,20 @@ export function Services() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.1 }}
-              whileHover={{ y: -8 }}
-              className="group relative rounded-3xl border border-foreground/5 bg-card p-8 shadow-sm transition-all hover:shadow-premium dark:bg-zinc-900/50 dark:backdrop-blur-xl"
+              whileHover={{ y: -6 }}
+              className="group relative flex flex-col rounded-3xl bg-card p-8 shadow-card ring-1 ring-foreground/5 transition-all hover:shadow-premium"
             >
-              <div className={`inline-flex h-12 w-12 items-center justify-center rounded-2xl ${service.color} bg-opacity-10 text-white shadow-sm ring-1 ring-inset ring-foreground/5`}>
-                <service.icon className={`h-6 w-6 ${service.color.replace('bg-', 'text-')}`} />
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-6">
+                <service.icon className="h-7 w-7" />
               </div>
-              <h3 className="mt-6 text-xl font-bold text-foreground">
+              <h3 className="text-xl font-bold text-foreground">
                 {service.title}
               </h3>
-              <p className="mt-3 text-base text-foreground/60 leading-relaxed">
+              <p className="mt-3 text-sm text-foreground/60 leading-relaxed flex-1">
                 {service.desc}
               </p>
               <div className="mt-6 flex items-center text-sm font-semibold text-primary opacity-0 transition-opacity group-hover:opacity-100">
-                Learn more
-                <ChevronRight className="ml-1 h-4 w-4" />
-              </div>
-              
-              <div className="absolute top-0 right-0 p-8">
-                <Search className="h-24 w-24 text-foreground/5 transition-colors group-hover:text-primary/5" />
+                Learn more <ChevronRight className="ml-1 h-4 w-4" />
               </div>
             </motion.div>
           ))}

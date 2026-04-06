@@ -13,7 +13,7 @@ export function Hero() {
         <img
           src="https://images.unsplash.com/photo-1519494140261-d90193639b42?q=80&w=2000&auto=format&fit=crop"
           alt="Clinic Background"
-          className="h-full w-full object-cover opacity-15 dark:opacity-10 grayscale-[50%]"
+          className="h-full w-full object-cover opacity-15 grayscale-[50%]"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background/90 to-background" />
       </div>

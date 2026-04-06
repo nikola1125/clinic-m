@@ -316,7 +316,7 @@ export default function BookPage() {
                 <button
                   onClick={book}
                   disabled={isBooking || !canProceed}
-                  className="flex items-center gap-2 bg-foreground text-white font-bold px-8 py-3 rounded-full shadow-premium hover:bg-foreground/90 transition-all active:scale-95 disabled:opacity-50"
+                  className="flex items-center gap-2 bg-primary text-white font-bold px-8 py-3 rounded-full shadow-premium hover:bg-primary/90 transition-all active:scale-95 disabled:opacity-50"
                 >
                   {isBooking ? "Confirming..." : "Confirm Booking"} <CheckCircle2 className="h-5 w-5" />
                 </button>

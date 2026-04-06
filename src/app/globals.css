@@ -1,65 +1,63 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #064e3b; /* emerald-900 */
-  
-  /* Primary Colors - Dark Green */
-  --primary: #15803d; /* green-700 */
+  /* ── Core Palette ──────────────────────────────────────── */
+  --background:        #FAFAF7;
+  --background-alt:    #F5F4F0;
+  --foreground:        #1F2937;
+  --foreground-muted:  #6B7280;
+
+  /* Primary – sage green */
+  --primary:           #6FAF8F;
+  --primary-dark:      #4C8C6D;
+  --primary-light:     #5F8F7B;
   --primary-foreground: #ffffff;
-  
-  /* Accent Colors - Light Green */
-  --accent: #4ade80; /* green-400 */
-  --accent-foreground: #022c22; /* emerald-950 */
-  
-  /* Backgrounds */
-  --card: #ffffff;
-  
-  /* Glassmorphism Tokens */
-  --glass: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.3);
+
+  /* Secondary – soft mint */
+  --secondary:         #A8D5BA;
+  --secondary-light:   rgba(207, 232, 216, 0.35);
+
+  /* CTA green (from screenshot spec) */
+  --cta:               #6FAF8F;
+
+  /* Accent – soft peach (icons/highlights only) */
+  --accent:            #F4B8A8;
+  --accent-foreground: #1F2937;
+
+  /* Card & Surface */
+  --card:              #ffffff;
+  --card-border:       rgba(95, 143, 123, 0.12);
+
+  /* Footer – slightly darker neutral */
+  --footer-bg:         #F0EFEB;
+
+  /* Glassmorphism */
+  --glass:             rgba(255, 255, 255, 0.75);
+  --glass-border:      rgba(95, 143, 123, 0.15);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-primary: var(--primary);
+  --color-background:         var(--background);
+  --color-foreground:         var(--foreground);
+  --color-primary:            var(--primary);
   --color-primary-foreground: var(--primary-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-card: var(--card);
-  
-  --font-sans: "Outfit", "Inter", var(--font-geist-sans), sans-serif;
-  --font-heading: "Outfit", sans-serif;
-  
-  --shadow-premium: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
-  --shadow-glass: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --color-secondary:          var(--secondary);
+  --color-accent:             var(--accent);
+  --color-accent-foreground:  var(--accent-foreground);
+  --color-card:               var(--card);
+  --color-cta:                var(--cta);
+
+  --font-sans:    var(--font-sans, "Inter"), "Inter", system-ui, sans-serif;
+  --font-heading: var(--font-heading, "Playfair Display"), "Playfair Display", Georgia, serif;
+
+  --shadow-premium: 0 8px 24px -4px rgba(76, 140, 109, 0.12), 0 4px 8px -2px rgba(0, 0, 0, 0.06);
+  --shadow-glass:   0 2px 8px -1px rgba(76, 140, 109, 0.08), 0 1px 4px -1px rgba(0, 0, 0, 0.04);
+  --shadow-card:    0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(76, 140, 109, 0.08);
 }
 
-/* Dark Mode Support via class */
-.dark {
-  --background: #022c22; /* emerald-950 - very dark green */
-  --foreground: #f0fdf4; /* emerald-50 - almost white */
-  --primary: #22c55e; /* green-500 */
-  --primary-foreground: #022c22;
-  --accent: #86efac; /* green-300 */
-  --accent-foreground: #064e3b; 
-  --card: #064e3b; /* Slightly lighter than background for depth */
-  --glass: rgba(2, 44, 34, 0.85); /* More opaque for readability */
-  --glass-border: rgba(255, 255, 255, 0.1);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not(.light) {
-    --background: #022c22;
-    --foreground: #ecfdf5;
-    --primary: #22c55e;
-    --primary-foreground: #022c22;
-    --accent: #86efac;
-    --accent-foreground: #064e3b; 
-    --glass: rgba(2, 44, 34, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.1);
-  }
+/* ── Base ──────────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
 }
 
 body {
@@ -70,31 +68,55 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Smooth Scrolling */
-html {
-  scroll-behavior: smooth;
+/* Heading font utility */
+.font-heading {
+  font-family: var(--font-heading);
 }
 
-/* Glassmorphism Utility */
+h1, h2, h3 {
+  font-family: var(--font-heading);
+}
+
+/* ── Glassmorphism ─────────────────────────────────────── */
 .glass {
   background: var(--glass);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--glass-border);
 }
 
-/* Gradient Text */
+/* ── Gradient Text ─────────────────────────────────────── */
 .text-gradient {
-  background: linear-gradient(to right, var(--primary), var(--accent));
+  background: linear-gradient(135deg, var(--primary-light) 0%, var(--secondary) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-/* Scrollbar Hide Utility */
+/* ── Section Backgrounds ───────────────────────────────── */
+.section-alt {
+  background: var(--background-alt);
+}
+
+.section-mint {
+  background: linear-gradient(180deg, rgba(207, 232, 216, 0.18) 0%, var(--background) 100%);
+}
+
+.section-sage {
+  background: rgba(207, 232, 216, 0.15);
+}
+
+/* ── Scrollbar Hide ────────────────────────────────────── */
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+/* ── Focus Ring ────────────────────────────────────────── */
+*:focus-visible {
+  outline: 2px solid var(--primary-light);
+  outline-offset: 2px;
 }

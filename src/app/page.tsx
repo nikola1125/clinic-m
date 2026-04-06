@@ -1,66 +1,85 @@
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
-import { Services } from "@/components/Services";
 import { DoctorSpotlight } from "@/components/DoctorSpotlight";
+import { Services } from "@/components/Services";
+import { TrustSection } from "@/components/TrustSection";
+import { Testimonials } from "@/components/Testimonials";
 import { Footer } from "@/components/Footer";
-import { motion } from "framer-motion";
 
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
-      
+
       <main className="grow">
+        {/* 1. HERO */}
         <Hero />
-        
-        {/* Trust/Logo Cloud Section */}
-        <div className="py-12 border-y border-foreground/5 bg-foreground/1">
+
+        {/* 2. TRUST BAR */}
+        <div className="py-10 border-y border-foreground/5">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <p className="text-center text-sm font-semibold uppercase tracking-widest text-foreground/30">
+            <p className="text-center text-xs font-semibold uppercase tracking-widest text-foreground/30">
               Trusted by leading health organizations
             </p>
-            <div className="mt-10 flex flex-wrap justify-center items-center gap-12 grayscale opacity-40">
-              {/* Symbolic Logos */}
-              <div className="text-xl font-black text-foreground">WHO</div>
-              <div className="text-xl font-black text-foreground">UNICEF</div>
-              <div className="text-xl font-black text-foreground">NHS</div>
-              <div className="text-xl font-black text-foreground">RED CROSS</div>
-              <div className="text-xl font-black text-foreground">MAYO CLINIC</div>
+            <div className="mt-8 flex flex-wrap justify-center items-center gap-10 sm:gap-16 grayscale opacity-35">
+              {["WHO", "UNICEF", "NHS", "RED CROSS", "MAYO CLINIC"].map(
+                (org) => (
+                  <div
+                    key={org}
+                    className="text-lg font-black text-foreground tracking-wider"
+                  >
+                    {org}
+                  </div>
+                )
+              )}
             </div>
           </div>
         </div>
 
-        <Services />
+        {/* 3. DOCTORS — "Our Specialists" */}
         <DoctorSpotlight />
 
-        {/* CTA Section */}
-        <section className="py-24 bg-primary relative overflow-hidden">
-          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-            <h2 className="text-4xl font-bold tracking-tight text-white lg:text-6xl">
-              Ready to take control of <br /> your <span className="underline decoration-accent underline-offset-8">health journey?</span>
+        {/* 4. SERVICES — oncology, light sage bg */}
+        <Services />
+
+        {/* 5. TRUST SECTION — "Why Choose Us" */}
+        <TrustSection />
+
+        {/* 6. TESTIMONIALS */}
+        <Testimonials />
+
+        {/* 7. FINAL CTA — bg #6FAF8F per spec */}
+        <section
+          className="py-24 relative overflow-hidden"
+          style={{ background: "#6FAF8F" }}
+        >
+          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+            <h2 className="text-4xl font-bold tracking-tight text-white lg:text-5xl">
+              Take the first step
+              <br />
+              <span className="opacity-90">toward your care.</span>
             </h2>
-            <p className="mt-8 text-xl text-primary-foreground/80 max-w-2xl mx-auto">
-              Book your first consultation today and experience the Zenith Health difference. 
-              Our specialists are ready to provide the personalized care you deserve.
+            <p className="mt-6 text-lg text-white/75 max-w-xl mx-auto">
+              Our specialists are ready to guide you through every stage of your
+              journey — with expertise, compassion, and clarity.
             </p>
-            <div className="mt-12 flex justify-center">
+            <div className="mt-10">
               <a
-                href="/signup"
-                className="rounded-2xl bg-white px-10 py-5 text-lg font-bold text-primary shadow-2xl transition-all hover:bg-zinc-50 hover:scale-105 active:scale-95"
+                href="/book"
+                className="inline-flex items-center gap-2 rounded-2xl bg-white px-10 py-5 text-lg font-bold text-primary shadow-premium transition-all hover:bg-white/90 hover:scale-[1.03] active:scale-[0.97]"
               >
-                Get Started Now
+                Book Appointment
               </a>
             </div>
           </div>
-          
-          {/* Decorative elements */}
-          <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-accent/20 rounded-full blur-3xl" />
+          {/* Subtle decorative circles */}
+          <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-white/5 blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-white/5 blur-3xl pointer-events-none" />
         </section>
       </main>
 
+      {/* 8. FOOTER — slightly darker neutral */}
       <Footer />
     </div>
   );
 }
-
