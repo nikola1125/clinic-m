@@ -1,13 +1,16 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import { Calendar, ChevronRight, Star, Users } from "lucide-react";
+import { SearchBar } from "./SearchBar";
 
 export function Hero() {
+  const t = useTranslations("Hero");
+
   return (
-    <section className="relative overflow-hidden py-24 lg:py-32">
+    <section className="relative overflow-hidden pt-10 pb-12 lg:pt-16 lg:pb-14">
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 -z-10 h-full w-full">
         <img
@@ -27,17 +30,16 @@ export function Hero() {
           >
             <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-semibold text-primary">
               <Star className="h-4 w-4 fill-current" />
-              <span>Trust Zenith: #1 Medical Clinic in the Region</span>
+              <span>{t("badge")}</span>
             </div>
             
             <h1 className="mt-8 text-5xl font-bold tracking-tight text-foreground lg:text-7xl">
-              Healthcare tailored <br />
-              <span className="text-gradient">for your life.</span>
+              {t("title_1")} <br />
+              <span className="text-gradient">{t("title_2")}</span>
             </h1>
             
             <p className="mt-6 text-lg leading-8 text-foreground/60 max-w-xl">
-              Experience the future of medicine with Zenith Health. Our world-class specialists and 
-              cutting-edge technology provide personalized care that fits your schedule.
+              {t("description")}
             </p>
             
             <div className="mt-10 flex flex-col sm:flex-row sm:items-center gap-4">
@@ -46,13 +48,13 @@ export function Hero() {
                 className="inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-8 py-4 text-lg font-semibold text-white shadow-premium transition-all hover:bg-primary/90 hover:scale-[1.03] active:scale-[0.97]"
               >
                 <Calendar className="h-5 w-5" />
-                Book Appointment
+                {t("book_btn")}
               </Link>
               <Link
                 href="#services"
                 className="inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-4 text-lg font-semibold text-foreground/70 transition-all hover:bg-foreground/5 hover:text-foreground"
               >
-                Our Services
+                {t("services_btn")}
                 <ChevronRight className="h-5 w-5" />
               </Link>
             </div>
@@ -60,12 +62,12 @@ export function Hero() {
             <div className="mt-12 grid grid-cols-2 gap-6 sm:flex sm:items-center sm:gap-8 border-t border-foreground/5 pt-10">
               <div>
                 <div className="text-2xl font-bold text-foreground">15k+</div>
-                <div className="text-sm text-foreground/50">Happy Patients</div>
+                <div className="text-sm text-foreground/50">{t("stat_patients")}</div>
               </div>
               <div className="hidden sm:block h-10 w-px bg-foreground/10" />
               <div>
                 <div className="text-2xl font-bold text-foreground">48+</div>
-                <div className="text-sm text-foreground/50">Expert Doctors</div>
+                <div className="text-sm text-foreground/50">{t("stat_doctors")}</div>
               </div>
               <div className="hidden sm:block h-10 w-px bg-foreground/10" />
               <div className="flex -space-x-3 overflow-hidden col-span-2 sm:col-auto justify-start mt-2 sm:mt-0">
@@ -104,12 +106,22 @@ export function Hero() {
                 <Users className="h-5 w-5 sm:h-6 text-white" />
               </div>
               <div>
-                <div className="text-sm font-semibold text-foreground">Available Now</div>
-                <div className="text-xs text-foreground/50">8 Specialists Online</div>
+                <div className="text-sm font-semibold text-foreground">{t("floating_title")}</div>
+                <div className="text-xs text-foreground/50">{t("floating_desc")}</div>
               </div>
             </motion.div>
           </motion.div>
         </div>
+
+        {/* Search Bar - below the hero grid */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.5 }}
+          className="mt-16 lg:mt-20"
+        >
+          <SearchBar />
+        </motion.div>
       </div>
       
       {/* Background blobs for depth */}

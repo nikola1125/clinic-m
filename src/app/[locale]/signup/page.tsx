@@ -11,11 +11,11 @@ import * as z from "zod";
 import { useClinicStore } from "@/store/clinicStore";
 
 const signupSchema = z.object({
-  fullName: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
+  fullName: z.string().min(2, "Emri duhet të ketë të paktën 2 karaktere"),
+  email: z.string().email("Adresë emaili e pavlefshme"),
   phone: z.string().optional(),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  terms: z.boolean().refine(val => val === true, "You must agree to terms"),
+  password: z.string().min(6, "Fjalëkalimi duhet të ketë të paktën 6 karaktere"),
+  terms: z.boolean().refine(val => val === true, "Duhet të pranoni kushtet"),
 });
 
 type SignupFormValues = z.infer<typeof signupSchema>;
@@ -54,7 +54,7 @@ export default function SignupPage() {
       setSession({ role: result.role, patientId: result.patient_id });
       router.push("/patient/dashboard");
     } catch (e: any) {
-      setErrorMsg(e.message || "Failed to create account. Please try again.");
+      setErrorMsg(e.message || "Dështoi krijimi i llogarisë. Ju lutem provoni përsëri.");
       setSession(null);
     } finally {
       setLoading(false);
@@ -68,7 +68,7 @@ export default function SignupPage() {
         className="absolute top-8 left-8 flex items-center gap-2 text-sm font-medium text-foreground/50 hover:text-primary transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />
-        Back to Home
+        Kthehu në Faqen Kryesore
       </Link>
 
       <motion.div
@@ -80,8 +80,8 @@ export default function SignupPage() {
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary shadow-premium mb-4">
             <Activity className="h-7 w-7 text-white" />
           </div>
-          <h2 className="text-3xl font-bold tracking-tight text-foreground">Join Zenith Health</h2>
-          <p className="mt-2 text-sm text-foreground/50 max-w-sm">The first step to a healthier life. Sign up for your patient profile today.</p>
+          <h2 className="text-3xl font-bold tracking-tight text-foreground">Bashkohu me Zenith Health</h2>
+          <p className="mt-2 text-sm text-foreground/50 max-w-sm">Hapi i parë drejt një jete më të shëndetshme. Regjistrohuni sot për profilin tuaj.</p>
         </div>
 
         <div className="glass rounded-4xl p-8 lg:p-12 shadow-premium">
@@ -95,7 +95,7 @@ export default function SignupPage() {
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div>
                 <label className="block text-sm font-semibold text-foreground mb-2">
-                  Full Name
+                  Emri i Plotë
                 </label>
                 <div className="relative">
                   <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-foreground/30" />
@@ -111,7 +111,7 @@ export default function SignupPage() {
 
               <div>
                 <label className="block text-sm font-semibold text-foreground mb-2">
-                  Phone Number
+                  Numri i Telefonit
                 </label>
                 <div className="relative">
                   <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-foreground/30" />
@@ -128,7 +128,7 @@ export default function SignupPage() {
 
             <div>
               <label className="block text-sm font-semibold text-foreground mb-2">
-                Email address
+                Adresa e Emailit
               </label>
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-foreground/30" />
@@ -146,7 +146,7 @@ export default function SignupPage() {
 
             <div>
               <label className="text-sm font-semibold text-foreground block mb-2">
-                Password
+                Fjalëkalimi
               </label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-foreground/30" />
@@ -161,7 +161,7 @@ export default function SignupPage() {
                 <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>
               ) : (
                 <p className="mt-2 text-[10px] text-foreground/40 px-2 italic">
-                  Must be at least 6 characters.
+                  Duhet të ketë të paktën 6 karaktere.
                 </p>
               )}
             </div>
@@ -169,7 +169,7 @@ export default function SignupPage() {
             <div className="flex items-center gap-2 px-2">
               <input type="checkbox" {...register("terms")} className="rounded-md border-foreground/10 text-primary focus:ring-primary h-4 w-4" />
               <label className="text-xs text-foreground/50">
-                I agree to the <Link href="/terms" className="text-primary hover:underline">Terms of Service</Link> and <Link href="/privacy" className="text-primary hover:underline">Privacy Policy</Link>.
+                Pranoj <Link href="/terms" className="text-primary hover:underline">Kushtet e Shërbimit</Link> dhe <Link href="/privacy" className="text-primary hover:underline">Politikën e Privatësisë</Link>.
               </label>
             </div>
              {errors.terms && <p className="text-red-500 text-xs px-2">{errors.terms.message}</p>}
@@ -179,16 +179,16 @@ export default function SignupPage() {
               disabled={loading}
               className="w-full flex items-center justify-center gap-2 rounded-2xl bg-primary py-5 text-base font-bold text-white shadow-premium transition-all hover:bg-primary/90 hover:translate-y-[-2px] active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? "Creating Account..." : "Create Account"}
+              {loading ? "Duke krijuar llogarinë..." : "Krijo Llogari"}
               {!loading && <ChevronRight className="h-5 w-5" />}
             </button>
           </form>
 
           <div className="mt-8 pt-8 border-t border-foreground/5 text-center">
             <p className="text-sm text-foreground/50">
-              Already a member?{" "}
+              Keni një llogari?{" "}
               <Link href="/login" className="font-bold text-primary hover:underline">
-                Sign in
+                Hyni
               </Link>
             </p>
           </div>

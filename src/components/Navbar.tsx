@@ -1,15 +1,18 @@
 "use client";
 
-import Link from "next/link";
-import { motion } from "framer-motion";
-import { Activity, User, Menu, X } from "lucide-react";
+import { Link } from "@/i18n/routing";
+import { motion, AnimatePresence } from "framer-motion";
+import { Activity, Menu, X } from "lucide-react";
 import { useClinicStore } from "@/store/clinicStore";
 import { useState, useEffect } from "react";
-import { AnimatePresence } from "framer-motion";
+import { ThemeToggle } from "./ThemeToggle";
+import { LanguageToggle } from "./LanguageToggle";
+import { useTranslations } from "next-intl";
 
 export function Navbar() {
   const session = useClinicStore((s) => s.session);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const t = useTranslations("Navbar");
 
   useEffect(() => {
     const handleResize = () => {
@@ -29,10 +32,10 @@ export function Navbar() {
         <div
           className="mt-4 flex h-16 items-center justify-between rounded-2xl px-6 shadow-glass"
           style={{
-            background: "rgba(255,255,255,0.82)",
+            background: "var(--glass)",
             backdropFilter: "blur(16px)",
             WebkitBackdropFilter: "blur(16px)",
-            border: "1px solid rgba(95,143,123,0.14)",
+            border: "1px solid var(--glass-border)",
           }}
         >
           {/* Brand */}
@@ -50,7 +53,11 @@ export function Navbar() {
 
           {/* Desktop Nav */}
           <nav className="hidden items-center gap-8 md:flex">
-            {["/#services", "/#doctors", "/#about"].map((href, i) => (
+            {[
+              { href: "/#services", label: t("services") },
+              { href: "/#doctors", label: t("specialists") },
+              { href: "/#about", label: t("about") }
+            ].map(({href, label}) => (
               <Link
                 key={href}
                 href={href}
@@ -59,13 +66,15 @@ export function Navbar() {
                 onMouseEnter={e => (e.currentTarget.style.color = "var(--primary)")}
                 onMouseLeave={e => (e.currentTarget.style.color = "var(--foreground-muted)")}
               >
-                {["Services", "Specialists", "About"][i]}
+                {label}
               </Link>
             ))}
           </nav>
 
           {/* Desktop Actions */}
           <div className="hidden items-center gap-4 md:flex">
+            <LanguageToggle />
+            <ThemeToggle />
             {session ? (
               <Link
                 href={
@@ -89,7 +98,7 @@ export function Navbar() {
                   alt="Profile"
                   className="h-8 w-8 rounded-full border border-white shadow-sm"
                 />
-                <span style={{ color: "var(--foreground)" }}>Dashboard</span>
+                <span style={{ color: "var(--foreground)" }}>{t("dashboard")}</span>
               </Link>
             ) : (
               <>
@@ -98,14 +107,14 @@ export function Navbar() {
                   className="text-sm font-semibold transition-colors"
                   style={{ color: "var(--foreground-muted)" }}
                 >
-                  Log in
+                  {t("login")}
                 </Link>
                 <Link
                   href="/signup"
                   className="rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-premium transition-all hover:scale-[1.02] active:scale-[0.98]"
                   style={{ background: "var(--primary)" }}
                 >
-                  Join Clinic
+                  {t("join")}
                 </Link>
               </>
             )}
@@ -113,6 +122,8 @@ export function Navbar() {
 
           {/* Mobile menu toggle */}
           <div className="flex items-center gap-3 md:hidden">
+            <LanguageToggle />
+            <ThemeToggle />
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="flex h-10 w-10 items-center justify-center rounded-xl transition-colors"
@@ -133,15 +144,15 @@ export function Navbar() {
             exit={{ opacity: 0, scale: 0.95 }}
             className="absolute top-24 left-4 right-4 z-50 overflow-hidden rounded-3xl p-6 shadow-2xl md:hidden"
             style={{
-              background: "#ffffff",
-              border: "1px solid rgba(95,143,123,0.12)",
+              background: "var(--card)",
+              border: "1px solid var(--card-border)",
             }}
           >
             <div className="flex flex-col gap-6">
               {[
-                { label: "Services", href: "/#services" },
-                { label: "Specialists", href: "/#doctors" },
-                { label: "About", href: "/#about" },
+                { label: t("services"), href: "/#services" },
+                { label: t("specialists"), href: "/#doctors" },
+                { label: t("about"), href: "/#about" },
               ].map(({ label, href }) => (
                 <Link
                   key={href}
@@ -182,13 +193,13 @@ export function Navbar() {
                   />
                   <div className="flex flex-col">
                     <span className="font-bold" style={{ color: "var(--foreground)" }}>
-                      My Dashboard
+                      {t("dashboard")}
                     </span>
                     <span
                       className="text-xs uppercase tracking-widest"
                       style={{ color: "var(--foreground-muted)" }}
                     >
-                      {session.role} Portal
+                      {session.role === "admin" ? "Admin" : session.role === "doctor" ? "Doctor" : "Patient"} Portal
                     </span>
                   </div>
                 </Link>
@@ -203,7 +214,7 @@ export function Navbar() {
                       color: "var(--foreground)",
                     }}
                   >
-                    Log in
+                    {t("login")}
                   </Link>
                   <Link
                     onClick={() => setIsMenuOpen(false)}
@@ -211,7 +222,7 @@ export function Navbar() {
                     className="flex h-12 items-center justify-center rounded-2xl font-bold text-lg text-white shadow-premium"
                     style={{ background: "var(--primary)" }}
                   >
-                    Join Clinic
+                    {t("join")}
                   </Link>
                 </div>
               )}

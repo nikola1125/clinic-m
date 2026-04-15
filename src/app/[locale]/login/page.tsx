@@ -11,8 +11,8 @@ import * as z from "zod";
 import { useClinicStore } from "@/store/clinicStore";
 
 const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(1, "Password is required"),
+  email: z.string().email("Adresë emaili e pavlefshme"),
+  password: z.string().min(1, "Fjalëkalimi është i detyrueshëm"),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -47,7 +47,7 @@ export default function LoginPage() {
         router.push("/patient/dashboard");
       }
     } catch (err: any) {
-      setErrorMsg(err.message || "An error occurred during login.");
+      setErrorMsg(err.message || "Ndodhi një gabim gjatë identifikimit.");
       setLoading(false);
     }
   };
@@ -59,7 +59,7 @@ export default function LoginPage() {
         className="absolute top-8 left-8 flex items-center gap-2 text-sm font-medium text-foreground/50 hover:text-primary transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />
-        Back to Home
+        Kthehu në Faqen Kryesore
       </Link>
 
       <motion.div
@@ -71,8 +71,8 @@ export default function LoginPage() {
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary shadow-premium mb-4">
             <Activity className="h-7 w-7 text-white" />
           </div>
-          <h2 className="text-3xl font-bold tracking-tight text-foreground">Welcome back</h2>
-          <p className="mt-2 text-sm text-foreground/50">Log in to your patient account</p>
+          <h2 className="text-3xl font-bold tracking-tight text-foreground">Mirësevini përsëri</h2>
+          <p className="mt-2 text-sm text-foreground/50">Identifikohuni në llogarinë tuaj të pacientit</p>
         </div>
 
         <div className="glass rounded-4xl p-8 shadow-premium">
@@ -85,7 +85,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div>
               <label className="block text-sm font-semibold text-foreground mb-2">
-                Email address
+                Adresa e Emailit
               </label>
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-foreground/30" />
@@ -102,10 +102,10 @@ export default function LoginPage() {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="text-sm font-semibold text-foreground">
-                  Password
+                  Fjalëkalimi
                 </label>
                 <Link href="#" className="text-xs font-medium text-primary hover:underline">
-                  Forgot password?
+                  Keni harruar fjalëkalimin?
                 </Link>
               </div>
               <div className="relative">
@@ -125,16 +125,16 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full flex items-center justify-center gap-2 rounded-2xl bg-primary py-4 text-sm font-bold text-white shadow-premium transition-all hover:bg-primary/90 hover:translate-y-[-2px] active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? "Signing in..." : "Sign In"}
+              {loading ? "Duke u identifikuar..." : "Hyr"}
               {!loading && <ChevronRight className="h-4 w-4" />}
             </button>
           </form>
 
           <div className="mt-8 pt-8 border-t border-foreground/5 text-center">
             <p className="text-sm text-foreground/50">
-              Don't have an account?{" "}
+              Nuk keni llogari?{" "}
               <Link href="/signup" className="font-bold text-primary hover:underline">
-                Register here
+                Regjistrohuni këtu
               </Link>
             </p>
           </div>
@@ -143,7 +143,7 @@ export default function LoginPage() {
         {/* Subtle Staff Link - Hidden but exists */}
         <div className="mt-12 text-center opacity-0 hover:opacity-100 transition-opacity">
           <Link href="/portal/login" className="text-xs text-foreground/20 hover:text-primary underline">
-            Staff Portal
+            Portali i Stafit
           </Link>
         </div>
       </motion.div>

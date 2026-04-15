@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-:root {
+html {
   /* ── Core Palette ──────────────────────────────────────── */
   --background:        #FAFAF7;
   --background-alt:    #F5F4F0;
@@ -34,6 +34,39 @@
   /* Glassmorphism */
   --glass:             rgba(255, 255, 255, 0.75);
   --glass-border:      rgba(95, 143, 123, 0.15);
+}
+
+/* ── Dark Mode ─────────────────────────────────────────── */
+html.dark, html[data-theme="dark"] {
+  --background:        #0F1419;
+  --background-alt:    #1A2028;
+  --foreground:        #E8ECF0;
+  --foreground-muted:  #8B95A2;
+
+  --primary:           #7CC4A0;
+  --primary-dark:      #9DD8B8;
+  --primary-light:     #5FAA83;
+  --primary-foreground: #0F1419;
+
+  --secondary:         #5A9B78;
+  --secondary-light:   rgba(90, 155, 120, 0.2);
+
+  --cta:               #7CC4A0;
+
+  --accent:            #F4B8A8;
+  --accent-foreground: #E8ECF0;
+
+  --card:              #1A2028;
+  --card-border:       rgba(124, 196, 160, 0.12);
+
+  --footer-bg:         #141A20;
+
+  --glass:             rgba(15, 20, 25, 0.82);
+  --glass-border:      rgba(124, 196, 160, 0.12);
+
+  --shadow-premium: 0 8px 24px -4px rgba(0, 0, 0, 0.3), 0 4px 8px -2px rgba(0, 0, 0, 0.2);
+  --shadow-glass:   0 2px 8px -1px rgba(0, 0, 0, 0.2), 0 1px 4px -1px rgba(0, 0, 0, 0.12);
+  --shadow-card:    0 1px 4px rgba(0,0,0,0.2), 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
 @theme inline {

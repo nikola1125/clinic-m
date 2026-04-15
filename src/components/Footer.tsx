@@ -1,9 +1,12 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { Activity, Mail, Phone, MapPin } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export function Footer() {
+  const t = useTranslations("Footer");
+
   return (
     <footer
       className="border-t border-foreground/5 py-16 lg:py-24"
@@ -22,8 +25,7 @@ export function Footer() {
               </span>
             </Link>
             <p className="mt-6 text-sm leading-6 text-foreground/50 max-w-xs">
-              Providing world-class oncology care with a personal touch. Your
-              health is our priority — from diagnosis to recovery.
+              {t("description")}
             </p>
             <div className="mt-8 flex gap-4">
               {/* Twitter */}
@@ -96,22 +98,16 @@ export function Footer() {
           {/* Services */}
           <div>
             <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">
-              Services
+              {t("servicesTitle")}
             </h3>
             <ul className="mt-6 space-y-4">
-              {[
-                "Tumor Surgery",
-                "Follow-up Care",
-                "Minimally Invasive",
-                "Multidisciplinary Eval",
-                "Book Appointment",
-              ].map((item) => (
-                <li key={item}>
+              {[0, 1, 2, 3, 4].map((idx) => (
+                <li key={idx}>
                   <Link
                     href="#services"
                     className="text-sm text-foreground/60 hover:text-primary transition-colors"
                   >
-                    {item}
+                    {t(`s${idx}`)}
                   </Link>
                 </li>
               ))}
@@ -121,22 +117,16 @@ export function Footer() {
           {/* Clinic */}
           <div>
             <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">
-              Clinic
+              {t("clinicTitle")}
             </h3>
             <ul className="mt-6 space-y-4">
-              {[
-                "Our Specialists",
-                "Patient Stories",
-                "About Zenith",
-                "Careers",
-                "Research",
-              ].map((item) => (
-                <li key={item}>
+              {[0, 1, 2, 3, 4].map((idx) => (
+                <li key={idx}>
                   <Link
                     href="#doctors"
                     className="text-sm text-foreground/60 hover:text-primary transition-colors"
                   >
-                    {item}
+                    {t(`c${idx}`)}
                   </Link>
                 </li>
               ))}
@@ -146,7 +136,7 @@ export function Footer() {
           {/* Contact */}
           <div>
             <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">
-              Contact
+              {t("contactTitle")}
             </h3>
             <ul className="mt-6 space-y-4">
               <li className="flex items-center gap-3 text-sm text-foreground/60 transition-colors hover:text-primary">
@@ -171,27 +161,26 @@ export function Footer() {
 
         <div className="mt-16 border-t border-foreground/5 pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="text-xs text-foreground/40 text-center md:text-left">
-            © {new Date().getFullYear()} Zenith Health Group. All medical
-            services provided by licensed specialists.
+            © {new Date().getFullYear()} {t("rights")}
           </p>
           <div className="flex gap-8">
             <Link
               href="#"
               className="text-xs text-foreground/40 hover:text-primary transition-colors"
             >
-              Privacy Policy
+              {t("privacy")}
             </Link>
             <Link
               href="#"
               className="text-xs text-foreground/40 hover:text-primary transition-colors"
             >
-              Terms of Service
+              {t("terms")}
             </Link>
             <Link
               href="#"
               className="text-xs text-foreground/40 hover:text-primary transition-colors"
             >
-              Cookie Settings
+              {t("cookies")}
             </Link>
           </div>
         </div>

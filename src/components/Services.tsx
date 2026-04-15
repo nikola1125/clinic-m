@@ -30,7 +30,7 @@ export function Services() {
   return (
     <section
       id="services"
-      className="py-24 lg:py-32"
+      className="py-16 lg:py-20"
       style={{ background: "rgba(207, 232, 216, 0.15)" }}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
