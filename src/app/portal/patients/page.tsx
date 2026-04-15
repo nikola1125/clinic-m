@@ -40,7 +40,7 @@ export default function DoctorPatientsPage() {
                 <Users className="h-6 w-6 text-primary" />
                 Patient Directory
               </div>
-              <div className="mt-1 text-sm text-foreground/50">
+              <div className="mt-1 text-sm text-foreground">
                 Manage your patient roster, view medical histories, and track progress.
               </div>
             </div>
@@ -65,7 +65,7 @@ export default function DoctorPatientsPage() {
                   <Users className="h-8 w-8" />
                 </div>
                 <div className="text-lg font-bold text-foreground">No patients found</div>
-                <div className="mt-2 text-sm text-foreground/60 max-w-sm mx-auto">
+                <div className="mt-2 text-sm text-foreground max-w-sm mx-auto">
                   {q 
                     ? `No patients match your search for "${q}". Try a different term.` 
                     : "You don't have any registered patients yet. Records are created when appointments are booked."}
@@ -84,16 +84,16 @@ export default function DoctorPatientsPage() {
                         <div className="text-lg font-bold text-foreground truncate group-hover:text-primary transition-colors">
                           {p.fullName}
                         </div>
-                        <div className="mt-1 flex items-center gap-2 text-sm text-foreground/60 truncate">
+                        <div className="mt-1 flex items-center gap-2 text-sm text-foreground truncate">
                           <Mail className="h-3 w-3 shrink-0" /> {p.email}
                         </div>
                         {p.phone && (
-                          <div className="mt-1 flex items-center gap-2 text-sm text-foreground/60 truncate">
+                          <div className="mt-1 flex items-center gap-2 text-sm text-foreground truncate">
                             <Phone className="h-3 w-3 shrink-0" /> {p.phone}
                           </div>
                         )}
                       </div>
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-foreground/5 text-foreground/40 transition-colors group-hover:bg-primary/10 group-hover:text-primary">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-foreground/5 text-foreground transition-colors group-hover:bg-primary/10 group-hover:text-primary">
                         <ChevronRight className="h-5 w-5" />
                       </div>
                     </div>

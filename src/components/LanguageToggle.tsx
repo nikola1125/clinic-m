@@ -37,7 +37,7 @@ export function LanguageToggle() {
   const activeLang = languages.find((l) => l.code === locale) || languages[0];
 
   return (
-    <div ref={containerRef} className="relative z-50">
+    <div ref={containerRef} className="relative z-[60]">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex h-10 w-10 items-center justify-center rounded-xl bg-card border border-foreground/10 text-foreground transition-all hover:bg-foreground/5 hover:border-foreground/20 shadow-sm"
@@ -53,7 +53,7 @@ export function LanguageToggle() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.96 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="absolute right-0 top-full mt-2 w-48 overflow-hidden rounded-2xl p-1.5 shadow-xl glass z-50"
+            className="absolute right-0 top-full mt-2 w-48 overflow-hidden rounded-2xl p-1.5 shadow-xl glass z-[60]"
             style={{
               background: "var(--card)",
               border: "1px solid var(--card-border)",

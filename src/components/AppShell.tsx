@@ -39,7 +39,7 @@ export function AppShell({
               </span>
             </Link>
             <div className="h-6 w-px bg-foreground/10 mx-2 hidden sm:block" />
-            <div className="text-sm font-bold text-foreground/60 hidden sm:block">{title}</div>
+            <div className="text-sm font-bold text-foreground hidden sm:block">{title}</div>
           </div>
           
           <div className="flex items-center gap-3">
@@ -99,10 +99,10 @@ export function AppShell({
                         key={item.href}
                         href={item.href}
                         className={cn(
-                          "block rounded-xl md:rounded-2xl px-4 py-2 md:py-3 text-xs md:text-sm font-bold transition-all whitespace-nowrap md:whitespace-normal",
+                          "block rounded-xl md:rounded-2xl px-3 py-2.5 md:px-4 md:py-3 text-xs md:text-sm font-bold transition-all whitespace-nowrap md:whitespace-normal min-w-fit",
                           isActive 
                             ? "bg-primary text-white shadow-premium" 
-                            : "text-foreground/60 hover:bg-foreground/5 hover:text-foreground"
+                            : "text-foreground hover:bg-foreground/5"
                         )}
                       >
                         {item.label}

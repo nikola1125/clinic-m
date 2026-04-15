@@ -62,7 +62,7 @@ export default function PatientDashboard() {
               <h1 className="text-3xl font-bold tracking-tight text-foreground">
                 Welcome back, {patient?.fullName?.split(" ")[0] || "Patient"}
               </h1>
-              <p className="mt-2 text-foreground/60">
+              <p className="mt-2 text-foreground">
                 Manage your appointments and stay on top of your health.
               </p>
             </div>
@@ -93,10 +93,10 @@ export default function PatientDashboard() {
               {upcoming.length === 0 ? (
                 <div className="glass rounded-3xl p-10 text-center shadow-premium">
                   <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-foreground/5 mb-4">
-                    <Calendar className="h-6 w-6 text-foreground/40" />
+                    <Calendar className="h-6 w-6 text-foreground" />
                   </div>
                   <h3 className="text-lg font-bold text-foreground">No upcoming visits</h3>
-                  <p className="mt-2 text-sm text-foreground/50 max-w-sm mx-auto">
+                  <p className="mt-2 text-sm text-foreground max-w-sm mx-auto">
                     You're all caught up! Book a new appointment if you need to see a doctor.
                   </p>
                 </div>
@@ -120,8 +120,8 @@ export default function PatientDashboard() {
                             </div>
                             <div>
                               <div className="font-bold text-lg text-foreground">{doc?.name || "Doctor"}</div>
-                              <div className="text-sm text-foreground/60">{doc?.specialty || "Specialist"}</div>
-                              <div className="mt-1 flex items-center gap-2 text-xs font-medium text-foreground/50">
+                              <div className="text-sm text-foreground">{doc?.specialty || "Specialist"}</div>
+                              <div className="mt-1 flex items-center gap-2 text-xs font-medium text-foreground">
                                 <Clock className="h-3 w-3" />
                                 {format(dt, "MMMM d, yyyy 'at' h:mm a")}
                               </div>
@@ -165,10 +165,10 @@ export default function PatientDashboard() {
                           </div>
                           <div>
                             <div className="font-semibold text-sm">{doc?.name}</div>
-                            <div className="text-xs text-foreground/50">{format(new Date(appt.scheduledAt), "MMMM d, yyyy")}</div>
+                            <div className="text-xs text-foreground">{format(new Date(appt.scheduledAt), "MMMM d, yyyy")}</div>
                           </div>
                         </div>
-                        <span className="text-xs font-medium text-foreground/40 capitalize">{appt.status}</span>
+                        <span className="text-xs font-medium text-foreground capitalize">{appt.status}</span>
                       </div>
                     );
                   })}
@@ -185,15 +185,15 @@ export default function PatientDashboard() {
                 </h3>
                 <div className="space-y-4 text-sm">
                   <div>
-                    <span className="block text-foreground/50 text-xs mb-1">Full Name</span>
+                    <span className="block text-foreground text-xs mb-1">Full Name</span>
                     <span className="font-medium">{patient?.fullName}</span>
                   </div>
                   <div>
-                    <span className="block text-foreground/50 text-xs mb-1">Email Address</span>
+                    <span className="block text-foreground text-xs mb-1">Email Address</span>
                     <span className="font-medium">{patient?.email}</span>
                   </div>
                   <div>
-                    <span className="block text-foreground/50 text-xs mb-1">Phone Number</span>
+                    <span className="block text-foreground text-xs mb-1">Phone Number</span>
                     <span className="font-medium">{patient?.phone || "Not set"}</span>
                   </div>
                 </div>

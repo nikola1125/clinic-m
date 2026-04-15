@@ -58,14 +58,14 @@ export function Services() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="mt-6 text-lg text-foreground/60 max-w-2xl mx-auto"
+            className="mt-6 text-lg text-foreground max-w-2xl mx-auto"
           >
             Our oncology team combines surgical excellence with compassionate
             care at every stage of your treatment journey.
           </motion.p>
         </div>
 
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 sm:gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {services.map((service, idx) => (
             <motion.div
               key={service.title}
@@ -74,18 +74,18 @@ export function Services() {
               viewport={{ once: true }}
               transition={{ delay: idx * 0.1 }}
               whileHover={{ y: -6 }}
-              className="group relative flex flex-col rounded-3xl bg-card p-8 shadow-card ring-1 ring-foreground/5 transition-all hover:shadow-premium"
+              className="group relative flex flex-col rounded-3xl bg-card p-6 sm:p-8 shadow-card ring-1 ring-foreground/5 transition-all hover:shadow-premium"
             >
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-6">
-                <service.icon className="h-7 w-7" />
+              <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-4 sm:mb-6">
+                <service.icon className="h-6 w-6 sm:h-7 sm:w-7" />
               </div>
-              <h3 className="text-xl font-bold text-foreground">
+              <h3 className="text-lg font-bold text-foreground sm:text-xl">
                 {service.title}
               </h3>
-              <p className="mt-3 text-sm text-foreground/60 leading-relaxed flex-1">
+              <p className="mt-2 text-sm text-foreground leading-relaxed flex-1 sm:mt-3">
                 {service.desc}
               </p>
-              <div className="mt-6 flex items-center text-sm font-semibold text-primary opacity-0 transition-opacity group-hover:opacity-100">
+              <div className="mt-4 sm:mt-6 flex items-center text-sm font-semibold text-primary opacity-0 transition-opacity group-hover:opacity-100">
                 Learn more <ChevronRight className="ml-1 h-4 w-4" />
               </div>
             </motion.div>

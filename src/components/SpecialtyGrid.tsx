@@ -67,7 +67,7 @@ export function SpecialtyGrid() {
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
+        <div className="grid grid-cols-3 lg:grid-cols-4 gap-3 lg:gap-6">
           {specialtiesBase.slice(0, visibleCount).map((specialty, idx) => (
             <motion.a
               key={specialty.id}
@@ -76,9 +76,9 @@ export function SpecialtyGrid() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.04, duration: 0.4 }}
-              whileHover={{ y: -6, scale: 1.02 }}
+              whileHover={{ y: -4, scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="group relative flex flex-col items-center gap-4 rounded-3xl p-6 lg:p-8 text-center transition-all duration-300 cursor-pointer"
+              className="group relative flex flex-col items-center justify-center gap-2 lg:gap-4 rounded-2xl lg:rounded-3xl p-3 lg:p-8 text-center transition-all duration-300 cursor-pointer aspect-square lg:aspect-auto"
               style={{
                 background: specialty.gradient,
                 border: "1px solid rgba(95,143,123,0.08)",
@@ -86,38 +86,38 @@ export function SpecialtyGrid() {
             >
               {/* Icon */}
               <div
-                className="flex h-14 w-14 items-center justify-center rounded-2xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-[-4deg]"
+                className="flex h-10 w-10 lg:h-14 lg:w-14 items-center justify-center rounded-xl lg:rounded-2xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-[-4deg]"
                 style={{
                   background: `${specialty.iconColor}12`,
                 }}
               >
                 <specialty.icon
-                  className="h-7 w-7 transition-colors"
+                  className="h-5 w-5 lg:h-7 lg:w-7 transition-colors"
                   style={{ color: specialty.iconColor }}
                 />
               </div>
 
               {/* Name */}
-              <h3 className="text-sm lg:text-base font-bold text-foreground leading-tight">
+              <h3 className="text-xs lg:text-base font-bold text-foreground leading-tight">
                 {t(`${specialty.id}_name`)}
               </h3>
 
               {/* Description - visible on hover */}
-              <p className="text-xs text-foreground/50 leading-relaxed hidden sm:block">
+              <p className="text-[10px] lg:text-xs text-foreground/50 leading-relaxed hidden lg:block">
                 {t(`${specialty.id}_desc`)}
               </p>
 
               {/* Hover arrow */}
               <div
-                className="absolute top-4 right-4 flex h-7 w-7 items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-0 -translate-x-1"
+                className="absolute top-2 right-2 lg:top-4 lg:right-4 flex h-5 w-5 lg:h-7 lg:w-7 items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-0 -translate-x-1"
                 style={{ background: `${specialty.iconColor}15` }}
               >
                 <svg
-                  width="12" height="12" viewBox="0 0 12 12"
+                  width="10" height="10" viewBox="0 0 10 10"
                   style={{ color: specialty.iconColor }}
                 >
                   <path
-                    d="M2 6h8M7 3l3 3-3 3"
+                    d="M2 5h6M6 2.5l2.5 2.5-2.5 2.5"
                     stroke="currentColor"
                     strokeWidth="1.5"
                     fill="none"

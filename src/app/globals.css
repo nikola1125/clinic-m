@@ -4,8 +4,8 @@ html {
   /* ── Core Palette ──────────────────────────────────────── */
   --background:        #FAFAF7;
   --background-alt:    #F5F4F0;
-  --foreground:        #1F2937;
-  --foreground-muted:  #6B7280;
+  --foreground:        #000000;
+  --foreground-muted:  #111827;
 
   /* Primary – sage green */
   --primary:           #6FAF8F;
@@ -22,7 +22,7 @@ html {
 
   /* Accent – soft peach (icons/highlights only) */
   --accent:            #F4B8A8;
-  --accent-foreground: #1F2937;
+  --accent-foreground: #000000;
 
   /* Card & Surface */
   --card:              #ffffff;

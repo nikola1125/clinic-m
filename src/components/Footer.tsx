@@ -13,9 +13,9 @@ export function Footer() {
       style={{ background: "var(--footer-bg)" }}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
-          <div className="lg:col-span-1">
+          <div className="sm:col-span-2 lg:col-span-1">
             <Link href="/" className="flex items-center gap-2">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-card">
                 <Activity className="h-6 w-6 text-white" />
@@ -24,14 +24,14 @@ export function Footer() {
                 Zenith<span className="text-primary">Health</span>
               </span>
             </Link>
-            <p className="mt-6 text-sm leading-6 text-foreground/50 max-w-xs">
+            <p className="mt-6 text-sm leading-6 text-foreground max-w-xs">
               {t("description")}
             </p>
             <div className="mt-8 flex gap-4">
               {/* Twitter */}
               <Link
                 href="#"
-                className="text-foreground/40 hover:text-primary transition-colors"
+                className="text-foreground hover:text-primary transition-colors"
                 aria-label="Twitter"
               >
                 <svg
@@ -51,7 +51,7 @@ export function Footer() {
               {/* Instagram */}
               <Link
                 href="#"
-                className="text-foreground/40 hover:text-primary transition-colors"
+                className="text-foreground hover:text-primary transition-colors"
                 aria-label="Instagram"
               >
                 <svg
@@ -73,7 +73,7 @@ export function Footer() {
               {/* LinkedIn */}
               <Link
                 href="#"
-                className="text-foreground/40 hover:text-primary transition-colors"
+                className="text-foreground hover:text-primary transition-colors"
                 aria-label="LinkedIn"
               >
                 <svg
@@ -105,7 +105,7 @@ export function Footer() {
                 <li key={idx}>
                   <Link
                     href="#services"
-                    className="text-sm text-foreground/60 hover:text-primary transition-colors"
+                    className="text-sm text-foreground hover:text-primary transition-colors"
                   >
                     {t(`s${idx}`)}
                   </Link>
@@ -124,7 +124,7 @@ export function Footer() {
                 <li key={idx}>
                   <Link
                     href="#doctors"
-                    className="text-sm text-foreground/60 hover:text-primary transition-colors"
+                    className="text-sm text-foreground hover:text-primary transition-colors"
                   >
                     {t(`c${idx}`)}
                   </Link>
@@ -139,15 +139,15 @@ export function Footer() {
               {t("contactTitle")}
             </h3>
             <ul className="mt-6 space-y-4">
-              <li className="flex items-center gap-3 text-sm text-foreground/60 transition-colors hover:text-primary">
+              <li className="flex items-center gap-3 text-sm text-foreground transition-colors hover:text-primary">
                 <Phone className="h-4 w-4 text-primary shrink-0" />
                 <a href="tel:+15550000000">+1 (555) 000-0000</a>
               </li>
-              <li className="flex items-center gap-3 text-sm text-foreground/60">
+              <li className="flex items-center gap-3 text-sm text-foreground">
                 <Mail className="h-4 w-4 text-primary shrink-0" />
                 contact@zenithhealth.com
               </li>
-              <li className="flex items-start gap-3 text-sm text-foreground/60">
+              <li className="flex items-start gap-3 text-sm text-foreground">
                 <MapPin className="h-4 w-4 text-primary mt-1 shrink-0" />
                 <span>
                   123 Medical Plaza,
@@ -159,26 +159,26 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-16 border-t border-foreground/5 pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-xs text-foreground/40 text-center md:text-left">
+        <div className="mt-12 sm:mt-16 border-t border-foreground/5 pt-8 sm:pt-10 flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6">
+          <p className="text-xs text-foreground text-center md:text-left">
             © {new Date().getFullYear()} {t("rights")}
           </p>
-          <div className="flex gap-8">
+          <div className="flex gap-6 sm:gap-8 flex-wrap justify-center">
             <Link
               href="#"
-              className="text-xs text-foreground/40 hover:text-primary transition-colors"
+              className="text-xs text-foreground hover:text-primary transition-colors"
             >
               {t("privacy")}
             </Link>
             <Link
               href="#"
-              className="text-xs text-foreground/40 hover:text-primary transition-colors"
+              className="text-xs text-foreground hover:text-primary transition-colors"
             >
               {t("terms")}
             </Link>
             <Link
               href="#"
-              className="text-xs text-foreground/40 hover:text-primary transition-colors"
+              className="text-xs text-foreground hover:text-primary transition-colors"
             >
               {t("cookies")}
             </Link>

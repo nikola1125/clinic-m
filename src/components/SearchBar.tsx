@@ -71,7 +71,7 @@ export function SearchBar() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className="relative flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-300"
+            className="relative flex items-center gap-2 rounded-full px-3 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm font-semibold transition-all duration-300"
             style={{
               background: activeTab === tab.id ? "var(--primary)" : "transparent",
               color: activeTab === tab.id ? "white" : "var(--foreground-muted)",
@@ -99,7 +99,7 @@ export function SearchBar() {
           }}
         >
           <Search
-            className="absolute left-5 h-5 w-5 transition-colors"
+            className="absolute left-4 lg:left-5 h-4 w-4 lg:h-5 lg:w-5 transition-colors"
             style={{ color: isFocused ? "var(--primary)" : "var(--foreground-muted)" }}
           />
           <input
@@ -109,7 +109,7 @@ export function SearchBar() {
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => setIsFocused(true)}
             placeholder={placeholders[placeholderIdx]}
-            className="w-full rounded-2xl bg-transparent py-4 pl-14 pr-32 text-base font-medium text-foreground outline-none placeholder:text-foreground/35"
+            className="w-full rounded-2xl bg-transparent py-3 lg:py-4 pl-12 lg:pl-14 pr-32 text-sm lg:text-base font-medium text-foreground outline-none placeholder:text-foreground/35"
           />
           {query && (
             <button
@@ -120,10 +120,10 @@ export function SearchBar() {
             </button>
           )}
           <button
-            className="absolute right-3 flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white shadow-premium transition-all hover:scale-[1.03] active:scale-[0.97]"
+            className="absolute right-3 flex items-center gap-2 rounded-xl px-4 lg:px-5 py-2 lg:py-2.5 text-xs lg:text-sm font-bold text-white shadow-premium transition-all hover:scale-[1.03] active:scale-[0.97]"
             style={{ background: "var(--primary)" }}
           >
-            <Search className="h-4 w-4" />
+            <Search className="h-3 w-3 lg:h-4 lg:w-4" />
             Kërko
           </button>
         </div>

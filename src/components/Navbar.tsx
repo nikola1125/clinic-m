@@ -30,7 +30,7 @@ export function Navbar() {
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div
-          className="mt-4 flex h-16 items-center justify-between rounded-2xl px-6 shadow-glass"
+          className="mt-4 flex h-16 items-center justify-between rounded-2xl px-4 sm:px-6 shadow-glass"
           style={{
             background: "var(--glass)",
             backdropFilter: "blur(16px)",
@@ -39,20 +39,20 @@ export function Navbar() {
           }}
         >
           {/* Brand */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 min-w-0">
             <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl shadow-premium"
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl shadow-premium flex-shrink-0"
                 style={{ background: "linear-gradient(135deg, #4C8C6D, #5F8F7B)" }}>
                 <Activity className="h-5 w-5 text-white" />
               </div>
-              <span className="text-xl font-bold tracking-tight text-foreground">
+              <span className="text-lg font-bold tracking-tight text-foreground">
                 Zenith<span style={{ color: "var(--primary)" }}>Health</span>
               </span>
             </Link>
           </div>
 
           {/* Desktop Nav */}
-          <nav className="hidden items-center gap-8 md:flex">
+          <nav className="hidden items-center gap-6 lg:flex">
             {[
               { href: "/#services", label: t("services") },
               { href: "/#doctors", label: t("specialists") },
@@ -61,10 +61,10 @@ export function Navbar() {
               <Link
                 key={href}
                 href={href}
-                className="text-sm font-medium transition-colors"
-                style={{ color: "var(--foreground-muted)" }}
+                className="text-sm font-medium transition-colors whitespace-nowrap"
+                style={{ color: "var(--foreground)" }}
                 onMouseEnter={e => (e.currentTarget.style.color = "var(--primary)")}
-                onMouseLeave={e => (e.currentTarget.style.color = "var(--foreground-muted)")}
+                onMouseLeave={e => (e.currentTarget.style.color = "var(--foreground)")}
               >
                 {label}
               </Link>
@@ -72,7 +72,7 @@ export function Navbar() {
           </nav>
 
           {/* Desktop Actions */}
-          <div className="hidden items-center gap-4 md:flex">
+          <div className="hidden items-center gap-3 lg:flex">
             <LanguageToggle />
             <ThemeToggle />
             {session ? (
@@ -84,7 +84,7 @@ export function Navbar() {
                     ? "/patient/dashboard"
                     : "/hq-command"
                 }
-                className="flex items-center gap-3 rounded-full p-1 pr-4 text-sm font-semibold transition-colors"
+                className="flex items-center gap-2 rounded-full p-1 pr-3 text-sm font-semibold transition-colors whitespace-nowrap"
                 style={{ background: "rgba(76,140,109,0.07)" }}
               >
                 <img
@@ -96,22 +96,23 @@ export function Navbar() {
                       : session.patientId
                   }`}
                   alt="Profile"
-                  className="h-8 w-8 rounded-full border border-white shadow-sm"
+                  className="h-7 w-7 rounded-full border border-white shadow-sm"
                 />
-                <span style={{ color: "var(--foreground)" }}>{t("dashboard")}</span>
+                <span style={{ color: "var(--foreground)" }} className="hidden xl:inline">{t("dashboard")}</span>
+                <span style={{ color: "var(--foreground)" }} className="xl:hidden">{t("dashboard_short") || t("dashboard")}</span>
               </Link>
             ) : (
               <>
                 <Link
                   href="/login"
-                  className="text-sm font-semibold transition-colors"
-                  style={{ color: "var(--foreground-muted)" }}
+                  className="text-sm font-semibold transition-colors whitespace-nowrap"
+                  style={{ color: "var(--foreground)" }}
                 >
                   {t("login")}
                 </Link>
                 <Link
                   href="/signup"
-                  className="rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-premium transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  className="rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-premium transition-all hover:scale-[1.02] active:scale-[0.98] whitespace-nowrap"
                   style={{ background: "var(--primary)" }}
                 >
                   {t("join")}
@@ -121,19 +122,16 @@ export function Navbar() {
           </div>
 
           {/* Mobile menu toggle */}
-          <div className="flex items-center gap-3 md:hidden">
-            <LanguageToggle />
+          <div className="flex items-center gap-2 lg:hidden">
             <ThemeToggle />
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="flex h-10 w-10 items-center justify-center rounded-xl transition-colors"
+              className="flex h-9 w-9 items-center justify-center rounded-xl transition-colors shrink-0"
               style={{ background: "rgba(76,140,109,0.07)", color: "var(--foreground)" }}
             >
               {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
-        </div>
-      </div>
 
       {/* Mobile Menu Overlay */}
       <AnimatePresence>
@@ -142,13 +140,13 @@ export function Navbar() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="absolute top-24 left-4 right-4 z-50 overflow-hidden rounded-3xl p-6 shadow-2xl md:hidden"
+            className="absolute left-0 right-0 top-full z-50 mt-4 overflow-visible rounded-3xl p-4 shadow-2xl lg:hidden"
             style={{
               background: "var(--card)",
               border: "1px solid var(--card-border)",
             }}
           >
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-4">
               {[
                 { label: t("services"), href: "/#services" },
                 { label: t("specialists"), href: "/#doctors" },
@@ -158,12 +156,22 @@ export function Navbar() {
                   key={href}
                   onClick={() => setIsMenuOpen(false)}
                   href={href}
-                  className="text-lg font-bold"
+                  className="text-base font-bold sm:text-lg"
                   style={{ color: "var(--foreground)" }}
                 >
                   {label}
                 </Link>
               ))}
+
+              <hr style={{ borderColor: "rgba(76,140,109,0.1)" }} />
+
+              {/* Language Toggle Section */}
+              <div className="flex items-center justify-between py-2">
+                <span className="text-sm font-bold" style={{ color: "var(--foreground-muted)" }}>
+                  Language
+                </span>
+                <LanguageToggle />
+              </div>
 
               <hr style={{ borderColor: "rgba(76,140,109,0.1)" }} />
 
@@ -204,11 +212,11 @@ export function Navbar() {
                   </div>
                 </Link>
               ) : (
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-2">
                   <Link
                     onClick={() => setIsMenuOpen(false)}
                     href="/login"
-                    className="flex h-12 items-center justify-center rounded-2xl font-bold text-lg"
+                    className="flex h-10 items-center justify-center rounded-2xl font-bold text-base sm:text-lg"
                     style={{
                       border: "1px solid rgba(76,140,109,0.2)",
                       color: "var(--foreground)",
@@ -219,7 +227,7 @@ export function Navbar() {
                   <Link
                     onClick={() => setIsMenuOpen(false)}
                     href="/signup"
-                    className="flex h-12 items-center justify-center rounded-2xl font-bold text-lg text-white shadow-premium"
+                    className="flex h-10 items-center justify-center rounded-2xl font-bold text-base sm:text-lg text-white shadow-premium"
                     style={{ background: "var(--primary)" }}
                   >
                     {t("join")}
@@ -230,6 +238,8 @@ export function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
+      </div>
+      </div>
     </motion.header>
   );
 }

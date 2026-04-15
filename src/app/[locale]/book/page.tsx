@@ -99,7 +99,7 @@ export default function BookPage() {
         <div className="mx-auto max-w-3xl">
 
           {/* Header */}
-          <div className="mb-12 relative overflow-hidden rounded-3xl bg-primary/10 px-8 py-16 text-center shadow-premium">
+          <div className="mb-8 sm:mb-12 relative overflow-hidden rounded-3xl bg-primary/10 px-6 py-12 text-center shadow-premium sm:px-8 sm:py-16">
             <img
               src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=2000&auto=format&fit=crop"
               alt="Hospital Reception"
@@ -107,16 +107,16 @@ export default function BookPage() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
             <div className="relative z-10">
-              <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">Book Consultation</h1>
-              <p className="mt-4 text-lg text-foreground/70 max-w-xl mx-auto font-medium">Follow the steps below to schedule your visit with our world-class specialists.</p>
+              <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl sm:text-5xl">Book Consultation</h1>
+              <p className="mt-3 text-base sm:text-lg text-foreground/70 max-w-xl mx-auto font-medium sm:mt-4">Follow the steps below to schedule your visit with our world-class specialists.</p>
             </div>
           </div>
 
           {/* Stepper */}
           {!confirmed && (
-            <div className="mb-12">
-              <div className="flex items-center justify-between relative px-4">
-                <div className="absolute left-8 right-8 top-1/2 h-0.5 -translate-y-1/2 bg-foreground/5 z-0" />
+            <div className="mb-8 sm:mb-12">
+              <div className="flex items-center justify-between relative px-2 sm:px-4">
+                <div className="absolute left-6 right-6 top-1/2 h-0.5 -translate-y-1/2 bg-foreground/5 z-0 sm:left-8 sm:right-8" />
                 <div
                   className="absolute left-8 top-1/2 h-0.5 -translate-y-1/2 bg-primary z-0 transition-all duration-500 ease-in-out"
                   style={{ width: `calc(${(step / (steps.length - 1)) * 100}% - 4rem)` }}
@@ -299,7 +299,7 @@ export default function BookPage() {
               <button
                 onClick={handleBack}
                 disabled={step === 0}
-                className={`flex items-center gap-2 font-bold px-6 py-3 rounded-full transition-colors ${step === 0 ? "opacity-0 pointer-events-none" : "text-foreground/50 hover:bg-foreground/5 hover:text-foreground"}`}
+                className={`flex items-center gap-2 font-bold px-6 py-3 rounded-full transition-colors ${step === 0 ? "opacity-0 pointer-events-none" : "text-foreground hover:bg-foreground/5"}`}
               >
                 <ChevronLeft className="h-5 w-5" /> Back
               </button>

@@ -36,26 +36,28 @@ export function Testimonials() {
           </motion.h2>
         </div>
 
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {testimonialsBase.map((item, idx) => (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: idx * 0.12 }}
-              className="flex flex-col rounded-3xl bg-card p-8 shadow-card ring-1 ring-foreground/5 transition-shadow hover:shadow-premium"
-            >
-              <Quote className="h-8 w-8 text-primary/30 mb-6" />
-              <p className="flex-1 text-base leading-relaxed text-foreground/70 italic">
-                &ldquo;{t(`${item.id}_quote`)}&rdquo;
-              </p>
-              <div className="mt-8 border-t border-foreground/5 pt-6">
-                <div className="font-bold text-foreground">{t(`${item.id}_name`)}</div>
-                <div className="text-sm text-foreground/50">{t(`${item.id}_detail`)}</div>
-              </div>
-            </motion.div>
-          ))}
+        <div className="overflow-x-auto lg:overflow-visible pb-4 lg:pb-0 scrollbar-hide scroll-smooth snap-x snap-mandatory lg:snap-none">
+          <div className="flex lg:grid lg:grid-cols-3 gap-4 lg:gap-8 min-w-max lg:min-w-0">
+            {testimonialsBase.map((item, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.12 }}
+                className="flex flex-col rounded-2xl lg:rounded-3xl bg-card p-5 lg:p-8 shadow-card ring-1 ring-foreground/5 transition-shadow hover:shadow-premium w-72 lg:w-auto shrink-0 lg:shrink snap-center lg:snap-align-none"
+              >
+                <Quote className="h-5 w-5 lg:h-8 lg:w-8 text-primary/30 mb-3 lg:mb-6" />
+                <p className="flex-1 text-xs lg:text-base leading-relaxed text-foreground italic">
+                  &ldquo;{t(`${item.id}_quote`)}&rdquo;
+                </p>
+                <div className="mt-4 lg:mt-8 border-t border-foreground/5 pt-3 lg:pt-6">
+                  <div className="text-xs lg:text-base font-bold text-foreground">{t(`${item.id}_name`)}</div>
+                  <div className="text-[10px] lg:text-sm text-foreground/60">{t(`${item.id}_detail`)}</div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

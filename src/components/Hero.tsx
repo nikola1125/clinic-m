@@ -33,50 +33,50 @@ export function Hero() {
               <span>{t("badge")}</span>
             </div>
             
-            <h1 className="mt-8 text-5xl font-bold tracking-tight text-foreground lg:text-7xl">
+            <h1 className="mt-6 text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl xl:text-7xl">
               {t("title_1")} <br />
               <span className="text-gradient">{t("title_2")}</span>
             </h1>
             
-            <p className="mt-6 text-lg leading-8 text-foreground/60 max-w-xl">
+            <p className="mt-4 text-base leading-7 text-foreground max-w-xl sm:text-lg sm:leading-8">
               {t("description")}
             </p>
             
-            <div className="mt-10 flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
               <Link
                 href="/book"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-8 py-4 text-lg font-semibold text-white shadow-premium transition-all hover:bg-primary/90 hover:scale-[1.03] active:scale-[0.97]"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-3 text-base font-semibold text-white shadow-premium transition-all hover:bg-primary/90 hover:scale-[1.03] active:scale-[0.97] sm:px-8 sm:py-4 sm:text-lg"
               >
                 <Calendar className="h-5 w-5" />
                 {t("book_btn")}
               </Link>
               <Link
                 href="#services"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-4 text-lg font-semibold text-foreground/70 transition-all hover:bg-foreground/5 hover:text-foreground"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-3 text-base font-semibold text-foreground transition-all hover:bg-foreground/5 sm:px-6 sm:py-4 sm:text-lg"
               >
                 {t("services_btn")}
                 <ChevronRight className="h-5 w-5" />
               </Link>
             </div>
             
-            <div className="mt-12 grid grid-cols-2 gap-6 sm:flex sm:items-center sm:gap-8 border-t border-foreground/5 pt-10">
+            <div className="mt-10 grid grid-cols-2 gap-4 border-t border-foreground/5 pt-6 sm:mt-12 sm:gap-6 sm:flex sm:items-center sm:gap-8 sm:pt-10">
               <div>
-                <div className="text-2xl font-bold text-foreground">15k+</div>
-                <div className="text-sm text-foreground/50">{t("stat_patients")}</div>
+                <div className="text-xl font-bold text-foreground sm:text-2xl">15k+</div>
+                <div className="text-xs text-foreground sm:text-sm">{t("stat_patients")}</div>
               </div>
               <div className="hidden sm:block h-10 w-px bg-foreground/10" />
               <div>
-                <div className="text-2xl font-bold text-foreground">48+</div>
-                <div className="text-sm text-foreground/50">{t("stat_doctors")}</div>
+                <div className="text-xl font-bold text-foreground sm:text-2xl">48+</div>
+                <div className="text-xs text-foreground sm:text-sm">{t("stat_doctors")}</div>
               </div>
               <div className="hidden sm:block h-10 w-px bg-foreground/10" />
-              <div className="flex -space-x-3 overflow-hidden col-span-2 sm:col-auto justify-start mt-2 sm:mt-0">
+              <div className="flex -space-x-2 overflow-hidden col-span-2 sm:col-auto justify-start mt-2 sm:mt-0 sm:-space-x-3">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="inline-block h-10 w-10 rounded-full border-2 border-background bg-zinc-200 overflow-hidden">
+                  <div key={i} className="inline-block h-8 w-8 rounded-full border-2 border-background bg-zinc-200 overflow-hidden sm:h-10 sm:w-10">
                      <img src={`https://i.pravatar.cc/100?img=${i+20}`} alt="" className="h-full w-full object-cover" />
                   </div>
                 ))}
-                <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-background bg-primary text-xs font-bold text-white">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-background bg-primary text-xs font-bold text-white sm:h-10 sm:w-10">
                   +1k
                 </div>
               </div>

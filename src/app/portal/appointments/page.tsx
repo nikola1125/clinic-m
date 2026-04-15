@@ -60,7 +60,7 @@ export default function DoctorAppointmentsPage() {
                 <Calendar className="h-6 w-6 text-primary" />
                 Schedule & Appointments
               </div>
-              <div className="mt-1 text-sm text-foreground/50">
+              <div className="mt-1 text-sm text-foreground">
                 Manage consultation requests, join active meetings, and review patient history.
               </div>
             </div>
@@ -73,7 +73,7 @@ export default function DoctorAppointmentsPage() {
                   <Calendar className="h-8 w-8" />
                 </div>
                 <div className="text-lg font-bold text-foreground">No appointments arranged yet</div>
-                <div className="mt-2 text-sm text-foreground/60 max-w-sm mx-auto">
+                <div className="mt-2 text-sm text-foreground max-w-sm mx-auto">
                   Patients have not scheduled any consultations with you yet. Check back later or make sure your availability is set.
                 </div>
               </div>
@@ -99,9 +99,9 @@ export default function DoctorAppointmentsPage() {
                         
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="flex items-start gap-3 rounded-2xl bg-white p-4 border border-foreground/5">
-                            <UserCircle className="w-8 h-8 text-foreground/30 mt-1" />
+                            <UserCircle className="w-8 h-8 text-foreground mt-1" />
                             <div>
-                              <div className="text-xs font-bold uppercase tracking-wider text-foreground/40 mb-1">Patient</div>
+                              <div className="text-xs font-bold uppercase tracking-wider text-foreground mb-1">Patient</div>
                               <div className="text-sm font-bold text-foreground">
                                 {patient ? patient.fullName : a.patientId}
                               </div>
@@ -111,7 +111,7 @@ export default function DoctorAppointmentsPage() {
                           <div className="flex items-start gap-3 rounded-2xl bg-white p-4 border border-foreground/5">
                             <Activity className="w-8 h-8 text-primary/30 mt-1" />
                             <div>
-                              <div className="text-xs font-bold uppercase tracking-wider text-foreground/40 mb-1">Consultation</div>
+                              <div className="text-xs font-bold uppercase tracking-wider text-foreground mb-1">Consultation</div>
                               <div className="text-sm font-bold text-foreground">
                                 {consult ? consult.title : "General Visit"}
                               </div>

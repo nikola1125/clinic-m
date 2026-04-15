@@ -30,10 +30,10 @@ function DoctorCard({
             <div className="mt-1 flex items-center gap-2 text-sm font-semibold text-primary">
               <Activity className="h-4 w-4" /> {doctor.specialty}
             </div>
-            <div className="mt-1 flex items-center gap-2 text-sm text-foreground/50">
+            <div className="mt-1 flex items-center gap-2 text-sm text-foreground">
               <Mail className="h-4 w-4" /> {doctor.email}
             </div>
-            <div className="mt-4 text-sm text-foreground/70 leading-relaxed max-w-2xl">{doctor.bio}</div>
+            <div className="mt-4 text-sm text-foreground leading-relaxed max-w-2xl">{doctor.bio}</div>
           </div>
         </div>
         <div className="flex gap-2 w-full sm:w-auto shrink-0">
@@ -54,7 +54,7 @@ function DoctorCard({
 
       {doctor.consults.length > 0 && (
         <div className="mt-6 pt-6 border-t border-foreground/5">
-          <div className="text-xs font-bold uppercase tracking-wider text-foreground/40 mb-3">
+          <div className="text-xs font-bold uppercase tracking-wider text-foreground mb-3">
             Available Consultations
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -160,7 +160,7 @@ export default function AdminDoctorsPage() {
               <Stethoscope className="h-6 w-6 text-primary" />
               Manage Doctors
             </div>
-            <div className="mt-1 text-sm text-foreground/50">
+            <div className="mt-1 text-sm text-foreground">
               Add new specialists, update profiles, and configure consultation pricing.
             </div>
           </div>
@@ -183,7 +183,7 @@ export default function AdminDoctorsPage() {
               </div>
               <button
                 onClick={() => setMode(null)}
-                className="h-8 w-8 flex items-center justify-center rounded-full bg-foreground/5 text-foreground/50 hover:bg-foreground/10 hover:text-foreground transition-colors"
+                className="h-8 w-8 flex items-center justify-center rounded-full bg-foreground/5 text-foreground hover:bg-foreground/10 transition-colors"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -191,9 +191,9 @@ export default function AdminDoctorsPage() {
 
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               <div className="lg:col-span-1">
-                <label className="block text-xs font-bold uppercase tracking-wide text-foreground/50 mb-2">Full Name</label>
+                <label className="block text-xs font-bold uppercase tracking-wide text-foreground mb-2">Full Name</label>
                 <div className="relative">
-                  <Stethoscope className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-foreground/30" />
+                  <Stethoscope className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-foreground" />
                   <input
                     value={form.name}
                     onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
@@ -205,9 +205,9 @@ export default function AdminDoctorsPage() {
               </div>
               
               <div className="lg:col-span-1">
-                <label className="block text-xs font-bold uppercase tracking-wide text-foreground/50 mb-2">Email Address</label>
+                <label className="block text-xs font-bold uppercase tracking-wide text-foreground mb-2">Email Address</label>
                 <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-foreground/30" />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-foreground" />
                   <input
                     value={form.email}
                     onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}

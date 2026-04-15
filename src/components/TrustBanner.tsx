@@ -7,7 +7,7 @@ const certifications = [
   {
     id: "iso",
     icon: (
-      <svg viewBox="0 0 40 40" className="h-10 w-10" fill="none">
+      <svg viewBox="0 0 40 40" className="h-8 w-8 lg:h-10 lg:w-10" fill="none">
         <circle cx="20" cy="20" r="18" stroke="currentColor" strokeWidth="2" />
         <path d="M14 20l4 4 8-8" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
@@ -16,7 +16,7 @@ const certifications = [
   {
     id: "eu",
     icon: (
-      <svg viewBox="0 0 40 40" className="h-10 w-10" fill="none">
+      <svg viewBox="0 0 40 40" className="h-8 w-8 lg:h-10 lg:w-10" fill="none">
         <circle cx="20" cy="20" r="18" stroke="currentColor" strokeWidth="2" />
         <circle cx="33" cy="20" r="1.5" fill="currentColor" />
         <circle cx="31.26" cy="26.5" r="1.5" fill="currentColor" />
@@ -36,7 +36,7 @@ const certifications = [
   {
     id: "qkum",
     icon: (
-      <svg viewBox="0 0 40 40" className="h-10 w-10" fill="none">
+      <svg viewBox="0 0 40 40" className="h-8 w-8 lg:h-10 lg:w-10" fill="none">
         <rect x="4" y="12" width="32" height="22" rx="3" stroke="currentColor" strokeWidth="2" />
         <path d="M20 6l8 6H12l8-6z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         <path d="M17 22h6M20 19v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
@@ -46,7 +46,7 @@ const certifications = [
   {
     id: "gdpr",
     icon: (
-      <svg viewBox="0 0 40 40" className="h-10 w-10" fill="none">
+      <svg viewBox="0 0 40 40" className="h-8 w-8 lg:h-10 lg:w-10" fill="none">
         <path d="M20 4L6 10v10c0 8.5 6 15 14 18 8-3 14-9.5 14-18V10L20 4z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
         <path d="M15 21l3 3 7-8" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
@@ -55,7 +55,7 @@ const certifications = [
   {
     id: "emergency",
     icon: (
-      <svg viewBox="0 0 40 40" className="h-10 w-10" fill="none">
+      <svg viewBox="0 0 40 40" className="h-8 w-8 lg:h-10 lg:w-10" fill="none">
         <circle cx="20" cy="20" r="18" stroke="currentColor" strokeWidth="2" />
         <path d="M20 10v10l6 4" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
@@ -64,7 +64,7 @@ const certifications = [
   {
     id: "tech",
     icon: (
-      <svg viewBox="0 0 40 40" className="h-10 w-10" fill="none">
+      <svg viewBox="0 0 40 40" className="h-8 w-8 lg:h-10 lg:w-10" fill="none">
         <rect x="6" y="6" width="28" height="20" rx="3" stroke="currentColor" strokeWidth="2" />
         <path d="M14 30h12M20 26v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
         <circle cx="20" cy="16" r="4" stroke="currentColor" strokeWidth="2" />
@@ -77,36 +77,36 @@ export function TrustBanner() {
   const t = useTranslations("TrustBanner");
 
   return (
-    <div className="py-12 border-y border-foreground/5 overflow-hidden">
+    <div className="py-8 border-y border-foreground/5 overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <motion.p
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-foreground/30 mb-10"
+          className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-foreground/30 mb-8"
         >
           {t("title")}
         </motion.p>
 
-        <div className="flex flex-wrap justify-center items-center gap-x-10 gap-y-8 lg:gap-x-16">
+        <div className="grid grid-cols-2 lg:flex lg:flex-wrap lg:justify-center lg:items-center gap-4 lg:gap-x-8 lg:gap-y-4">
           {certifications.map((cert, idx) => (
             <motion.div
               key={cert.id}
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 8 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: idx * 0.07 }}
-              whileHover={{ scale: 1.05, y: -2 }}
-              className="group flex items-center gap-3.5 cursor-default transition-all"
+              transition={{ delay: idx * 0.05 }}
+              whileHover={{ scale: 1.03, y: -1 }}
+              className="group flex items-center gap-2 lg:gap-3 cursor-default transition-all"
             >
-              <div className="text-foreground/20 group-hover:text-primary transition-colors duration-300">
+              <div className="text-foreground/20 group-hover:text-primary transition-colors duration-300 shrink-0">
                 {cert.icon}
               </div>
               <div>
-                <div className="text-sm font-bold text-foreground/50 group-hover:text-foreground transition-colors">
+                <div className="text-xs lg:text-sm font-bold text-foreground/60 group-hover:text-foreground transition-colors">
                   {t(`${cert.id}_name`)}
                 </div>
-                <div className="text-xs text-foreground/25 group-hover:text-foreground/40 transition-colors">
+                <div className="text-[10px] lg:text-xs text-foreground/30 group-hover:text-foreground/50 transition-colors">
                   {t(`${cert.id}_sub`)}
                 </div>
               </div>

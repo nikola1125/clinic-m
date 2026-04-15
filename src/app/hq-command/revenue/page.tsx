@@ -49,7 +49,7 @@ export default function AdminRevenuePage() {
               <div className="text-2xl font-bold tracking-tight text-foreground">
                 Revenue Tracking
               </div>
-              <div className="mt-1 text-sm text-foreground/50">
+              <div className="mt-1 text-sm text-foreground">
                 Monitor completed consultations and upcoming projected earnings.
               </div>
             </div>
@@ -61,7 +61,7 @@ export default function AdminRevenuePage() {
                 <DollarSign className="w-32 h-32" />
               </div>
               <div className="relative z-10">
-                <div className="text-sm font-bold uppercase tracking-wide text-foreground/50 flex items-center gap-2">
+                <div className="text-sm font-bold uppercase tracking-wide text-foreground flex items-center gap-2">
                   <Activity className="h-4 w-4 text-emerald-500" /> Total Realized
                 </div>
                 <div className="mt-4 text-5xl font-bold text-foreground">
@@ -78,7 +78,7 @@ export default function AdminRevenuePage() {
                 <Calendar className="w-32 h-32" />
               </div>
               <div className="relative z-10">
-                <div className="text-sm font-bold uppercase tracking-wide text-foreground/50 flex items-center gap-2">
+                <div className="text-sm font-bold uppercase tracking-wide text-foreground flex items-center gap-2">
                   <TrendingUp className="h-4 w-4 text-primary" /> Projected Upcoming
                 </div>
                 <div className="mt-4 text-5xl font-bold text-foreground">
@@ -98,9 +98,9 @@ export default function AdminRevenuePage() {
             
             <div className="grid gap-3">
               {months.length === 0 ? (
-                <div className="rounded-2xl border border-foreground/5 bg-white/50 p-8 text-center text-sm text-foreground/50">
+                <div className="rounded-2xl border border-foreground/5 bg-white/50 p-8 text-center text-sm text-foreground">
                   <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-foreground/5 mb-3">
-                    <DollarSign className="h-5 w-5 text-foreground/30" />
+                    <DollarSign className="h-5 w-5 text-foreground" />
                   </div>
                   No completed revenue yet.
                 </div>
@@ -111,7 +111,7 @@ export default function AdminRevenuePage() {
                     className="flex flex-col sm:flex-row sm:items-center justify-between rounded-2xl border border-foreground/5 bg-white p-5 transition-colors hover:border-primary/20 hover:shadow-sm gap-4"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-foreground/5 text-foreground/50">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-foreground/5 text-foreground">
                         <Calendar className="h-5 w-5" />
                       </div>
                       <div className="text-lg font-bold text-foreground">{k}</div>

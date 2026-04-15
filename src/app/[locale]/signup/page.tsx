@@ -62,7 +62,7 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       <Link 
         href="/" 
         className="absolute top-8 left-8 flex items-center gap-2 text-sm font-medium text-foreground/50 hover:text-primary transition-colors"
@@ -77,10 +77,7 @@ export default function SignupPage() {
         className="w-full max-w-lg"
       >
         <div className="flex flex-col items-center mb-10 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary shadow-premium mb-4">
-            <Activity className="h-7 w-7 text-white" />
-          </div>
-          <h2 className="text-3xl font-bold tracking-tight text-foreground">Bashkohu me Zenith Health</h2>
+          <h2 className="text-2xl font-bold tracking-tight text-foreground">Bashkohu me Zenith Health</h2>
           <p className="mt-2 text-sm text-foreground/50 max-w-sm">Hapi i parë drejt një jete më të shëndetshme. Regjistrohuni sot për profilin tuaj.</p>
         </div>
 
