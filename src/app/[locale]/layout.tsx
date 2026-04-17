@@ -55,6 +55,10 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
               </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
+        {/* Skip to main content — WCAG 2.4.1 */}
+        <a href="#main-content" className="skip-nav">
+          Skip to main content
+        </a>
         <NextIntlClientProvider messages={messages}>
           <SessionWrapper>{children}</SessionWrapper>
         </NextIntlClientProvider>

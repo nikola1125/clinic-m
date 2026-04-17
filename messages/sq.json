@@ -5,7 +5,9 @@
     "about": "Rreth Nesh",
     "dashboard": "Paneli im",
     "login": "Hyr",
-    "join": "Bashkohu në Klinikë"
+    "join": "Bashkohu në Klinikë",
+    "book_btn": "Rezervo Takim",
+    "language": "Gjuha"
   },
   "Hero": {
     "badge": "Zenith: Klinika #1 Mjekësore në Rajon",
@@ -18,6 +20,32 @@
     "stat_doctors": "Mjekë Ekspertë",
     "floating_title": "Në Dispozicion",
     "floating_desc": "8 Specialistë Online"
+  },
+  "HowItWorks": {
+    "badge": "Procesi i Thjeshtë",
+    "heading_1": "Gati në",
+    "heading_2": "3 hapa.",
+    "subtitle": "Pa regjistrim. Gjeni dhe rezervoni një specialist brenda minutave.",
+    "step_label": "Hapi",
+    "step1_title": "Kërko",
+    "step1_desc": "Shkruaj një specialitet ose simptomë për të gjetur menjëherë llojin e duhur të mjekut.",
+    "step2_title": "Zgjedh",
+    "step2_desc": "Shfleto specialistët sipas kategorisë dhe zgjidh atë që përshtatet me orarin dhe preferencat tuaja.",
+    "step3_title": "Rezervo Menjëherë",
+    "step3_desc": "Konfirmo takimin tënd online në sekonda — pa thirrje telefonike, pa pritje.",
+    "cta": "Rezervo Takim"
+  },
+  "WhyChooseUs": {
+    "badge": "Pse Ne",
+    "heading": "Çfarë na bën të ndryshëm",
+    "verified_title": "Mjekë të Verifikuar",
+    "verified_desc": "Çdo specialist është i licensuar, i certifikuar dhe i vlerësuar.",
+    "booking_title": "Rezervim i Lehtë",
+    "booking_desc": "Rezervo vendin tënd në pak sekonda, në çdo moment të ditës.",
+    "response_title": "Disponueshmëri e Shpejtë",
+    "response_desc": "Shiko oraret në kohë reale dhe merr konfirmim menjëherë.",
+    "trusted_title": "Platformë e Besuar",
+    "trusted_desc": "E sigurt, konfidenciale dhe e përdorur nga mijëra pacientë."
   },
   "TrustBanner": {
     "title": "Certifikime & Standarde",
@@ -34,6 +62,42 @@
     "tech_name": "Teknologji Moderne",
     "tech_sub": "Pajisjet më të Fundit"
   },
+  "Services": {
+    "badge": "Ekspertiza Jonë",
+    "heading_1": "Kujdes i Specializuar për ",
+    "heading_highlight": "Çdo Pacient",
+    "desc": "Ekipi ynë onkologjik kombinon ekselencën kirurgjikale me kujdesin e dhembshur në çdo fazë të udhëtimit tuaj të trajtimit.",
+    "s1_title": "Kirurgji e Tumoreve",
+    "s1_desc": "Resekim dhe rindërtim onkologjik expert, i udhëhequr nga imazheria e saktë dhe teknikat minimalisht invazive.",
+    "s2_title": "Procedura Minimalisht Invazive",
+    "s2_desc": "Ndërhyrje laparoskopike dhe të asistуara me robot që reduktojnë kohën e rikuperimit dhe përmirësojnë rehatinë e pacientit.",
+    "s3_title": "Kujdesi Pasues",
+    "s3_desc": "Planet e monitorimit afatgjatë të strukturuara që i japin pacientëve besim dhe zbulojnë rekurrencën herët.",
+    "s4_title": "Vlerësim Multidisiplinar",
+    "s4_desc": "Bordet e tumorit me shumë specialitete shqyrtojnë çdo rast bashkërisht — kirurgë, onkologë, radiologë dhe të tjerë.",
+    "learn_more": "Mëso më shumë"
+  },
+  "SearchBar": {
+    "tab_in_person": "Në Klinikë",
+    "tab_online": "Online",
+    "tab_emergency": "Urgjencë",
+    "search_btn": "Kërko",
+    "specialties_label": "Specialitete",
+    "popular_label": "Kërkimet më të popullarizuara",
+    "placeholder_1": "Kërko një kardiolog...",
+    "placeholder_2": "Kërko një dentist...",
+    "placeholder_3": "Kërko një gjinekolog...",
+    "placeholder_4": "Kërko një dermatolog...",
+    "placeholder_5": "Kërko sipas simptomave...",
+    "sp1": "Kardiologji", "sp2": "Dermatologji", "sp3": "Gjinekologji",
+    "sp4": "Neurologji", "sp5": "Ortopedi", "sp6": "Pediatri",
+    "sp7": "Urologji", "sp8": "Okulistikë", "sp9": "Gastroenterologji",
+    "sp10": "Endokrinologji", "sp11": "Psikologji", "sp12": "ORL",
+    "sp13": "Pneumologji", "sp14": "Onkologji", "sp15": "Hematologji",
+    "sp16": "Dentist", "sp17": "Kirurgjia e Tumorit", "sp18": "Fizioterapi",
+    "pop1": "Kardiolog", "pop2": "Dentist", "pop3": "Gjinekolog",
+    "pop4": "Dermatolog", "pop5": "Pediatër", "pop6": "Okulist"
+  },
   "SpecialtyGrid": {
     "title": "Specialitetet",
     "heading_1": "Gjej ",
@@ -42,6 +106,9 @@
     "description": "Eksploro specialitetet tona mjekësore dhe rezervo një takim me mjekun e duhur për nevojat tuaja.",
     "show_less": "Shfaq Më Pak",
     "show_all": "Shiko Të Gjitha Specialitetet",
+    "view_all_specialists": "Shiko Të Gjithë Specialistët",
+    "doctor_singular": "mjek",
+    "doctor_plural": "mjekë",
     "s1_name": "Kardiologji", "s1_desc": "Zemra & sistemi qarkullues",
     "s2_name": "Neurologji", "s2_desc": "Truri & sistemi nervor",
     "s3_name": "Pediatri", "s3_desc": "Kujdesi për fëmijë",
@@ -58,6 +125,33 @@
     "s14_name": "Kirurgji", "s14_desc": "Ndërhyrjet kirurgjikale",
     "s15_name": "Dentist", "s15_desc": "Kujdesi dentar",
     "s16_name": "Gastroenterologji", "s16_desc": "Sistemi tretës"
+  },
+  "BlogSection": {
+    "badge": "Blog Shëndëtor",
+    "heading_1": "Lajme &",
+    "heading_2": "Këshilla",
+    "desc": "Informacione të dobishme nga specialistët tanë për shëndëtin tuaj.",
+    "view_all": "Shiko Të Gjitha",
+    "a1_title": "Si të Përgatiteni për Vizitin Tuaj të Parë Onkologjike",
+    "a1_excerpt": "Mësoni çfarë të prisni gjatë konsultimit tuaj të parë dhe si të përgatiteni për të marrë maksimumin nga takimi me specialistin.",
+    "a1_category": "Udhëzues Pacientësh",
+    "a1_readTime": "5 min lexim",
+    "a1_date": "12 Prill 2026",
+    "a2_title": "10 Këshilla për Një Zemër të Shëndëshme",
+    "a2_excerpt": "Zbuloni mënyrat e thjeshta, bazuar në shkencë, për të mbrojtur shëndëtin e zemërs suaj çdo ditë.",
+    "a2_category": "Shëndeti i Zemërs",
+    "a2_readTime": "4 min lexim",
+    "a2_date": "8 Prill 2026",
+    "a3_title": "Rëndësia e Check-Up Vjetor: Çfarë Duhet të Dini",
+    "a3_excerpt": "Kontrolli i rregullt shëndëtsësor mund të zbulojë problemet para se të bëhen serioze. Ja pse nuk duhet ta neglizhoni.",
+    "a3_category": "Parandalimi",
+    "a3_readTime": "3 min lexim",
+    "a3_date": "3 Prill 2026",
+    "a4_title": "Mjekësia Moderne: Teknikat Minimalisht Invazive",
+    "a4_excerpt": "Si ndërhyrjet kirurgjikale me akses minimal po transformojnë rikuperimin e pacientëve dhe rezultatet klinike.",
+    "a4_category": "Inovacion",
+    "a4_readTime": "6 min lexim",
+    "a4_date": "28 Mars 2026"
   },
   "Testimonials": {
     "title": "Historitë e Pacientëve",
@@ -94,10 +188,11 @@
     "cookies": "Cilësimet e Cookies"
   },
   "Cta": {
-    "heading_1": "Bëni hapin e parë",
-    "heading_2": "drejt kujdesit tuaj.",
-    "desc": "Specialistët tanë janë gati t'ju udhëzojnë në çdo fazë të udhëtimit tuaj — me ekspertizë, dhembshuri dhe qartësi.",
-    "btn": "Rezervoni Takim"
+    "heading_1": "Gati të merrni",
+    "heading_2": "kontëllin e shëndëtsit tuaj?",
+    "desc": "Bashkohuni me mijëra pacientë që i besojnë Zenith Health për këjdes expert.",
+    "btn": "Rezervo Takim",
+    "sticky_label": "Gati të shihni një specialist?"
   },
   "DoctorSpotlight": {
     "title": "Takoni Ekspertët Tanë",

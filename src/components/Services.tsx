@@ -2,31 +2,14 @@
 
 import { motion } from "framer-motion";
 import { Scissors, Eye, Microscope, Users, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 
-const services = [
-  {
-    title: "Tumor Surgery",
-    desc: "Expert oncological resection and reconstruction, guided by precision imaging and minimally invasive techniques.",
-    icon: Scissors,
-  },
-  {
-    title: "Minimally Invasive Procedures",
-    desc: "Laparoscopic and robotic-assisted interventions that reduce recovery time and improve patient comfort.",
-    icon: Eye,
-  },
-  {
-    title: "Follow-up Care",
-    desc: "Structured long-term monitoring plans that give patients confidence and catch recurrence early.",
-    icon: Microscope,
-  },
-  {
-    title: "Multidisciplinary Evaluation",
-    desc: "Cross-specialty tumor boards review every case together — surgeons, oncologists, radiologists, and more.",
-    icon: Users,
-  },
-];
+const serviceIds = ["s1", "s2", "s3", "s4"] as const;
+const serviceIcons = [Scissors, Eye, Microscope, Users];
 
 export function Services() {
+  const t = useTranslations("Services");
+
   return (
     <section
       id="services"
@@ -41,7 +24,7 @@ export function Services() {
             viewport={{ once: true }}
             className="text-sm font-semibold uppercase tracking-widest text-primary"
           >
-            Our Expertise
+            {t("badge")}
           </motion.p>
           <motion.h2
             initial={{ opacity: 0, y: 16 }}
@@ -50,8 +33,8 @@ export function Services() {
             transition={{ delay: 0.1 }}
             className="mt-4 text-4xl font-bold tracking-tight text-foreground lg:text-5xl"
           >
-            Specialized Care for{" "}
-            <span className="text-gradient">Every Patient</span>
+            {t("heading_1")}
+            <span className="text-gradient">{t("heading_highlight")}</span>
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 16 }}
@@ -60,36 +43,38 @@ export function Services() {
             transition={{ delay: 0.2 }}
             className="mt-6 text-lg text-foreground max-w-2xl mx-auto"
           >
-            Our oncology team combines surgical excellence with compassionate
-            care at every stage of your treatment journey.
+            {t("desc")}
           </motion.p>
         </div>
 
         <div className="grid gap-6 sm:gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {services.map((service, idx) => (
-            <motion.div
-              key={service.title}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: idx * 0.1 }}
-              whileHover={{ y: -6 }}
-              className="group relative flex flex-col rounded-3xl bg-card p-6 sm:p-8 shadow-card ring-1 ring-foreground/5 transition-all hover:shadow-premium"
-            >
-              <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-4 sm:mb-6">
-                <service.icon className="h-6 w-6 sm:h-7 sm:w-7" />
-              </div>
-              <h3 className="text-lg font-bold text-foreground sm:text-xl">
-                {service.title}
-              </h3>
-              <p className="mt-2 text-sm text-foreground leading-relaxed flex-1 sm:mt-3">
-                {service.desc}
-              </p>
-              <div className="mt-4 sm:mt-6 flex items-center text-sm font-semibold text-primary opacity-0 transition-opacity group-hover:opacity-100">
-                Learn more <ChevronRight className="ml-1 h-4 w-4" />
-              </div>
-            </motion.div>
-          ))}
+          {serviceIds.map((id, idx) => {
+            const Icon = serviceIcons[idx];
+            return (
+              <motion.div
+                key={id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.1 }}
+                whileHover={{ y: -6 }}
+                className="group relative flex flex-col rounded-3xl bg-card p-6 sm:p-8 shadow-card ring-1 ring-foreground/5 transition-all hover:shadow-premium"
+              >
+                <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-4 sm:mb-6">
+                  <Icon className="h-6 w-6 sm:h-7 sm:w-7" />
+                </div>
+                <h3 className="text-lg font-bold text-foreground sm:text-xl">
+                  {t(`${id}_title`)}
+                </h3>
+                <p className="mt-2 text-sm text-foreground leading-relaxed flex-1 sm:mt-3">
+                  {t(`${id}_desc`)}
+                </p>
+                <div className="mt-4 sm:mt-6 flex items-center text-sm font-semibold text-primary opacity-0 transition-opacity group-hover:opacity-100">
+                  {t("learn_more")} <ChevronRight className="ml-1 h-4 w-4" />
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>

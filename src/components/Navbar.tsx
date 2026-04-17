@@ -52,7 +52,7 @@ export function Navbar() {
           </div>
 
           {/* Desktop Nav */}
-          <nav className="hidden items-center gap-6 lg:flex">
+          <nav className="hidden items-center gap-6 lg:flex" aria-label="Main navigation">
             {[
               { href: "/#services", label: t("services") },
               { href: "/#doctors", label: t("specialists") },
@@ -61,10 +61,7 @@ export function Navbar() {
               <Link
                 key={href}
                 href={href}
-                className="text-sm font-medium transition-colors whitespace-nowrap"
-                style={{ color: "var(--foreground)" }}
-                onMouseEnter={e => (e.currentTarget.style.color = "var(--primary)")}
-                onMouseLeave={e => (e.currentTarget.style.color = "var(--foreground)")}
+                className="nav-link text-sm font-medium whitespace-nowrap"
               >
                 {label}
               </Link>
@@ -111,11 +108,11 @@ export function Navbar() {
                   {t("login")}
                 </Link>
                 <Link
-                  href="/signup"
-                  className="rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-premium transition-all hover:scale-[1.02] active:scale-[0.98] whitespace-nowrap"
-                  style={{ background: "var(--primary)" }}
+                  href="/book"
+                  className="flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-bold text-white shadow-premium transition-all hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] whitespace-nowrap"
+                  style={{ background: "linear-gradient(135deg, #4C8C6D, #6FAF8F)" }}
                 >
-                  {t("join")}
+                  {t("book_btn")}
                 </Link>
               </>
             )}
@@ -126,7 +123,10 @@ export function Navbar() {
             <ThemeToggle />
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="flex h-9 w-9 items-center justify-center rounded-xl transition-colors shrink-0"
+              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={isMenuOpen}
+              aria-controls="mobile-menu"
+              className="touch-target flex items-center justify-center rounded-xl transition-colors shrink-0 cursor-pointer"
               style={{ background: "rgba(76,140,109,0.07)", color: "var(--foreground)" }}
             >
               {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -137,6 +137,7 @@ export function Navbar() {
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div
+            id="mobile-menu"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
@@ -168,7 +169,7 @@ export function Navbar() {
               {/* Language Toggle Section */}
               <div className="flex items-center justify-between py-2">
                 <span className="text-sm font-bold" style={{ color: "var(--foreground-muted)" }}>
-                  Language
+                  {t("language")}
                 </span>
                 <LanguageToggle />
               </div>

@@ -1,77 +1,79 @@
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { TrustBanner } from "@/components/TrustBanner";
+import { WhyChooseUs } from "@/components/WhyChooseUs";
+import { HowItWorks } from "@/components/HowItWorks";
 import { SpecialtyGrid } from "@/components/SpecialtyGrid";
-import { DoctorSpotlight } from "@/components/DoctorSpotlight";
 import { WorkingHours } from "@/components/WorkingHours";
-import { Testimonials } from "@/components/Testimonials";
 import { BlogSection } from "@/components/BlogSection";
 import { Footer } from "@/components/Footer";
 import { ChatWidget } from "@/components/ChatWidget";
-import { useTranslations } from "next-intl";
+import { SkeletonCard } from "@/components/SkeletonCard";
+import { Suspense } from "react";
+
 import { Link } from "@/i18n/routing";
+import { Calendar } from "lucide-react";
 
 export default function Home() {
-  const t = useTranslations("Cta");
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
 
-      <main className="grow">
-        {/* 1. HERO + SEARCH BAR */}
+      <main id="main-content" className="grow" tabIndex={-1}>
+        {/* 1. HERO */}
         <Hero />
 
-        {/* 2. TRUST BANNER — real certifications */}
+        {/* 2. HOW IT WORKS */}
+        <HowItWorks />
+
+        {/* 3. TRUST BADGES */}
         <TrustBanner />
 
-        {/* 3. SPECIALTY GRID — browse specialties */}
-        <SpecialtyGrid />
+        {/* 4. WHY CHOOSE US */}
+        <WhyChooseUs />
 
-        {/* 4. DOCTORS — "Our Specialists" */}
-        <DoctorSpotlight />
+        {/* 5. BROWSE BY SPECIALTY — Suspense for loading state */}
+        <Suspense
+          fallback={
+            <section className="py-12 lg:py-16">
+              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div className="grid grid-cols-3 lg:grid-cols-4 gap-3 lg:gap-6">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <SkeletonCard key={i} variant="stat" />
+                  ))}
+                </div>
+              </div>
+            </section>
+          }
+        >
+          <SpecialtyGrid />
+        </Suspense>
 
-        {/* 5. WORKING HOURS & AVAILABILITY */}
+        {/* 6. OPENING HOURS */}
         <WorkingHours />
 
-        {/* 6. HEALTH BLOG */}
-        <BlogSection />
-
-        {/* 7. TESTIMONIALS */}
-        <Testimonials />
-
-        {/* 10. FINAL CTA */}
-        <section
-          className="py-24 relative overflow-hidden"
-          style={{ background: "#6FAF8F" }}
+        {/* 7. HEALTH BLOG — Suspense for loading state */}
+        <Suspense
+          fallback={
+            <section className="py-12 lg:py-16">
+              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div className="grid grid-cols-2 gap-4 sm:gap-6">
+                  <SkeletonCard variant="article" />
+                  <div className="flex flex-col gap-4">
+                    {[1, 2, 3].map((i) => (
+                      <SkeletonCard key={i} showAvatar lines={2} />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </section>
+          }
         >
-          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-            <h2 className="text-4xl font-bold tracking-tight text-white lg:text-5xl">
-              {t("heading_1")}
-              <br />
-              <span className="opacity-90">{t("heading_2")}</span>
-            </h2>
-            <p className="mt-6 text-lg text-white/75 max-w-xl mx-auto">
-              {t("desc")}
-            </p>
-            <div className="mt-10">
-              <Link
-                href="/book"
-                className="inline-flex items-center gap-2 rounded-2xl bg-white px-10 py-5 text-lg font-bold text-primary shadow-premium transition-all hover:bg-white/90 hover:scale-[1.03] active:scale-[0.97]"
-              >
-                {t("btn")}
-              </Link>
-            </div>
-          </div>
-          {/* Subtle decorative circles */}
-          <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-white/5 blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-white/5 blur-3xl pointer-events-none" />
-        </section>
+          <BlogSection />
+        </Suspense>
       </main>
 
-      {/* FOOTER */}
       <Footer />
-
-      {/* FLOATING CHAT WIDGET */}
       <ChatWidget />
     </div>
   );

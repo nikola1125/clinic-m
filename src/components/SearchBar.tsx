@@ -3,22 +3,20 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, MapPin, Video, AlertCircle, X, ChevronRight } from "lucide-react";
-
-const specialties = [
-  "Kardiologji", "Dermatologji", "Gjinekologji", "Neurologji",
-  "Ortopedi", "Pediatri", "Urologji", "Okulistikë",
-  "Gastroenterologji", "Endokrinologji", "Psikologji", "ORL",
-  "Pneumologji", "Onkologji", "Hematologji", "Dentist",
-  "Kirurgjia e Tumorit", "Fizioterapi",
-];
-
-const popularSearches = [
-  "Kardiolog", "Dentist", "Gjinekolog", "Dermatolog", "Pediatër", "Okulist",
-];
+import { useTranslations } from "next-intl";
 
 type Tab = "in-person" | "online" | "emergency";
 
+const SPECIALTY_KEYS = [
+  "sp1","sp2","sp3","sp4","sp5","sp6",
+  "sp7","sp8","sp9","sp10","sp11","sp12",
+  "sp13","sp14","sp15","sp16","sp17","sp18",
+] as const;
+
+const POPULAR_KEYS = ["pop1","pop2","pop3","pop4","pop5","pop6"] as const;
+
 export function SearchBar() {
+  const t = useTranslations("SearchBar");
   const [activeTab, setActiveTab] = useState<Tab>("in-person");
   const [query, setQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
@@ -26,18 +24,14 @@ export function SearchBar() {
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const placeholders = [
-    "Kërko një kardiolog...",
-    "Kërko një dentist...",
-    "Kërko një gjinekolog...",
-    "Kërko një dermatolog...",
-    "Kërko sipas simptomave...",
-  ];
+  const placeholderKeys = [
+    "placeholder_1","placeholder_2","placeholder_3","placeholder_4","placeholder_5",
+  ] as const;
 
   // Cycle placeholder text
   useEffect(() => {
     const interval = setInterval(() => {
-      setPlaceholderIdx((i) => (i + 1) % placeholders.length);
+      setPlaceholderIdx((i) => (i + 1) % placeholderKeys.length);
     }, 3000);
     return () => clearInterval(interval);
   }, []);
@@ -53,14 +47,17 @@ export function SearchBar() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
+  const allSpecialties = SPECIALTY_KEYS.map((k) => t(k));
+  const popularSearches = POPULAR_KEYS.map((k) => t(k));
+
   const filteredSpecialties = query.length > 0
-    ? specialties.filter((s) => s.toLowerCase().includes(query.toLowerCase()))
+    ? allSpecialties.filter((s) => s.toLowerCase().includes(query.toLowerCase()))
     : [];
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
-    { id: "in-person", label: "Në Klinikë", icon: <MapPin className="h-4 w-4" /> },
-    { id: "online", label: "Online", icon: <Video className="h-4 w-4" /> },
-    { id: "emergency", label: "Urgjencë", icon: <AlertCircle className="h-4 w-4" /> },
+    { id: "in-person", label: t("tab_in_person"), icon: <MapPin className="h-4 w-4" /> },
+    { id: "online", label: t("tab_online"), icon: <Video className="h-4 w-4" /> },
+    { id: "emergency", label: t("tab_emergency"), icon: <AlertCircle className="h-4 w-4" /> },
   ];
 
   return (
@@ -108,7 +105,7 @@ export function SearchBar() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => setIsFocused(true)}
-            placeholder={placeholders[placeholderIdx]}
+            placeholder={t(placeholderKeys[placeholderIdx])}
             className="w-full rounded-2xl bg-transparent py-3 lg:py-4 pl-12 lg:pl-14 pr-32 text-sm lg:text-base font-medium text-foreground outline-none placeholder:text-foreground/35"
           />
           {query && (
@@ -124,7 +121,7 @@ export function SearchBar() {
             style={{ background: "var(--primary)" }}
           >
             <Search className="h-3 w-3 lg:h-4 lg:w-4" />
-            Kërko
+            {t("search_btn")}
           </button>
         </div>
 
@@ -147,7 +144,7 @@ export function SearchBar() {
               {filteredSpecialties.length > 0 ? (
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-widest text-foreground/40 mb-3 px-2">
-                    Specialitete
+                    {t("specialties_label")}
                   </p>
                   <div className="space-y-1">
                     {filteredSpecialties.slice(0, 6).map((s) => (
@@ -166,7 +163,7 @@ export function SearchBar() {
               ) : (
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-widest text-foreground/40 mb-3 px-2">
-                    Kërkimet më të popullarizuara
+                    {t("popular_label")}
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {popularSearches.map((s) => (

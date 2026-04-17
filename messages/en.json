@@ -5,7 +5,9 @@
     "about": "About",
     "dashboard": "Dashboard",
     "login": "Log in",
-    "join": "Join Clinic"
+    "join": "Join Clinic",
+    "book_btn": "Book Appointment",
+    "language": "Language"
   },
   "Hero": {
     "badge": "Zenith: #1 Medical Clinic in the Region",
@@ -18,6 +20,32 @@
     "stat_doctors": "Expert Doctors",
     "floating_title": "Available",
     "floating_desc": "8 Specialists Online"
+  },
+  "HowItWorks": {
+    "badge": "Simple Process",
+    "heading_1": "Ready in",
+    "heading_2": "3 steps.",
+    "subtitle": "No registration required. Find and book a specialist in minutes.",
+    "step_label": "Step",
+    "step1_title": "Search",
+    "step1_desc": "Type a specialty or symptom to instantly find the right type of doctor for your needs.",
+    "step2_title": "Choose",
+    "step2_desc": "Browse specialists by category and pick the one that fits your schedule and preferences.",
+    "step3_title": "Book Instantly",
+    "step3_desc": "Confirm your appointment online in seconds — no phone calls, no waiting.",
+    "cta": "Book an Appointment"
+  },
+  "WhyChooseUs": {
+    "badge": "Why Us",
+    "heading": "What makes us different",
+    "verified_title": "Verified Doctors",
+    "verified_desc": "Every specialist is licensed, credentialed, and reviewed.",
+    "booking_title": "Easy Booking",
+    "booking_desc": "Reserve your slot in under 60 seconds, any time of day.",
+    "response_title": "Fast Availability",
+    "response_desc": "See real-time slots and get confirmed appointments instantly.",
+    "trusted_title": "Trusted Platform",
+    "trusted_desc": "HIPAA-compliant, secure, and used by thousands of patients."
   },
   "TrustBanner": {
     "title": "Certifications & Standards",
@@ -34,6 +62,42 @@
     "tech_name": "Modern Technology",
     "tech_sub": "Latest Equipment"
   },
+  "Services": {
+    "badge": "Our Expertise",
+    "heading_1": "Specialized Care for ",
+    "heading_highlight": "Every Patient",
+    "desc": "Our oncology team combines surgical excellence with compassionate care at every stage of your treatment journey.",
+    "s1_title": "Tumor Surgery",
+    "s1_desc": "Expert oncological resection and reconstruction, guided by precision imaging and minimally invasive techniques.",
+    "s2_title": "Minimally Invasive Procedures",
+    "s2_desc": "Laparoscopic and robotic-assisted interventions that reduce recovery time and improve patient comfort.",
+    "s3_title": "Follow-up Care",
+    "s3_desc": "Structured long-term monitoring plans that give patients confidence and catch recurrence early.",
+    "s4_title": "Multidisciplinary Evaluation",
+    "s4_desc": "Cross-specialty tumor boards review every case together — surgeons, oncologists, radiologists, and more.",
+    "learn_more": "Learn more"
+  },
+  "SearchBar": {
+    "tab_in_person": "In Clinic",
+    "tab_online": "Online",
+    "tab_emergency": "Emergency",
+    "search_btn": "Search",
+    "specialties_label": "Specialties",
+    "popular_label": "Most Popular Searches",
+    "placeholder_1": "Search for a cardiologist...",
+    "placeholder_2": "Search for a dentist...",
+    "placeholder_3": "Search for a gynecologist...",
+    "placeholder_4": "Search for a dermatologist...",
+    "placeholder_5": "Search by symptoms...",
+    "sp1": "Cardiology", "sp2": "Dermatology", "sp3": "Gynecology",
+    "sp4": "Neurology", "sp5": "Orthopedics", "sp6": "Pediatrics",
+    "sp7": "Urology", "sp8": "Ophthalmology", "sp9": "Gastroenterology",
+    "sp10": "Endocrinology", "sp11": "Psychology", "sp12": "ENT",
+    "sp13": "Pneumology", "sp14": "Oncology", "sp15": "Hematology",
+    "sp16": "Dentistry", "sp17": "Tumor Surgery", "sp18": "Physiotherapy",
+    "pop1": "Cardiologist", "pop2": "Dentist", "pop3": "Gynecologist",
+    "pop4": "Dermatologist", "pop5": "Pediatrician", "pop6": "Ophthalmologist"
+  },
   "SpecialtyGrid": {
     "title": "Specialties",
     "heading_1": "Find the Right ",
@@ -42,6 +106,9 @@
     "description": "Explore our medical specialties and book an appointment with the right doctor for your needs.",
     "show_less": "Show Less",
     "show_all": "View All Specialties",
+    "view_all_specialists": "View All Specialists",
+    "doctor_singular": "doctor",
+    "doctor_plural": "doctors",
     "s1_name": "Cardiology", "s1_desc": "Heart & circulatory system",
     "s2_name": "Neurology", "s2_desc": "Brain & nervous system",
     "s3_name": "Pediatrics", "s3_desc": "Child care",
@@ -58,6 +125,33 @@
     "s14_name": "Surgery", "s14_desc": "Surgical interventions",
     "s15_name": "Dentist", "s15_desc": "Dental care",
     "s16_name": "Gastroenterology", "s16_desc": "Digestive system"
+  },
+  "BlogSection": {
+    "badge": "Health Blog",
+    "heading_1": "News &",
+    "heading_2": "Tips",
+    "desc": "Useful information from our specialists to keep you informed and healthy.",
+    "view_all": "View All",
+    "a1_title": "How to Prepare for Your First Oncology Visit",
+    "a1_excerpt": "Learn what to expect during your first consultation and how to get the most from your meeting with the specialist.",
+    "a1_category": "Patient Guide",
+    "a1_readTime": "5 min read",
+    "a1_date": "April 12, 2026",
+    "a2_title": "10 Tips for a Healthy Heart",
+    "a2_excerpt": "Discover simple, science-based ways to protect your heart health every single day.",
+    "a2_category": "Heart Health",
+    "a2_readTime": "4 min read",
+    "a2_date": "April 8, 2026",
+    "a3_title": "The Importance of Annual Check-Ups: What You Need to Know",
+    "a3_excerpt": "Regular health checks can detect problems before they become serious. Here's why you shouldn't skip them.",
+    "a3_category": "Prevention",
+    "a3_readTime": "3 min read",
+    "a3_date": "April 3, 2026",
+    "a4_title": "Modern Medicine: Minimally Invasive Techniques",
+    "a4_excerpt": "How minimal-access surgical procedures are transforming patient recovery and clinical outcomes.",
+    "a4_category": "Innovation",
+    "a4_readTime": "6 min read",
+    "a4_date": "March 28, 2026"
   },
   "Testimonials": {
     "title": "Patient Stories",
@@ -94,10 +188,11 @@
     "cookies": "Cookie Settings"
   },
   "Cta": {
-    "heading_1": "Take the first step",
-    "heading_2": "towards your care.",
-    "desc": "Our specialists are ready to guide you at every stage of your journey — with expertise, compassion, and clarity.",
-    "btn": "Book Appointment"
+    "heading_1": "Ready to take",
+    "heading_2": "control of your health?",
+    "desc": "Join thousands of patients who trust Zenith Health for expert care.",
+    "btn": "Book Appointment",
+    "sticky_label": "Ready to see a specialist?"
   },
   "DoctorSpotlight": {
     "title": "Meet Our Experts",

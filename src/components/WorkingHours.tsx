@@ -5,15 +5,6 @@ import { Clock, Phone, AlertCircle, MapPin, CheckCircle2 } from "lucide-react";
 import { useState, useEffect, useTransition } from "react";
 import { useTranslations } from "next-intl";
 
-const schedule = [
-  { day: "E Hënë", hours: "08:00 – 20:00", isOpen: true },
-  { day: "E Martë", hours: "08:00 – 20:00", isOpen: true },
-  { day: "E Mërkurë", hours: "08:00 – 20:00", isOpen: true },
-  { day: "E Enjte", hours: "08:00 – 20:00", isOpen: true },
-  { day: "E Premte", hours: "08:00 – 20:00", isOpen: true },
-  { day: "E Shtunë", hours: "09:00 – 15:00", isOpen: true },
-  { day: "E Diel", hours: "Mbyllur", isOpen: false },
-];
 
 function getClinicStatus(t: any): { isOpen: boolean; message: string } {
   const now = new Date();
@@ -59,7 +50,7 @@ export function WorkingHours() {
   }, [t]);
 
   return (
-    <section className="py-10 lg:py-20">
+    <section className="py-12 lg:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid gap-4 lg:gap-8 lg:grid-cols-3">
           {/* Left: Live Status Card */}

@@ -148,8 +148,77 @@ h1, h2, h3 {
   display: none;
 }
 
-/* ── Focus Ring ────────────────────────────────────────── */
+/* ── Focus Ring — WCAG AA (3px per ui-ux-pro-max spec) ──── */
 *:focus-visible {
-  outline: 2px solid var(--primary-light);
-  outline-offset: 2px;
+  outline: 3px solid var(--primary);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Remove focus ring for mouse users only */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ── Skip Navigation Link (Accessibility) ──────────────── */
+.skip-nav {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  z-index: 9999;
+  padding: 0.5rem 1rem;
+  background: var(--primary);
+  color: white;
+  font-weight: 700;
+  border-radius: 0 0 8px 8px;
+  text-decoration: none;
+  transition: top 0.15s;
+}
+.skip-nav:focus {
+  top: 0;
+}
+
+/* ── Minimum Touch Target (44×44px) ────────────────────── */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* ── Skeleton Loading Animation ────────────────────────── */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+.skeleton {
+  background: var(--card-border);
+  border-radius: 8px;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+/* ── Hover nav links — CSS transition (no JS needed) ───── */
+.nav-link {
+  color: var(--foreground);
+  transition: color 200ms ease;
+}
+.nav-link:hover {
+  color: var(--primary);
+}
+
+/* ── Prefers-Reduced-Motion ─────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Keep framer-motion elements visible but don't animate */
+  [data-framer-motion] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }

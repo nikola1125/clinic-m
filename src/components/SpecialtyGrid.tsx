@@ -1,45 +1,61 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { useClinicStore } from "@/store/clinicStore";
+import { Link } from "@/i18n/routing";
 import {
   Heart, Brain, Baby, Eye, Bone, Stethoscope,
-  Microscope, Pill, Ear, Wind, Droplets, Scissors,
-  Smile, Syringe, Activity, ChevronDown, ChevronUp,
+  Microscope, Droplets, Activity, Ear, Wind, Pill,
+  Syringe, Scissors, Smile, ArrowRight, ChevronDown, ChevronUp,
+  Users,
 } from "lucide-react";
 
+// Static specialty metadata — icons, colors, translation key
 const specialtiesBase = [
-  { id: "s1", icon: Heart, gradient: "linear-gradient(135deg, #FF6B6B22, #FF6B6B08)", iconColor: "#E05555" },
-  { id: "s2", icon: Brain, gradient: "linear-gradient(135deg, #9B59B622, #9B59B608)", iconColor: "#8E44AD" },
-  { id: "s3", icon: Baby, gradient: "linear-gradient(135deg, #3498DB22, #3498DB08)", iconColor: "#2980B9" },
-  { id: "s4", icon: Eye, gradient: "linear-gradient(135deg, #1ABC9C22, #1ABC9C08)", iconColor: "#16A085" },
-  { id: "s5", icon: Bone, gradient: "linear-gradient(135deg, #E67E2222, #E67E2208)", iconColor: "#D35400" },
-  { id: "s6", icon: Stethoscope, gradient: "linear-gradient(135deg, #6FAF8F22, #6FAF8F08)", iconColor: "#4C8C6D" },
-  { id: "s7", icon: Microscope, gradient: "linear-gradient(135deg, #8E44AD22, #8E44AD08)", iconColor: "#7D3C98" },
-  { id: "s8", icon: Droplets, gradient: "linear-gradient(135deg, #F39C1222, #F39C1208)", iconColor: "#E08E0B" },
-  { id: "s9", icon: Activity, gradient: "linear-gradient(135deg, #E91E6322, #E91E6308)", iconColor: "#C2185B" },
-  { id: "s10", icon: Ear, gradient: "linear-gradient(135deg, #00968822, #00968808)", iconColor: "#00796B" },
-  { id: "s11", icon: Wind, gradient: "linear-gradient(135deg, #5DADE222, #5DADE208)", iconColor: "#2E86C1" },
-  { id: "s12", icon: Pill, gradient: "linear-gradient(135deg, #AF7AC522, #AF7AC508)", iconColor: "#884EA0" },
-  { id: "s13", icon: Syringe, gradient: "linear-gradient(135deg, #48C9B022, #48C9B008)", iconColor: "#17A589" },
-  { id: "s14", icon: Scissors, gradient: "linear-gradient(135deg, #E7494922, #E7494908)", iconColor: "#CB4335" },
-  { id: "s15", icon: Smile, gradient: "linear-gradient(135deg, #5499C722, #5499C708)", iconColor: "#2E86C1" },
-  { id: "s16", icon: Stethoscope, gradient: "linear-gradient(135deg, #F1948A22, #F1948A08)", iconColor: "#E74C3C" },
-];
+  { id: "s1",  slug: "Cardiology",       icon: Heart,        color: "#E05555", bg: "rgba(224,85,85,0.09)"    },
+  { id: "s2",  slug: "Neurology",        icon: Brain,        color: "#8E44AD", bg: "rgba(142,68,173,0.09)"   },
+  { id: "s3",  slug: "Pediatrics",       icon: Baby,         color: "#2980B9", bg: "rgba(41,128,185,0.09)"   },
+  { id: "s4",  slug: "Ophthalmology",    icon: Eye,          color: "#16A085", bg: "rgba(22,160,133,0.09)"   },
+  { id: "s5",  slug: "Orthopedics",      icon: Bone,         color: "#D35400", bg: "rgba(211,84,0,0.09)"     },
+  { id: "s6",  slug: "General Medicine", icon: Stethoscope,  color: "#4C8C6D", bg: "rgba(76,140,109,0.09)"   },
+  { id: "s7",  slug: "Oncology",         icon: Microscope,   color: "#7D3C98", bg: "rgba(125,60,152,0.09)"   },
+  { id: "s8",  slug: "Dermatology",      icon: Droplets,     color: "#E08E0B", bg: "rgba(224,142,11,0.09)"   },
+  { id: "s9",  slug: "Gynecology",       icon: Activity,     color: "#C2185B", bg: "rgba(194,24,91,0.09)"    },
+  { id: "s10", slug: "ENT",              icon: Ear,          color: "#00796B", bg: "rgba(0,121,107,0.09)"    },
+  { id: "s11", slug: "Pneumology",       icon: Wind,         color: "#2E86C1", bg: "rgba(46,134,193,0.09)"   },
+  { id: "s12", slug: "Endocrinology",    icon: Pill,         color: "#884EA0", bg: "rgba(136,78,160,0.09)"   },
+  { id: "s13", slug: "Urology",          icon: Syringe,      color: "#17A589", bg: "rgba(23,165,137,0.09)"   },
+  { id: "s14", slug: "Surgery",          icon: Scissors,     color: "#CB4335", bg: "rgba(203,67,53,0.09)"    },
+  { id: "s15", slug: "Dentist",          icon: Smile,        color: "#2E86C1", bg: "rgba(46,134,193,0.09)"   },
+  { id: "s16", slug: "Gastroenterology", icon: Stethoscope,  color: "#E74C3C", bg: "rgba(231,76,60,0.09)"    },
+] as const;
+
+const INITIAL_COUNT = 8;
 
 export function SpecialtyGrid() {
-  const [expanded, setExpanded] = useState(false);
   const t = useTranslations("SpecialtyGrid");
-  const visibleCount = expanded ? specialtiesBase.length : 8;
+  const doctors = useClinicStore((s) => s.doctors);
+  const [expanded, setExpanded] = useState(false);
+  const [hovered, setHovered] = useState<string | null>(null);
+
+  // Count doctors per specialty (case-insensitive match)
+  const doctorCountBySlug = (slug: string) =>
+    doctors.filter((d) =>
+      d.specialty.toLowerCase().includes(slug.toLowerCase())
+    ).length;
+
+  const visible = expanded ? specialtiesBase : specialtiesBase.slice(0, INITIAL_COUNT);
 
   return (
-    <section className="py-16 lg:py-20">
+    <section className="py-12 lg:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="max-w-3xl mx-auto text-center mb-16">
+
+        {/* ── Section Header ─────────────────────────────── */}
+        <div className="max-w-2xl mx-auto text-center mb-10 lg:mb-14">
           <motion.p
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="text-sm font-semibold uppercase tracking-widest text-primary"
@@ -47,117 +63,140 @@ export function SpecialtyGrid() {
             {t("title")}
           </motion.p>
           <motion.h2
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="mt-4 text-4xl font-bold tracking-tight text-foreground lg:text-5xl"
+            transition={{ delay: 0.08 }}
+            className="mt-3 text-3xl font-bold tracking-tight text-foreground lg:text-4xl"
           >
-            {t("heading_1")} <span className="text-gradient">{t("heading_specialist")}</span>{t("heading_2")}
+            {t("heading_1")}{" "}
+            <span className="text-gradient">{t("heading_specialist")}</span>
+            {t("heading_2")}
           </motion.h2>
           <motion.p
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-            className="mt-6 text-lg text-foreground/60 max-w-2xl mx-auto"
+            transition={{ delay: 0.14 }}
+            className="mt-3 text-base text-foreground/60 max-w-lg mx-auto"
           >
             {t("description")}
           </motion.p>
         </div>
 
-        {/* Grid */}
-        <div className="grid grid-cols-3 lg:grid-cols-4 gap-3 lg:gap-6">
-          {specialtiesBase.slice(0, visibleCount).map((specialty, idx) => (
-            <motion.a
-              key={specialty.id}
-              href={`/#specialty-${t(`${specialty.id}_name`).toLowerCase().replace(/\s+/g, "-").replace(/ë/g, "e")}`}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: idx * 0.04, duration: 0.4 }}
-              whileHover={{ y: -4, scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="group relative flex flex-col items-center justify-center gap-2 lg:gap-4 rounded-2xl lg:rounded-3xl p-3 lg:p-8 text-center transition-all duration-300 cursor-pointer aspect-square lg:aspect-auto"
-              style={{
-                background: specialty.gradient,
-                border: "1px solid rgba(95,143,123,0.08)",
-              }}
-            >
-              {/* Icon */}
-              <div
-                className="flex h-10 w-10 lg:h-14 lg:w-14 items-center justify-center rounded-xl lg:rounded-2xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-[-4deg]"
-                style={{
-                  background: `${specialty.iconColor}12`,
-                }}
-              >
-                <specialty.icon
-                  className="h-5 w-5 lg:h-7 lg:w-7 transition-colors"
-                  style={{ color: specialty.iconColor }}
-                />
-              </div>
+        {/* ── Specialty Cards Grid ───────────────────────── */}
+        <motion.div
+          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 lg:gap-4"
+          layout
+        >
+          <AnimatePresence>
+            {visible.map((spec, idx) => {
+              const Icon = spec.icon;
+              const count = doctorCountBySlug(spec.slug);
+              const isHovered = hovered === spec.id;
 
-              {/* Name */}
-              <h3 className="text-xs lg:text-base font-bold text-foreground leading-tight">
-                {t(`${specialty.id}_name`)}
-              </h3>
-
-              {/* Description - visible on hover */}
-              <p className="text-[10px] lg:text-xs text-foreground/50 leading-relaxed hidden lg:block">
-                {t(`${specialty.id}_desc`)}
-              </p>
-
-              {/* Hover arrow */}
-              <div
-                className="absolute top-2 right-2 lg:top-4 lg:right-4 flex h-5 w-5 lg:h-7 lg:w-7 items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-0 -translate-x-1"
-                style={{ background: `${specialty.iconColor}15` }}
-              >
-                <svg
-                  width="10" height="10" viewBox="0 0 10 10"
-                  style={{ color: specialty.iconColor }}
+              return (
+                <motion.div
+                  key={spec.id}
+                  layout
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ delay: idx * 0.04, duration: 0.35 }}
                 >
-                  <path
-                    d="M2 5h6M6 2.5l2.5 2.5-2.5 2.5"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    fill="none"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-            </motion.a>
-          ))}
-        </div>
+                  <Link
+                    href={`/book?specialty=${encodeURIComponent(spec.slug)}`}
+                    className="group relative flex flex-col gap-3 rounded-2xl p-4 lg:p-5 h-full cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    style={{
+                      background: isHovered ? spec.bg : "var(--card)",
+                      border: `1px solid ${isHovered ? spec.color + "30" : "var(--card-border)"}`,
+                      boxShadow: isHovered
+                        ? `0 8px 30px -4px ${spec.color}22, var(--shadow-card)`
+                        : "var(--shadow-card)",
+                      transform: isHovered ? "translateY(-3px) scale(1.015)" : "none",
+                    }}
+                    onMouseEnter={() => setHovered(spec.id)}
+                    onMouseLeave={() => setHovered(null)}
+                    aria-label={`${t(`${spec.id}_name`)} — ${count} ${count === 1 ? "doctor" : "doctors"}`}
+                  >
+                    {/* Icon */}
+                    <div
+                      className="flex h-11 w-11 lg:h-12 lg:w-12 items-center justify-center rounded-xl shrink-0 transition-transform duration-200 group-hover:scale-110"
+                      style={{ background: spec.bg }}
+                    >
+                      <Icon className="h-5 w-5 lg:h-6 lg:w-6" style={{ color: spec.color }} aria-hidden="true" />
+                    </div>
 
-        {/* Expand / Collapse Button */}
-        {specialtiesBase.length > 8 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="mt-10 text-center"
-          >
+                    {/* Text */}
+                    <div className="flex-1 min-w-0">
+                      <h3
+                        className="text-sm lg:text-base font-bold leading-snug text-foreground transition-colors group-hover:text-inherit"
+                        style={{ color: isHovered ? spec.color : undefined }}
+                      >
+                        {t(`${spec.id}_name`)}
+                      </h3>
+                      <p className="mt-0.5 text-[11px] lg:text-xs text-foreground/50 leading-relaxed line-clamp-1 hidden sm:block">
+                        {t(`${spec.id}_desc`)}
+                      </p>
+                    </div>
+
+                    {/* Doctor count badge */}
+                    <div className="flex items-center justify-between mt-auto pt-1">
+                      <span
+                        className="inline-flex items-center gap-1 text-[10px] font-bold rounded-full px-2 py-0.5"
+                        style={{
+                          background: `${spec.color}14`,
+                          color: spec.color,
+                        }}
+                      >
+                        <Users className="h-2.5 w-2.5" aria-hidden="true" />
+                        {count} {count === 1 ? t("doctor_singular") : t("doctor_plural")}
+                      </span>
+
+                      {/* Arrow — appears on hover */}
+                      <ArrowRight
+                        className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-all duration-200 -translate-x-1 group-hover:translate-x-0"
+                        style={{ color: spec.color }}
+                        aria-hidden="true"
+                      />
+                    </div>
+                  </Link>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+        </motion.div>
+
+        {/* ── Show More / View All ───────────────────────── */}
+        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
+          {specialtiesBase.length > INITIAL_COUNT && (
             <button
-              onClick={() => setExpanded(!expanded)}
-              className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-all hover:scale-[1.03] active:scale-[0.97]"
+              onClick={() => setExpanded((e) => !e)}
+              className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-all hover:scale-[1.03] active:scale-[0.97] cursor-pointer"
               style={{
                 background: "rgba(111,175,143,0.08)",
                 color: "var(--primary-dark)",
+                border: "1px solid rgba(111,175,143,0.15)",
               }}
+              aria-expanded={expanded}
             >
               {expanded ? (
-                <>
-                  {t("show_less")} <ChevronUp className="h-4 w-4" />
-                </>
+                <>{t("show_less")} <ChevronUp className="h-4 w-4" aria-hidden="true" /></>
               ) : (
-                <>
-                  {t("show_all")} <ChevronDown className="h-4 w-4" />
-                </>
+                <>{t("show_all")} <ChevronDown className="h-4 w-4" aria-hidden="true" /></>
               )}
             </button>
-          </motion.div>
-        )}
+          )}
+
+          <Link
+            href="/book"
+            className="inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-bold text-white transition-all hover:scale-[1.03] hover:shadow-lg active:scale-[0.97] cursor-pointer"
+            style={{ background: "linear-gradient(135deg, #4C8C6D, #6FAF8F)" }}
+          >
+            {t("view_all_specialists")}
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </Link>
+        </div>
       </div>
     </section>
   );
