@@ -74,10 +74,9 @@ export function DoctorSpotlight() {
             {doctorsBase.map((doctor, idx) => (
               <motion.div
                 key={doctor.name}
-                initial={{ opacity: 0, x: 30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.12, duration: 0.4 }}
                 className="group flex flex-col rounded-2xl lg:rounded-3xl bg-card shadow-card ring-1 ring-foreground/5 transition-all hover:shadow-premium overflow-hidden w-72 lg:w-auto shrink-0 lg:shrink snap-center lg:snap-align-none"
               >
                 {/* Photo */}

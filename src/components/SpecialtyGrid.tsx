@@ -85,9 +85,8 @@ export function SpecialtyGrid() {
         </div>
 
         {/* ── Specialty Cards Grid ───────────────────────── */}
-        <motion.div
-          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 lg:gap-4"
-          layout
+        <div
+          className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4"
         >
           <AnimatePresence>
             {visible.map((spec, idx) => {
@@ -98,15 +97,14 @@ export function SpecialtyGrid() {
               return (
                 <motion.div
                   key={spec.id}
-                  layout
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ delay: idx * 0.04, duration: 0.35 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ delay: idx * 0.04, duration: 0.3 }}
                 >
                   <Link
                     href={`/book?specialty=${encodeURIComponent(spec.slug)}`}
-                    className="group relative flex flex-col gap-3 rounded-2xl p-4 lg:p-5 h-full cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    className="group relative flex flex-col gap-2 sm:gap-3 rounded-xl sm:rounded-2xl p-2.5 sm:p-4 lg:p-5 h-full cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     style={{
                       background: isHovered ? spec.bg : "var(--card)",
                       border: `1px solid ${isHovered ? spec.color + "30" : "var(--card-border)"}`,
@@ -121,16 +119,16 @@ export function SpecialtyGrid() {
                   >
                     {/* Icon */}
                     <div
-                      className="flex h-11 w-11 lg:h-12 lg:w-12 items-center justify-center rounded-xl shrink-0 transition-transform duration-200 group-hover:scale-110"
+                      className="flex h-9 w-9 sm:h-11 sm:w-11 lg:h-12 lg:w-12 items-center justify-center rounded-lg sm:rounded-xl shrink-0 transition-transform duration-200 group-hover:scale-110"
                       style={{ background: spec.bg }}
                     >
-                      <Icon className="h-5 w-5 lg:h-6 lg:w-6" style={{ color: spec.color }} aria-hidden="true" />
+                      <Icon className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" style={{ color: spec.color }} aria-hidden="true" />
                     </div>
 
                     {/* Text */}
                     <div className="flex-1 min-w-0">
                       <h3
-                        className="text-sm lg:text-base font-bold leading-snug text-foreground transition-colors group-hover:text-inherit"
+                        className="text-xs sm:text-sm lg:text-base font-bold leading-snug text-foreground transition-colors group-hover:text-inherit"
                         style={{ color: isHovered ? spec.color : undefined }}
                       >
                         {t(`${spec.id}_name`)}
@@ -140,8 +138,8 @@ export function SpecialtyGrid() {
                       </p>
                     </div>
 
-                    {/* Doctor count badge */}
-                    <div className="flex items-center justify-between mt-auto pt-1">
+                    {/* Doctor count badge — hidden on mobile for compact 3-col */}
+                    <div className="hidden sm:flex items-center justify-between mt-auto pt-1">
                       <span
                         className="inline-flex items-center gap-1 text-[10px] font-bold rounded-full px-2 py-0.5"
                         style={{
@@ -165,7 +163,7 @@ export function SpecialtyGrid() {
               );
             })}
           </AnimatePresence>
-        </motion.div>
+        </div>
 
         {/* ── Show More / View All ───────────────────────── */}
         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">

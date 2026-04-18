@@ -38,7 +38,7 @@ export function ChatWidget() {
               className="absolute bottom-20 right-0 w-72 rounded-3xl p-5 z-[101]"
               style={{
                 background: "var(--card)",
-                backdropFilter: "blur(20px)",
+                backdropFilter: "blur(10px)",
                 border: "1px solid var(--card-border)",
                 boxShadow: "0 20px 60px -12px rgba(0,0,0,0.15), 0 8px 24px -4px rgba(76,140,109,0.1)",
               }}

@@ -24,16 +24,18 @@ const icons: Icon[] = [
 ];
 
 const floaters = [
-  { icon: 0, x: "6%",   y: "10%",  delay: 0,   dur: 24, dx: 35,  dy: -25, rot: 18,  op: 0.08 },
-  { icon: 1, x: "70%",  y: "6%",   delay: 2,   dur: 28, dx: -30, dy: 20,  rot: -8,  op: 0.10 },
-  { icon: 2, x: "85%",  y: "50%",  delay: 1,   dur: 22, dx: -25, dy: -35, rot: 22,  op: 0.07 },
-  { icon: 3, x: "20%",  y: "65%",  delay: 4,   dur: 30, dx: 25,  dy: -18, rot: -14, op: 0.08 },
-  { icon: 4, x: "50%",  y: "15%",  delay: 1.5, dur: 26, dx: -18, dy: 22,  rot: 10,  op: 0.09 },
-  { icon: 5, x: "35%",  y: "78%",  delay: 3,   dur: 27, dx: 28,  dy: -28, rot: -16, op: 0.07 },
-  { icon: 0, x: "62%",  y: "68%",  delay: 6,   dur: 25, dx: -22, dy: 18,  rot: 14,  op: 0.06 },
-  { icon: 1, x: "12%",  y: "38%",  delay: 5,   dur: 29, dx: 18,  dy: -22, rot: -10, op: 0.08 },
-  { icon: 4, x: "80%",  y: "28%",  delay: 7,   dur: 23, dx: -20, dy: 20,  rot: 12,  op: 0.06 },
-  { icon: 2, x: "42%",  y: "48%",  delay: 3.5, dur: 31, dx: 24,  dy: -16, rot: -20, op: 0.055 },
+  // First 5 visible on all screens
+  { icon: 0, x: "6%",   y: "10%",  delay: 0,   dur: 24, dx: 35,  dy: -25, rot: 18,  op: 0.08, desktop: false },
+  { icon: 1, x: "70%",  y: "6%",   delay: 2,   dur: 28, dx: -30, dy: 20,  rot: -8,  op: 0.10, desktop: false },
+  { icon: 2, x: "85%",  y: "50%",  delay: 1,   dur: 22, dx: -25, dy: -35, rot: 22,  op: 0.07, desktop: false },
+  { icon: 4, x: "50%",  y: "15%",  delay: 1.5, dur: 26, dx: -18, dy: 22,  rot: 10,  op: 0.09, desktop: false },
+  { icon: 5, x: "35%",  y: "78%",  delay: 3,   dur: 27, dx: 28,  dy: -28, rot: -16, op: 0.07, desktop: false },
+  // Desktop-only extras
+  { icon: 3, x: "20%",  y: "65%",  delay: 4,   dur: 30, dx: 25,  dy: -18, rot: -14, op: 0.08, desktop: true },
+  { icon: 0, x: "62%",  y: "68%",  delay: 6,   dur: 25, dx: -22, dy: 18,  rot: 14,  op: 0.06, desktop: true },
+  { icon: 1, x: "12%",  y: "38%",  delay: 5,   dur: 29, dx: 18,  dy: -22, rot: -10, op: 0.08, desktop: true },
+  { icon: 4, x: "80%",  y: "28%",  delay: 7,   dur: 23, dx: -20, dy: 20,  rot: 12,  op: 0.06, desktop: true },
+  { icon: 2, x: "42%",  y: "48%",  delay: 3.5, dur: 31, dx: 24,  dy: -16, rot: -20, op: 0.055, desktop: true },
 ] as const;
 
 export function HeroBg() {
@@ -81,13 +83,14 @@ export function HeroBg() {
         return (
           <div
             key={i}
-            className="hero-floater absolute"
+            className={`hero-floater absolute${f.desktop ? " hidden lg:block" : ""}`}
             style={{
               left: f.x,
               top: f.y,
               width: icon.size,
               height: icon.size,
               opacity: f.op,
+              willChange: "transform",
               "--dx": `${f.dx}px`,
               "--dy": `${f.dy}px`,
               "--rot": `${f.rot}deg`,

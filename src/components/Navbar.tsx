@@ -30,11 +30,11 @@ export function Navbar() {
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div
-          className="mt-4 flex h-16 items-center justify-between rounded-2xl px-4 sm:px-6 shadow-glass"
+          className="mt-4 flex h-16 items-center justify-between rounded-2xl px-4 sm:px-6 shadow-glass will-change-transform"
           style={{
             background: "var(--glass)",
-            backdropFilter: "blur(16px)",
-            WebkitBackdropFilter: "blur(16px)",
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
             border: "1px solid var(--glass-border)",
           }}
         >

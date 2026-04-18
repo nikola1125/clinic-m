@@ -41,10 +41,9 @@ export function Testimonials() {
             {testimonialsBase.map((item, idx) => (
               <motion.div
                 key={idx}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.12 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.12, duration: 0.4 }}
                 className="flex flex-col rounded-2xl lg:rounded-3xl bg-card p-5 lg:p-8 shadow-card ring-1 ring-foreground/5 transition-shadow hover:shadow-premium w-72 lg:w-auto shrink-0 lg:shrink snap-center lg:snap-align-none"
               >
                 <Quote className="h-5 w-5 lg:h-8 lg:w-8 text-primary/30 mb-3 lg:mb-6" />

@@ -160,12 +160,8 @@ export function WorkingHours() {
                   const item = scheduleItems[idx];
                   const isToday = idx === scheduleIndex;
                   return (
-                    <motion.div
+                    <div
                       key={item.day}
-                      initial={{ opacity: 0, x: -16 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: idx * 0.05 }}
                       className="flex items-center justify-between rounded-xl px-2 lg:px-5 py-1.5 lg:py-3.5 transition-colors"
                       style={{
                         background: isToday ? "rgba(111,175,143,0.08)" : "transparent",
@@ -210,7 +206,7 @@ export function WorkingHours() {
                           </span>
                         )}
                       </div>
-                    </motion.div>
+                    </div>
                   );
                 })}
               </div>

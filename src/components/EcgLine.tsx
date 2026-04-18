@@ -38,24 +38,17 @@ export function EcgLine() {
         viewBox="0 0 900 60"
         preserveAspectRatio="none"
         className="w-full"
-        style={{ height: 56 }}
+        style={{ height: 56, willChange: "auto" }}
       >
-        <defs>
-          <filter id="ecg-glow" x="-5%" y="-80%" width="110%" height="260%">
-            <feGaussianBlur stdDeviation="3" result="blur" />
-          </filter>
-        </defs>
-
-        {/* Soft glow layer */}
+        {/* Soft glow — thicker low-opacity duplicate (no filter) */}
         <path
           d={d}
           fill="none"
           stroke="#6FAF8F"
-          strokeWidth="4"
+          strokeWidth="5"
           strokeLinecap="round"
           strokeLinejoin="round"
-          opacity="0.12"
-          filter="url(#ecg-glow)"
+          opacity="0.08"
         />
 
         {/* Main animated draw line */}
@@ -71,32 +64,11 @@ export function EcgLine() {
             strokeDasharray: ECG_PATH_LEN,
             strokeDashoffset: ECG_PATH_LEN,
             opacity: 0,
+            willChange: "stroke-dashoffset, opacity",
             animation: `ecg-draw 3.8s cubic-bezier(0.3, 0, 0.7, 1) infinite`,
             animationDelay: "0.75s",
           }}
         />
-
-        {/* Leading dot */}
-        <circle
-          cx="0"
-          cy="30"
-          r="2.5"
-          fill="#6FAF8F"
-          className="ecg-dot"
-          style={{
-            opacity: 0,
-            transformOrigin: "center",
-            animation: `ecg-dot 3.8s linear infinite`,
-            animationDelay: "0.75s",
-          }}
-        >
-          <animateMotion
-            dur="3.8s"
-            repeatCount="indefinite"
-            path={d}
-            calcMode="linear"
-          />
-        </circle>
       </svg>
     </div>
   );
