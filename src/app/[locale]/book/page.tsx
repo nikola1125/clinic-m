@@ -9,6 +9,7 @@ import { useClinicStore } from "@/store/clinicStore";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Activity, Calendar, CheckCircle2, ChevronLeft, ChevronRight, Clock, Stethoscope, User } from "lucide-react";
+import Image from "next/image";
 
 const steps = ["Select Doctor", "Select Service", "Choose Date", "Confirm"];
 
@@ -100,14 +101,16 @@ export default function BookPage() {
 
           {/* Header */}
           <div className="mb-8 sm:mb-12 relative overflow-hidden rounded-3xl bg-primary/10 px-6 py-12 text-center shadow-premium sm:px-8 sm:py-16">
-            <img
+            <Image
               src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=2000&auto=format&fit=crop"
               alt="Hospital Reception"
-              className="absolute inset-0 h-full w-full object-cover opacity-20"
+              fill
+              sizes="(max-width: 768px) 100vw, 768px"
+              className="object-cover opacity-20"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-t from-background/80 to-transparent" />
             <div className="relative z-10">
-              <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl sm:text-5xl">Book Consultation</h1>
+              <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-5xl">Book Consultation</h1>
               <p className="mt-3 text-base sm:text-lg text-foreground/70 max-w-xl mx-auto font-medium sm:mt-4">Follow the steps below to schedule your visit with our world-class specialists.</p>
             </div>
           </div>
@@ -189,7 +192,9 @@ export default function BookPage() {
                               ${doctorId === d.id ? "border-primary bg-primary/5 shadow-md" : "border-foreground/5 bg-white hover:border-primary/30"}
                             `}
                           >
-                            <img src={`https://i.pravatar.cc/150?u=${d.id}`} alt={d.name} className="h-12 w-12 rounded-full object-cover shrink-0 bg-foreground/5" />
+                            <div className="relative h-12 w-12 rounded-full overflow-hidden shrink-0 bg-foreground/5">
+                              <Image src={`https://i.pravatar.cc/150?u=${d.id}`} alt={d.name} fill sizes="48px" className="object-cover" />
+                            </div>
                             <div>
                               <h4 className="font-bold text-foreground text-lg">{d.name}</h4>
                               <p className="text-sm text-foreground/50">{d.specialty}</p>

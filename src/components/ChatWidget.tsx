@@ -15,7 +15,7 @@ export function ChatWidget() {
   }, []);
 
   return (
-    <div className="fixed bottom-6 right-6 z-[100]">
+    <div className="fixed bottom-6 right-6 z-100">
       {/* Expanded Options */}
       <AnimatePresence>
         {isOpen && (
@@ -26,7 +26,7 @@ export function ChatWidget() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsOpen(false)}
-              className="fixed inset-0 z-[99]"
+              className="fixed inset-0 z-99"
             />
 
             {/* Contact Menu */}
@@ -35,7 +35,7 @@ export function ChatWidget() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.9 }}
               transition={{ duration: 0.25, ease: "easeOut" }}
-              className="absolute bottom-20 right-0 w-72 rounded-3xl p-5 z-[101]"
+              className="absolute bottom-20 right-0 w-72 rounded-3xl p-5 z-101"
               style={{
                 background: "var(--card)",
                 backdropFilter: "blur(10px)",
@@ -124,7 +124,7 @@ export function ChatWidget() {
         onClick={() => { setIsOpen(!isOpen); setShowPulse(false); }}
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.95 }}
-        className="relative flex h-16 w-16 items-center justify-center rounded-full shadow-xl transition-colors z-[101]"
+        className="relative flex h-16 w-16 items-center justify-center rounded-full shadow-xl transition-colors z-101"
         style={{
           background: isOpen
             ? "var(--foreground)"

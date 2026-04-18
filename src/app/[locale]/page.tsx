@@ -1,22 +1,24 @@
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
-import { TrustBanner } from "@/components/TrustBanner";
-import { WhyChooseUs } from "@/components/WhyChooseUs";
-import { HowItWorks } from "@/components/HowItWorks";
-import { SpecialtyGrid } from "@/components/SpecialtyGrid";
-import { WorkingHours } from "@/components/WorkingHours";
-import { BlogSection } from "@/components/BlogSection";
-import { Footer } from "@/components/Footer";
-import { ChatWidget } from "@/components/ChatWidget";
+import { HeroBg } from "@/components/HeroBg";
 import { SkeletonCard } from "@/components/SkeletonCard";
 import { Suspense } from "react";
+import dynamic from "next/dynamic";
 
-import { Link } from "@/i18n/routing";
-import { Calendar } from "lucide-react";
+/* Below-fold components — lazy-loaded for smaller initial bundle */
+const HowItWorks = dynamic(() => import("@/components/HowItWorks").then(m => m.HowItWorks));
+const TrustBanner = dynamic(() => import("@/components/TrustBanner").then(m => m.TrustBanner));
+const WhyChooseUs = dynamic(() => import("@/components/WhyChooseUs").then(m => m.WhyChooseUs));
+const SpecialtyGrid = dynamic(() => import("@/components/SpecialtyGrid").then(m => m.SpecialtyGrid));
+const WorkingHours = dynamic(() => import("@/components/WorkingHours").then(m => m.WorkingHours));
+const BlogSection = dynamic(() => import("@/components/BlogSection").then(m => m.BlogSection));
+const Footer = dynamic(() => import("@/components/Footer").then(m => m.Footer));
+import { ChatWidgetLazy } from "@/components/ChatWidgetLazy";
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="relative flex flex-col min-h-screen">
+      <HeroBg />
       <Navbar />
 
       <main id="main-content" className="grow" tabIndex={-1}>
@@ -74,7 +76,7 @@ export default function Home() {
       </main>
 
       <Footer />
-      <ChatWidget />
+      <ChatWidgetLazy />
     </div>
   );
 }

@@ -53,7 +53,55 @@ export default async function RootLayout({
         <meta name="format-detection" content="telephone=no" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-              </head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "MedicalClinic",
+              name: "ZenithHealth",
+              description:
+                "World-class oncology and medical care. Book specialist consultations and connect with top surgeons.",
+              url: "https://zenithhealth.com",
+              logo: "https://zenithhealth.com/logo.png",
+              medicalSpecialty: [
+                "Oncology",
+                "Cardiology",
+                "Neurology",
+                "Orthopedics",
+                "Dermatology",
+                "Pediatrics",
+              ],
+              openingHoursSpecification: [
+                {
+                  "@type": "OpeningHoursSpecification",
+                  dayOfWeek: [
+                    "Monday",
+                    "Tuesday",
+                    "Wednesday",
+                    "Thursday",
+                    "Friday",
+                  ],
+                  opens: "08:00",
+                  closes: "20:00",
+                },
+                {
+                  "@type": "OpeningHoursSpecification",
+                  dayOfWeek: "Saturday",
+                  opens: "09:00",
+                  closes: "15:00",
+                },
+              ],
+              contactPoint: {
+                "@type": "ContactPoint",
+                contactType: "customer service",
+                availableLanguage: ["Albanian", "English"],
+              },
+              sameAs: [],
+            }),
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         {/* Skip to main content — WCAG 2.4.1 */}
         <a href="#main-content" className="skip-nav">

@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Clock, ArrowRight, Tag, TrendingUp } from "lucide-react";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 
 const articleIds = ["a1", "a2", "a3", "a4"] as const;
 
@@ -96,13 +97,15 @@ export function BlogSection() {
               viewport={{ once: true }}
               className="group relative flex flex-col rounded-2xl sm:rounded-3xl overflow-hidden bg-card shadow-card ring-1 ring-foreground/5 transition-all hover:shadow-premium"
             >
-              <div className="relative flex-1 sm:flex-none sm:aspect-[16/10] overflow-hidden min-h-0">
-                <img
+              <div className="relative flex-1 sm:flex-none sm:aspect-16/10 overflow-hidden min-h-0">
+                <Image
                   src={featured.image}
                   alt={featured.title}
-                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  fill
+                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 50vw"
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/25 to-transparent" />
                 <div className="absolute bottom-3 left-3 right-3 sm:bottom-6 sm:left-6 sm:right-6">
                   <span
                     className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] sm:text-xs font-bold text-white mb-1.5 sm:mb-3"
@@ -144,10 +147,12 @@ export function BlogSection() {
                 className="group flex gap-2 sm:gap-4 lg:gap-5 rounded-xl sm:rounded-2xl bg-card p-2 sm:p-4 shadow-card ring-1 ring-foreground/5 transition-all hover:shadow-premium"
               >
                 <div className="relative h-14 w-14 sm:h-20 sm:w-20 lg:h-24 lg:w-24 shrink-0 overflow-hidden rounded-lg sm:rounded-xl">
-                  <img
+                  <Image
                     src={article.image}
                     alt={article.title}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    fill
+                    sizes="(max-width: 640px) 56px, (max-width: 1024px) 80px, 96px"
+                    className="object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                 </div>
                 <div className="flex flex-col justify-center min-w-0">

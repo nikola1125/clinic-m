@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Clock, Phone, AlertCircle, MapPin, CheckCircle2 } from "lucide-react";
-import { useState, useEffect, useTransition } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 
 

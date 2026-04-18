@@ -6,6 +6,7 @@ import { AutoSeed, RequireRole } from "@/components/RequireRole";
 import { uid } from "@/lib/ids";
 import { useClinicStore, type Consult, type Doctor } from "@/store/clinicStore";
 import { Edit2, Trash2, Plus, X, Save, Stethoscope, Mail, Activity, AlignLeft, Key, UserCheck } from "lucide-react";
+import Image from "next/image";
 
 function DoctorCard({
   doctor,
@@ -20,8 +21,8 @@ function DoctorCard({
     <div className="glass rounded-4xl p-6 shadow-premium transition-all hover:shadow-lg">
       <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
         <div className="flex gap-4">
-          <div className="hidden sm:flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary shrink-0 overflow-hidden">
-            <img src={`https://i.pravatar.cc/150?u=${doctor.id}`} alt={doctor.name} className="h-full w-full object-cover" />
+          <div className="relative hidden sm:flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary shrink-0 overflow-hidden">
+            <Image src={`https://i.pravatar.cc/150?u=${doctor.id}`} alt={doctor.name} fill sizes="64px" className="object-cover" />
           </div>
           <div>
             <div className="text-xl font-bold text-foreground">

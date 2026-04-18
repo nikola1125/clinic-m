@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Award, Star, Calendar } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
+import Image from "next/image";
 
 const doctorsBase = [
   {
@@ -81,10 +82,12 @@ export function DoctorSpotlight() {
               >
                 {/* Photo */}
                 <div className="relative aspect-4/3 overflow-hidden">
-                  <img
+                  <Image
                     src={doctor.image}
                     alt={doctor.name}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    fill
+                    sizes="(max-width: 1024px) 288px, 33vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>
 

@@ -41,7 +41,7 @@ export function Navbar() {
           {/* Brand */}
           <div className="flex items-center gap-2 min-w-0">
             <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl shadow-premium flex-shrink-0"
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl shadow-premium shrink-0"
                 style={{ background: "linear-gradient(135deg, #4C8C6D, #5F8F7B)" }}>
                 <Activity className="h-5 w-5 text-white" />
               </div>

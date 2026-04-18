@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { Calendar, ChevronRight, Star } from "lucide-react";
 import { SearchBar } from "./SearchBar";
 import { EcgLine } from "./EcgLine";
-import { HeroBg } from "./HeroBg";
+import Image from "next/image";
 
 const T = { duration: 0.55, ease: "easeOut" } as const;
 
@@ -17,16 +17,16 @@ export function Hero() {
     <section className="relative overflow-hidden pt-10 pb-12 lg:pt-16 lg:pb-14">
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 -z-10 h-full w-full">
-        <img
-          src="https://images.unsplash.com/photo-1519494140261-d90193639b42?q=80&w=2000&auto=format&fit=crop"
+        <Image
+          src="https://images.unsplash.com/photo-1538108149393-fbbd81895907?q=80&w=2000&auto=format&fit=crop"
           alt="Clinic Background"
-          className="h-full w-full object-cover opacity-15 grayscale-[50%]"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover opacity-15 grayscale-50"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/90 to-background" />
+        <div className="absolute inset-0 bg-linear-to-b from-background via-background/90 to-background" />
       </div>
-
-      {/* Animated medical-themed background */}
-      <HeroBg />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid items-center gap-16 lg:grid-cols-2">
@@ -95,7 +95,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ ...T, delay: 0.42 }}
-              className="mt-10 grid grid-cols-2 gap-4 border-t border-foreground/5 pt-6 sm:mt-12 sm:gap-6 sm:flex sm:items-center sm:gap-8 sm:pt-10"
+              className="mt-10 grid grid-cols-2 gap-4 border-t border-foreground/5 pt-6 sm:mt-12 sm:flex sm:items-center sm:gap-8 sm:pt-10"
             >
               <div>
                 <div className="text-xl font-bold text-foreground sm:text-2xl">15k+</div>
@@ -109,8 +109,8 @@ export function Hero() {
               <div className="hidden sm:block h-10 w-px bg-foreground/10" />
               <div className="flex -space-x-2 overflow-hidden col-span-2 sm:col-auto justify-start mt-2 sm:mt-0 sm:-space-x-3">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="inline-block h-8 w-8 rounded-full border-2 border-background bg-zinc-200 overflow-hidden sm:h-10 sm:w-10">
-                    <img src={`https://i.pravatar.cc/100?img=${i+20}`} alt="" className="h-full w-full object-cover" />
+                  <div key={i} className="relative inline-block h-8 w-8 rounded-full border-2 border-background bg-zinc-200 overflow-hidden sm:h-10 sm:w-10">
+                    <Image src={`https://i.pravatar.cc/100?img=${i+20}`} alt="" fill sizes="40px" className="object-cover" />
                   </div>
                 ))}
                 <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-background bg-primary text-xs font-bold text-white sm:h-10 sm:w-10">

@@ -23,14 +23,8 @@ export function EcgLine() {
           78%  { opacity: 0.9; }
           100% { stroke-dashoffset: 0; opacity: 0; }
         }
-        @keyframes ecg-dot {
-          0%, 4%  { opacity: 0; transform: scale(0.6); }
-          10%     { opacity: 1; transform: scale(1); }
-          90%     { opacity: 1; transform: scale(1); }
-          100%    { opacity: 0; transform: scale(0.6); }
-        }
         @media (prefers-reduced-motion: reduce) {
-          .ecg-path, .ecg-dot { animation: none !important; opacity: 0 !important; }
+          .ecg-path { animation: none !important; opacity: 0 !important; }
         }
       `}</style>
 
