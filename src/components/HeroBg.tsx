@@ -21,54 +21,77 @@ const icons: Icon[] = [
 
 /* ── Generate floater configs spread across the full page height ── */
 function buildFloaters() {
-  const rows = 10;      // number of vertical bands
-  const perRow = 6;     // icons per band on mobile
-  const perRowLg = 9;   // icons per band on desktop
+  const mobileCount = 60;
+  const desktopExtra = 30;
   const out: {
     icon: number; xPct: number; yPct: number;
     delay: number; dur: number; dx: number; dy: number; rot: number;
     op: number; desktop: boolean;
   }[] = [];
 
-  const seed = (i: number) => ((i * 7 + 13) % 97) / 97; // deterministic pseudo-random
+  // Deterministic pseudo-random generators using different primes for variety
+  const hash = (i: number, p: number) => (((i + 1) * p + 17) % 97) / 97;
 
-  for (let row = 0; row < rows; row++) {
-    const yBase = (row / rows) * 100;
-    // Mobile-visible icons
-    for (let col = 0; col < perRow; col++) {
-      const idx = row * perRow + col;
-      const s = seed(idx);
+  // Mobile icons — evenly spread via stratified grid with heavy random jitter
+  // Divide page into a ~10×6 grid, then jitter each cell by up to 70% of cell size
+  const mRows = 10;
+  const mCols = 6;
+  const cellW = 100 / mCols;
+  const cellH = 100 / mRows;
+
+  for (let r = 0; r < mRows; r++) {
+    for (let c = 0; c < mCols; c++) {
+      const idx = r * mCols + c;
+      const h1 = hash(idx, 31);   // x jitter
+      const h2 = hash(idx, 53);   // y jitter
+      const h3 = hash(idx, 71);   // animation seed
+      const h4 = hash(idx, 89);   // rotation seed
+
       out.push({
         icon: idx % icons.length,
-        xPct: (col / perRow) * 100 + s * (100 / perRow) * 0.7,
-        yPct: yBase + s * (100 / rows) * 0.8,
-        delay: s * 4,
-        dur: 10 + s * 8,
-        dx: (s - 0.5) * 80,
-        dy: (seed(idx + 50) - 0.5) * 70,
-        rot: (s - 0.5) * 40,
-        op: 0.15 + s * 0.08,
+        // Place within cell, jitter heavily so grid pattern breaks up
+        xPct: Math.min(96, Math.max(1, c * cellW + h1 * cellW * 1.4 - cellW * 0.2)),
+        yPct: Math.min(98, Math.max(0.5, r * cellH + h2 * cellH * 1.3 - cellH * 0.15)),
+        delay: h3 * 5,
+        dur: 10 + h3 * 8,
+        dx: (h1 - 0.5) * 80,
+        dy: (h2 - 0.5) * 70,
+        rot: (h4 - 0.5) * 40,
+        op: 0.14 + h3 * 0.09,
         desktop: false,
       });
     }
-    // Desktop-only extras
-    for (let col = 0; col < (perRowLg - perRow); col++) {
-      const idx = rows * perRow + row * (perRowLg - perRow) + col;
-      const s = seed(idx + 200);
+  }
+
+  // Desktop extras — same approach with different grid offset
+  const dRows = 10;
+  const dCols = 3;
+  const dCellW = 100 / dCols;
+  const dCellH = 100 / dRows;
+
+  for (let r = 0; r < dRows; r++) {
+    for (let c = 0; c < dCols; c++) {
+      const idx = mobileCount + r * dCols + c;
+      const h1 = hash(idx, 43);
+      const h2 = hash(idx, 67);
+      const h3 = hash(idx, 79);
+      const h4 = hash(idx, 97);
+
       out.push({
         icon: idx % icons.length,
-        xPct: s * 95,
-        yPct: yBase + s * (100 / rows) * 0.7,
-        delay: s * 5,
-        dur: 12 + s * 8,
-        dx: (s - 0.5) * 70,
-        dy: (seed(idx + 250) - 0.5) * 60,
-        rot: (s - 0.5) * 35,
-        op: 0.12 + s * 0.08,
+        xPct: Math.min(96, Math.max(1, c * dCellW + h1 * dCellW * 1.5 - dCellW * 0.25)),
+        yPct: Math.min(98, Math.max(0.5, r * dCellH + h2 * dCellH * 1.3 - dCellH * 0.15)),
+        delay: h3 * 6,
+        dur: 12 + h3 * 8,
+        dx: (h1 - 0.5) * 70,
+        dy: (h2 - 0.5) * 60,
+        rot: (h4 - 0.5) * 35,
+        op: 0.12 + h3 * 0.08,
         desktop: true,
       });
     }
   }
+
   return out;
 }
 

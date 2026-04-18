@@ -7,7 +7,6 @@ import dynamic from "next/dynamic";
 
 /* Below-fold components — lazy-loaded for smaller initial bundle */
 const HowItWorks = dynamic(() => import("@/components/HowItWorks").then(m => m.HowItWorks));
-const TrustBanner = dynamic(() => import("@/components/TrustBanner").then(m => m.TrustBanner));
 const WhyChooseUs = dynamic(() => import("@/components/WhyChooseUs").then(m => m.WhyChooseUs));
 const SpecialtyGrid = dynamic(() => import("@/components/SpecialtyGrid").then(m => m.SpecialtyGrid));
 const WorkingHours = dynamic(() => import("@/components/WorkingHours").then(m => m.WorkingHours));
@@ -27,9 +26,6 @@ export default function Home() {
 
         {/* 2. HOW IT WORKS */}
         <HowItWorks />
-
-        {/* 3. TRUST BADGES */}
-        <TrustBanner />
 
         {/* 4. WHY CHOOSE US */}
         <WhyChooseUs />
@@ -51,10 +47,7 @@ export default function Home() {
           <SpecialtyGrid />
         </Suspense>
 
-        {/* 6. OPENING HOURS */}
-        <WorkingHours />
-
-        {/* 7. HEALTH BLOG — Suspense for loading state */}
+        {/* 6. HEALTH BLOG — Suspense for loading state */}
         <Suspense
           fallback={
             <section className="py-12 lg:py-16">
@@ -73,6 +66,9 @@ export default function Home() {
         >
           <BlogSection />
         </Suspense>
+
+        {/* 7. OPENING HOURS */}
+        <WorkingHours />
       </main>
 
       <Footer />
