@@ -129,7 +129,7 @@ export function Hero() {
             <div className="relative z-10 aspect-4/5 overflow-hidden rounded-[3rem] shadow-premium bg-primary/10">
               <img
                 src="https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=2000&auto=format&fit=crop"
-                alt="Zenith Health Clinic"
+                alt="MjekOn Clinic"
                 className="absolute inset-0 h-full w-full object-cover"
               />
             </div>

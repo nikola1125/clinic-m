@@ -10,10 +10,10 @@
     "language": "Gjuha"
   },
   "Hero": {
-    "badge": "Zenith: Klinika #1 Mjekësore në Rajon",
+    "badge": "MjekOn: Klinika #1 Mjekësore në Rajon",
     "title_1": "Kujdesi shëndetësor i ",
     "title_2": "përshtatur për ju.",
-    "description": "Përjetoni të ardhmen e mjekësisë me Zenith Health. Specialistët tanë të klasës botërore dhe teknologjia moderne ofrojnë kujdes të personalizuar.",
+    "description": "Përjetoni të ardhmen e mjekësisë me MjekOn. Specialistët tanë të klasës botërore dhe teknologjia moderne ofrojnë kujdes të personalizuar.",
     "book_btn": "Rezervoni Takim",
     "services_btn": "Shërbimet Tona",
     "stat_patients": "Pacientë të Kënaqur",
@@ -178,11 +178,11 @@
     "clinicTitle": "Klinika",
     "c0": "Specialistët Tanë",
     "c1": "Historitë e Pacientëve",
-    "c2": "Rreth Zenith",
+    "c2": "Rreth MjekOn",
     "c3": "Karriera",
     "c4": "Kërkime Shkencore",
     "contactTitle": "Kontakt",
-    "rights": " Zenith Health Group. Të gjitha shërbimet mjekësore ofrohen nga specialistë të licencuar.",
+    "rights": " MjekOn Health Group. Të gjitha shërbimet mjekësore ofrohen nga specialistë të licencuar.",
     "privacy": "Politika e Privatësisë",
     "terms": "Kushtet e Shërbimit",
     "cookies": "Cilësimet e Cookies"
@@ -190,7 +190,7 @@
   "Cta": {
     "heading_1": "Gati të merrni",
     "heading_2": "kontëllin e shëndëtsit tuaj?",
-    "desc": "Bashkohuni me mijëra pacientë që i besojnë Zenith Health për këjdes expert.",
+    "desc": "Bashkohuni me mijëra pacientë që i besojnë MjekOn për këjdes expert.",
     "btn": "Rezervo Takim",
     "sticky_label": "Gati të shihni një specialist?"
   },

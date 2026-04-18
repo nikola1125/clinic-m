@@ -93,7 +93,7 @@ export function ChatWidget() {
 
                 {/* Email */}
                 <a
-                  href="mailto:info@zenithhealth.al"
+                  href="mailto:info@mjekon.al"
                   className="flex items-center gap-4 rounded-2xl px-4 py-3.5 transition-all hover:scale-[1.02] active:scale-[0.98]"
                   style={{ background: "rgba(111,175,143,0.05)" }}
                 >
@@ -105,7 +105,7 @@ export function ChatWidget() {
                   </div>
                   <div>
                     <div className="text-sm font-bold text-foreground">Email</div>
-                    <div className="text-xs text-foreground/50">info@zenithhealth.al</div>
+                    <div className="text-xs text-foreground/50">info@mjekon.al</div>
                   </div>
                 </a>
               </div>

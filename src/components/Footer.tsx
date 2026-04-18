@@ -21,7 +21,7 @@ export function Footer() {
                 <Activity className="h-6 w-6 text-white" />
               </div>
               <span className="text-2xl font-bold tracking-tight text-foreground">
-                Zenith<span className="text-primary">Health</span>
+                Mjek<span className="text-primary">On</span>
               </span>
             </Link>
             <p className="mt-6 text-sm leading-6 text-foreground max-w-xs">
@@ -145,7 +145,7 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-3 text-sm text-foreground">
                 <Mail className="h-4 w-4 text-primary shrink-0" />
-                contact@zenithhealth.com
+                contact@mjekon.com
               </li>
               <li className="flex items-start gap-3 text-sm text-foreground">
                 <MapPin className="h-4 w-4 text-primary mt-1 shrink-0" />

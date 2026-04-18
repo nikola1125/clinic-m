@@ -35,7 +35,7 @@ export function AppShell({
                 <Activity className="h-6 w-6" />
               </div>
               <span className="text-xl font-bold tracking-tight text-foreground hidden sm:block">
-                Zenith Health
+                MjekOn
               </span>
             </Link>
             <div className="h-6 w-px bg-foreground/10 mx-2 hidden sm:block" />

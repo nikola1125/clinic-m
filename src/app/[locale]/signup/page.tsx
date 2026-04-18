@@ -77,7 +77,7 @@ export default function SignupPage() {
         className="w-full max-w-lg"
       >
         <div className="flex flex-col items-center mb-10 text-center">
-          <h2 className="text-2xl font-bold tracking-tight text-foreground">Bashkohu me Zenith Health</h2>
+          <h2 className="text-2xl font-bold tracking-tight text-foreground">Bashkohu me MjekOn</h2>
           <p className="mt-2 text-sm text-foreground/50 max-w-sm">Hapi i parë drejt një jete më të shëndetshme. Regjistrohuni sot për profilin tuaj.</p>
         </div>
 

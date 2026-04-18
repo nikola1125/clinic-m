@@ -20,8 +20,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Zenith Health – World-Class Oncology & Medical Care",
-  description: "Book specialist oncology consultations, manage your health journey, and connect with top surgeons at Zenith Health.",
+  title: "MjekOn – World-Class Oncology & Medical Care",
+  description: "Book specialist oncology consultations, manage your health journey, and connect with top surgeons at MjekOn.",
 };
 
 export function generateStaticParams() {
@@ -59,11 +59,11 @@ export default async function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "MedicalClinic",
-              name: "ZenithHealth",
+              name: "MjekOn",
               description:
                 "World-class oncology and medical care. Book specialist consultations and connect with top surgeons.",
-              url: "https://zenithhealth.com",
-              logo: "https://zenithhealth.com/logo.png",
+              url: "https://mjekon.com",
+              logo: "https://mjekon.com/logo.png",
               medicalSpecialty: [
                 "Oncology",
                 "Cardiology",

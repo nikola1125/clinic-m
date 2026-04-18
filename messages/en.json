@@ -10,10 +10,10 @@
     "language": "Language"
   },
   "Hero": {
-    "badge": "Zenith: #1 Medical Clinic in the Region",
+    "badge": "MjekOn: #1 Medical Clinic in the Region",
     "title_1": "Healthcare ",
     "title_2": "tailored for you.",
-    "description": "Experience the future of medicine with Zenith Health. Our world-class specialists and modern technology offer personalized care.",
+    "description": "Experience the future of medicine with MjekOn. Our world-class specialists and modern technology offer personalized care.",
     "book_btn": "Book Appointment",
     "services_btn": "Our Services",
     "stat_patients": "Happy Patients",
@@ -178,11 +178,11 @@
     "clinicTitle": "Clinic",
     "c0": "Our Specialists",
     "c1": "Patient Stories",
-    "c2": "About Zenith",
+    "c2": "About MjekOn",
     "c3": "Careers",
     "c4": "Scientific Research",
     "contactTitle": "Contact",
-    "rights": " Zenith Health Group. All medical services are provided by licensed specialists.",
+    "rights": " MjekOn Health Group. All medical services are provided by licensed specialists.",
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
     "cookies": "Cookie Settings"
@@ -190,7 +190,7 @@
   "Cta": {
     "heading_1": "Ready to take",
     "heading_2": "control of your health?",
-    "desc": "Join thousands of patients who trust Zenith Health for expert care.",
+    "desc": "Join thousands of patients who trust MjekOn for expert care.",
     "btn": "Book Appointment",
     "sticky_label": "Ready to see a specialist?"
   },

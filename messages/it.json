@@ -10,10 +10,10 @@
     "language": "Lingua"
   },
   "Hero": {
-    "badge": "Zenith: Clinica Medica #1 nella Regione",
+    "badge": "MjekOn: Clinica Medica #1 nella Regione",
     "title_1": "Assistenza sanitaria ",
     "title_2": "su misura per te.",
-    "description": "Vivi il futuro della medicina con Zenith Health. I nostri specialisti di livello mondiale e la tecnologia moderna offrono cure personalizzate.",
+    "description": "Vivi il futuro della medicina con MjekOn. I nostri specialisti di livello mondiale e la tecnologia moderna offrono cure personalizzate.",
     "book_btn": "Prenota Appuntamento",
     "services_btn": "I Nostri Servizi",
     "stat_patients": "Pazienti Soddisfatti",
@@ -178,11 +178,11 @@
     "clinicTitle": "La Clinica",
     "c0": "I Nostri Specialisti",
     "c1": "Storie dei Pazienti",
-    "c2": "Chi è Zenith",
+    "c2": "Chi è MjekOn",
     "c3": "Carriere",
     "c4": "Ricerca Scientifica",
     "contactTitle": "Contatti",
-    "rights": " Zenith Health Group. Tutti i servizi medici sono forniti da specialisti autorizzati.",
+    "rights": " MjekOn Health Group. Tutti i servizi medici sono forniti da specialisti autorizzati.",
     "privacy": "Politica sulla Privacy",
     "terms": "Termini di Servizio",
     "cookies": "Impostazioni dei Cookie"
@@ -190,7 +190,7 @@
   "Cta": {
     "heading_1": "Pronto a prendere",
     "heading_2": "il controllo della tua salute?",
-    "desc": "Unisciti a migliaia di pazienti che si fidano di Zenith Health per cure specialistiche.",
+    "desc": "Unisciti a migliaia di pazienti che si fidano di MjekOn per cure specialistiche.",
     "btn": "Prenota Appuntamento",
     "sticky_label": "Pronto a vedere uno specialista?"
   },

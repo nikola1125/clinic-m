@@ -46,7 +46,7 @@ export function Navbar() {
                 <Activity className="h-5 w-5 text-white" />
               </div>
               <span className="text-lg font-bold tracking-tight text-foreground">
-                Zenith<span style={{ color: "var(--primary)" }}>Health</span>
+                Mjek<span style={{ color: "var(--primary)" }}>On</span>
               </span>
             </Link>
           </div>
