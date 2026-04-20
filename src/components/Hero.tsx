@@ -8,7 +8,7 @@ import { SearchBar } from "./SearchBar";
 import { EcgLine } from "./EcgLine";
 import Image from "next/image";
 
-const T = { duration: 0.55, ease: "easeOut" } as const;
+const T = { duration: 0.5, ease: [0.22, 1, 0.36, 1] } as const;
 
 export function Hero() {
   const t = useTranslations("Hero");
@@ -33,7 +33,7 @@ export function Hero() {
           <div className="relative">
             {/* Badge */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ ...T, delay: 0 }}
             >
@@ -48,7 +48,7 @@ export function Hero() {
 
             {/* Headline */}
             <motion.h1
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ ...T, delay: 0.1 }}
               className="mt-6 text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl xl:text-7xl"
@@ -59,7 +59,7 @@ export function Hero() {
 
             {/* Description */}
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ ...T, delay: 0.2 }}
               className="mt-4 text-base leading-7 text-foreground max-w-xl sm:text-lg sm:leading-8"
@@ -69,7 +69,7 @@ export function Hero() {
 
             {/* CTA Buttons */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ ...T, delay: 0.3 }}
               className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4"
@@ -92,9 +92,9 @@ export function Hero() {
 
             {/* Stats */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ ...T, delay: 0.42 }}
+              transition={{ ...T, delay: 0.4 }}
               className="mt-10 grid grid-cols-2 gap-4 border-t border-foreground/5 pt-6 sm:mt-12 sm:flex sm:items-center sm:gap-8 sm:pt-10"
             >
               <div>
@@ -138,9 +138,9 @@ export function Hero() {
 
         {/* Search Bar */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ ...T, delay: 0.52 }}
+          transition={{ ...T, delay: 0.5 }}
           className="mt-16 lg:mt-20"
         >
           <SearchBar />

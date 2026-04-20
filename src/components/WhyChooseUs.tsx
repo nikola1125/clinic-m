@@ -20,18 +20,19 @@ export function WhyChooseUs() {
         {/* Slim header */}
         <div className="text-center mb-8">
           <motion.p
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             className="text-sm font-semibold uppercase tracking-widest text-primary"
           >
             {t("badge")}
           </motion.p>
           <motion.h2
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.08 }}
+            transition={{ delay: 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             className="mt-2 text-2xl font-bold tracking-tight text-foreground lg:text-3xl"
           >
             {t("heading")}
@@ -46,7 +47,7 @@ export function WhyChooseUs() {
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: idx * 0.08 }}
+              transition={{ delay: idx * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
               whileHover={{ y: -4, scale: 1.02, transition: { duration: 0.18 } }}
               className="flex flex-col gap-3 rounded-2xl p-5 lg:p-6 cursor-default"
               style={{

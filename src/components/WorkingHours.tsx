@@ -55,9 +55,10 @@ export function WorkingHours() {
         <div className="grid gap-4 lg:gap-8 lg:grid-cols-3">
           {/* Left: Live Status Card */}
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             className="lg:col-span-1"
           >
             <div
@@ -119,10 +120,10 @@ export function WorkingHours() {
 
           {/* Right: Weekly Schedule */}
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
+            transition={{ delay: 0.1, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             className="lg:col-span-2"
           >
             <div

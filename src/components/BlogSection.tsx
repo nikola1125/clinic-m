@@ -51,6 +51,7 @@ export function BlogSection() {
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
               className="text-sm font-semibold uppercase tracking-widest text-primary"
             >
               {t("badge")}
@@ -59,7 +60,7 @@ export function BlogSection() {
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
+              transition={{ delay: 0.1, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
               className="mt-4 text-3xl font-bold tracking-tight text-foreground lg:text-4xl"
             >
               {t("heading_1")} <span className="text-gradient">{t("heading_2")}</span>
@@ -68,7 +69,7 @@ export function BlogSection() {
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
+              transition={{ delay: 0.2, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
               className="mt-4 text-base text-foreground/60 max-w-xl"
             >
               {t("desc")}
@@ -92,16 +93,18 @@ export function BlogSection() {
           {featured && (
             <motion.a
               href="#"
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="group relative flex flex-col rounded-2xl sm:rounded-3xl overflow-hidden bg-card shadow-card ring-1 ring-foreground/5 transition-all hover:shadow-premium"
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              className="group relative flex flex-col rounded-2xl sm:rounded-3xl overflow-hidden bg-card shadow-card ring-1 ring-foreground/5 transition-shadow duration-300 hover:shadow-premium"
             >
-              <div className="relative flex-1 sm:flex-none sm:aspect-16/10 overflow-hidden min-h-0">
+              <div className="relative flex-1 sm:flex-none sm:aspect-16/10 overflow-hidden min-h-0 bg-foreground/5">
                 <Image
                   src={featured.image}
                   alt={featured.title}
                   fill
+                  loading="eager"
                   sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 50vw"
                   className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />
@@ -140,17 +143,18 @@ export function BlogSection() {
               <motion.a
                 key={article.id}
                 href="#"
-                initial={{ opacity: 0, y: 24 }}
+                initial={{ opacity: 0, y: 14 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
-                className="group flex gap-2 sm:gap-4 lg:gap-5 rounded-xl sm:rounded-2xl bg-card p-2 sm:p-4 shadow-card ring-1 ring-foreground/5 transition-all hover:shadow-premium"
+                transition={{ delay: idx * 0.08, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                className="group flex gap-2 sm:gap-4 lg:gap-5 rounded-xl sm:rounded-2xl bg-card p-2 sm:p-4 shadow-card ring-1 ring-foreground/5 transition-shadow duration-300 hover:shadow-premium"
               >
-                <div className="relative h-14 w-14 sm:h-20 sm:w-20 lg:h-24 lg:w-24 shrink-0 overflow-hidden rounded-lg sm:rounded-xl">
+                <div className="relative h-14 w-14 sm:h-20 sm:w-20 lg:h-24 lg:w-24 shrink-0 overflow-hidden rounded-lg sm:rounded-xl bg-foreground/5">
                   <Image
                     src={article.image}
                     alt={article.title}
                     fill
+                    loading="eager"
                     sizes="(max-width: 640px) 56px, (max-width: 1024px) 80px, 96px"
                     className="object-cover transition-transform duration-500 group-hover:scale-110"
                   />

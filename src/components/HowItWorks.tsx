@@ -67,9 +67,9 @@ function MobileStep({ step, idx, t, isLast }: { step: typeof steps[number]; idx:
       <div className="flex flex-col items-center shrink-0" style={{ width: 44 }}>
         {/* Pulsing step dot */}
         <motion.div
-          initial={{ scale: 0 }}
-          animate={inView ? { scale: 1 } : {}}
-          transition={{ delay: 0.1, type: "spring", stiffness: 300, damping: 15 }}
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={inView ? { scale: 1, opacity: 1 } : {}}
+          transition={{ delay: 0.1, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
           className="relative z-10 flex h-11 w-11 items-center justify-center rounded-full"
           style={{
             background: step.bg,
@@ -78,9 +78,9 @@ function MobileStep({ step, idx, t, isLast }: { step: typeof steps[number]; idx:
           }}
         >
           <motion.div
-            initial={{ scale: 0, rotate: -30 }}
-            animate={inView ? { scale: 1, rotate: 0 } : {}}
-            transition={{ delay: 0.2, type: "spring", stiffness: 280, damping: 16 }}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={inView ? { scale: 1, opacity: 1 } : {}}
+            transition={{ delay: 0.2, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
           >
             <Icon className="h-5 w-5" style={{ color: step.accent }} />
           </motion.div>
@@ -113,8 +113,8 @@ function MobileStep({ step, idx, t, isLast }: { step: typeof steps[number]; idx:
 
       {/* Card */}
       <motion.div
-        initial={{ opacity: 0, x: 40, scale: 0.92 }}
-        animate={inView ? { opacity: 1, x: 0, scale: 1 } : {}}
+        initial={{ opacity: 0, x: 16 }}
+        animate={inView ? { opacity: 1, x: 0 } : {}}
         transition={{
           delay: 0.15,
           duration: 0.5,
@@ -198,12 +198,12 @@ function DesktopCard({ step, idx, t }: { step: typeof steps[number]; idx: number
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 50, scale: 0.9, rotateX: 8 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={{
-        delay: idx * 0.2,
-        duration: 0.6,
+        delay: idx * 0.12,
+        duration: 0.5,
         ease: [0.22, 1, 0.36, 1],
       }}
       className="relative flex flex-col rounded-3xl p-6 lg:p-8 h-full overflow-hidden group cursor-default"
@@ -252,13 +252,12 @@ function DesktopCard({ step, idx, t }: { step: typeof steps[number]; idx: number
           style={{ background: step.glow }}
         />
         <motion.div
-          initial={{ scale: 0, rotate: -20 }}
-          animate={inView ? { scale: 1, rotate: 0 } : {}}
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={inView ? { scale: 1, opacity: 1 } : {}}
           transition={{
-            delay: idx * 0.2 + 0.15,
-            type: "spring",
-            stiffness: 260,
-            damping: 18,
+            delay: idx * 0.12 + 0.15,
+            duration: 0.4,
+            ease: [0.22, 1, 0.36, 1],
           }}
           className="relative flex h-16 w-16 items-center justify-center rounded-2xl"
           style={{
@@ -340,6 +339,7 @@ export function HowItWorks() {
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             className="inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-bold uppercase tracking-[0.15em] text-primary"
             style={{
               borderColor: "rgba(111,175,143,0.25)",
@@ -353,7 +353,7 @@ export function HowItWorks() {
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
+            transition={{ delay: 0.1, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             className="mt-5 text-3xl font-bold tracking-tight text-foreground lg:text-5xl"
           >
             {t("heading_1")}{" "}
@@ -364,7 +364,7 @@ export function HowItWorks() {
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.18 }}
+            transition={{ delay: 0.18, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             className="mt-4 text-base max-w-lg mx-auto"
             style={{ color: "var(--foreground-muted)", opacity: 0.7 }}
           >
@@ -402,10 +402,10 @@ export function HowItWorks() {
 
         {/* CTA */}
         <motion.div
-          initial={{ opacity: 0, y: 20, scale: 0.95 }}
-          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.7, duration: 0.5 }}
+          transition={{ delay: 0.5, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           className="text-center mt-12 lg:mt-14"
         >
           <Link

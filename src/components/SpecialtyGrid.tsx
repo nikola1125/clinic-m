@@ -55,18 +55,19 @@ export function SpecialtyGrid() {
         {/* ── Section Header ─────────────────────────────── */}
         <div className="max-w-2xl mx-auto text-center mb-10 lg:mb-14">
           <motion.p
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             className="text-sm font-semibold uppercase tracking-widest text-primary"
           >
             {t("title")}
           </motion.p>
           <motion.h2
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.08 }}
+            transition={{ delay: 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             className="mt-3 text-3xl font-bold tracking-tight text-foreground lg:text-4xl"
           >
             {t("heading_1")}{" "}
@@ -74,10 +75,10 @@ export function SpecialtyGrid() {
             {t("heading_2")}
           </motion.h2>
           <motion.p
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.14 }}
+            transition={{ delay: 0.14, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             className="mt-3 text-base text-foreground/60 max-w-lg mx-auto"
           >
             {t("description")}
@@ -97,10 +98,10 @@ export function SpecialtyGrid() {
               return (
                 <motion.div
                   key={spec.id}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
-                  transition={{ delay: idx * 0.04, duration: 0.3 }}
+                  transition={{ delay: idx * 0.06, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                 >
                   <Link
                     href={`/book?specialty=${encodeURIComponent(spec.slug)}`}
