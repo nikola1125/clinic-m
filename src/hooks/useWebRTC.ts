@@ -129,6 +129,28 @@ export function useWebRTC(
       }
     };
 
+    /** Plain SDP payload — RTCSessionDescription does not JSON.stringify reliably on all browsers. */
+    const sdpPayload = (desc: RTCSessionDescriptionInit) => ({
+      type: desc.type!,
+      sdp: desc.sdp!,
+    });
+
+    const adoptSessionFromMessage = (msgSession: string | undefined) => {
+      if (!msgSession) return;
+      if (sessionIdRef.current == null) {
+        sessionIdRef.current = msgSession;
+        if (!isClosed) setSessionId(msgSession);
+      }
+    };
+
+    const isStaleSignalingMessage = (msgSession: string | undefined): boolean => {
+      if (!msgSession) return false;
+      // Drop only when BOTH sides have an id and they disagree (fixes race where
+      // offer arrives before session-ready: sessionIdRef is still null — must NOT drop).
+      if (sessionIdRef.current != null && msgSession !== sessionIdRef.current) return true;
+      return false;
+    };
+
     const maybeCreateOffer = async () => {
       if (role !== "patient") return;
       const pc = pcRef.current;
@@ -142,7 +164,7 @@ export function useWebRTC(
         ws?.send(
           JSON.stringify({
             type: "offer",
-            sdp: offer,
+            sdp: sdpPayload(offer),
             session_id: sessionIdRef.current,
           })
         );
@@ -224,9 +246,13 @@ export function useWebRTC(
           sessionIdRef.current = null;
           resetPeerConnection();
         } else if (msg.type === "session-ready") {
-          // Fresh call session: reset any residual pc state from a prior call.
+          // If we already adopted this session (e.g. offer arrived before session-ready on
+          // the doctor), do not reset the peer connection or we tear down a working negotiation.
+          if (sessionIdRef.current === msg.session_id) {
+            return;
+          }
           sessionIdRef.current = msg.session_id;
-          setSessionId(msg.session_id);
+          if (!isClosed) setSessionId(msg.session_id);
           resetPeerConnection();
           await maybeCreateOffer();
         } else if (msg.type === "session-ended") {
@@ -237,10 +263,10 @@ export function useWebRTC(
           console.warn("This connection was replaced by a newer session.");
         } else if (msg.type === "offer") {
           if (role !== "doctor") return;
-          // Reject SDP from a stale session
-          if (msg.session_id && msg.session_id !== sessionIdRef.current) return;
+          if (isStaleSignalingMessage(msg.session_id)) return;
+          adoptSessionFromMessage(msg.session_id);
           const pc = pcRef.current;
-          if (!pc) return;
+          if (!pc || !msg.sdp?.sdp) return;
           try {
             await pc.setRemoteDescription(new RTCSessionDescription(msg.sdp));
             remoteDescSetRef.current = true;
@@ -251,7 +277,7 @@ export function useWebRTC(
             ws?.send(
               JSON.stringify({
                 type: "answer",
-                sdp: answer,
+                sdp: sdpPayload(answer),
                 session_id: sessionIdRef.current,
               })
             );
@@ -260,9 +286,10 @@ export function useWebRTC(
           }
         } else if (msg.type === "answer") {
           if (role !== "patient") return;
-          if (msg.session_id && msg.session_id !== sessionIdRef.current) return;
+          if (isStaleSignalingMessage(msg.session_id)) return;
+          adoptSessionFromMessage(msg.session_id);
           const pc = pcRef.current;
-          if (!pc) return;
+          if (!pc || !msg.sdp?.sdp) return;
           try {
             await pc.setRemoteDescription(new RTCSessionDescription(msg.sdp));
             remoteDescSetRef.current = true;
@@ -271,7 +298,8 @@ export function useWebRTC(
             console.error("Failed to handle answer:", e);
           }
         } else if (msg.type === "ice-candidate") {
-          if (msg.session_id && msg.session_id !== sessionIdRef.current) return;
+          if (isStaleSignalingMessage(msg.session_id)) return;
+          adoptSessionFromMessage(msg.session_id);
           const pc = pcRef.current;
           if (!pc) return;
           if (!remoteDescSetRef.current) {
