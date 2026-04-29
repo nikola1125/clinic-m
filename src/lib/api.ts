@@ -43,7 +43,10 @@ export class ApiClient {
 
     if (!response.ok) {
       const err: ApiError = await response.json().catch(() => ({ detail: response.statusText }));
-      throw new Error(err.detail || `API error: ${response.status}`);
+      const detail = Array.isArray(err.detail)
+        ? err.detail.map((e: any) => e.msg ?? JSON.stringify(e)).join(", ")
+        : err.detail || `API error: ${response.status}`;
+      throw new Error(detail);
     }
 
     if (response.status === 204) {
@@ -109,9 +112,12 @@ export class ApiClient {
     specialty?: string;
     bio?: string;
   }) {
+    const body: Record<string, unknown> = { ...payload };
+    if (!body.password || (body.password as string).length < 8) delete body.password;
+    if (!body.username) delete body.username;
     return this.request<any>("/admin/doctors", {
       method: "POST",
-      body: JSON.stringify(payload),
+      body: JSON.stringify(body),
     });
   }
 
@@ -123,9 +129,12 @@ export class ApiClient {
     specialty?: string;
     bio?: string;
   }) {
+    const body: Record<string, unknown> = { ...payload };
+    if (!body.password || (body.password as string).length < 8) delete body.password;
+    if (!body.username) delete body.username;
     return this.request<any>(`/admin/doctors/${doctorId}`, {
       method: "PUT",
-      body: JSON.stringify(payload),
+      body: JSON.stringify(body),
     });
   }
 

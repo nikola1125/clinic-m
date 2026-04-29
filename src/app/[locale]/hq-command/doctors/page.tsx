@@ -282,6 +282,9 @@ export default function AdminDoctorsPage() {
                       autoComplete="new-password"
                     />
                   </div>
+                  {form.password && form.password.length < 8 && (
+                    <p className="mt-1.5 text-xs text-amber-600 font-medium">Password must be at least 8 characters</p>
+                  )}
                 </div>
               </div>
             </div>
