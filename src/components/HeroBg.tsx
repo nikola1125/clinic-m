@@ -1,13 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { motion, useAnimation } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 
 /**
- * HeroBg — full-page animated medical background with scroll parallax.
- * Uses depth layers (far/mid/near) for natural parallax feel.
- * Icons placed via Poisson-disk–style rejection for organic, even spacing.
- * Tap/click triggers scatter interaction.
+ * HeroBg — full-page ambient medical background.
+ * Icons are placed via Poisson-disk rejection for even, organic spacing
+ * across the entire page height. Three depth layers provide subtle
+ * scroll parallax. Motion is slow and unobtrusive; no interactions.
  */
 
 type Icon = { vb: string; render: "stroke" | "fill"; d: string };
@@ -29,9 +28,9 @@ const LAYER_CFG: Record<DepthLayer, {
   parallax: number; opRange: [number, number];
   sizeRange: [number, number]; floatRange: [number, number];
 }> = {
-  far:  { parallax: 0.02, opRange: [0.08, 0.14], sizeRange: [20, 28], floatRange: [18, 28] },
-  mid:  { parallax: 0.05, opRange: [0.12, 0.20],  sizeRange: [28, 38], floatRange: [12, 20] },
-  near: { parallax: 0.10, opRange: [0.16, 0.26],  sizeRange: [36, 48], floatRange: [8,  16] },
+  far:  { parallax: 0.015, opRange: [0.04, 0.07],  sizeRange: [16, 22], floatRange: [28, 40] },
+  mid:  { parallax: 0.04,  opRange: [0.06, 0.10],  sizeRange: [22, 28], floatRange: [22, 32] },
+  near: { parallax: 0.08,  opRange: [0.09, 0.14],  sizeRange: [28, 34], floatRange: [16, 24] },
 };
 
 /* ── Seeded PRNG (mulberry32) — deterministic randomness so SSR = client ── */
@@ -104,79 +103,29 @@ function buildFloaters(): FloaterConfig[] {
     }
   }
 
-  placeSet(42, false, 8);
-  placeSet(28, true, 10);
+  placeSet(18, false, 14);
+  placeSet(12, true, 16);
   return out;
 }
 
 const floaters = buildFloaters();
 
-/* ── Scatter config ── */
-const SCATTER_RADIUS = 180;
-const SCATTER_FORCE = 100;
-
 /* ── Single Floater with scroll parallax ── */
 function Floater({
   f,
   scrollY,
-  scatterTrigger,
 }: {
   f: FloaterConfig;
   scrollY: number;
-  scatterTrigger: { x: number; y: number; id: number } | null;
 }) {
   const icon = icons[f.icon];
-  const controls = useAnimation();
-  const elRef = useRef<HTMLDivElement>(null);
-  const [scattered, setScattered] = useState(false);
 
   // Parallax offset based on scroll position and depth layer
   const parallaxY = scrollY * LAYER_CFG[f.layer].parallax;
 
-  // React to scatter triggers
-  const prevTrigger = useRef<number>(0);
-  if (scatterTrigger && scatterTrigger.id !== prevTrigger.current && elRef.current) {
-    prevTrigger.current = scatterTrigger.id;
-    const rect = elRef.current.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-    const ddx = cx - scatterTrigger.x;
-    const ddy = cy - scatterTrigger.y;
-    const dist = Math.sqrt(ddx * ddx + ddy * ddy);
-
-    if (dist < SCATTER_RADIUS && dist > 0) {
-      const force = ((SCATTER_RADIUS - dist) / SCATTER_RADIUS) * SCATTER_FORCE;
-      const angle = Math.atan2(ddy, ddx);
-      const pushX = Math.cos(angle) * force;
-      const pushY = Math.sin(angle) * force;
-      const spin = (Math.random() - 0.5) * 120;
-
-      setScattered(true);
-      controls.start({
-        x: pushX,
-        y: pushY,
-        rotate: spin,
-        scale: 1.2,
-        opacity: Math.min(f.op * 1.8, 0.3),
-        transition: { type: "spring", stiffness: 180, damping: 14, mass: 0.5 },
-      }).then(() => {
-        controls.start({
-          x: 0,
-          y: 0,
-          rotate: 0,
-          scale: 1,
-          opacity: f.op,
-          transition: { type: "spring", stiffness: 50, damping: 16, mass: 1.2, delay: 0.4 },
-        }).then(() => setScattered(false));
-      });
-    }
-  }
-
   return (
-    <motion.div
-      ref={elRef}
-      animate={controls}
-      className={`absolute${f.desktopOnly ? " hidden lg:block" : ""}`}
+    <div
+      className={`absolute hero-floater${f.desktopOnly ? " hidden lg:block" : ""}`}
       style={{
         left: `${f.xPct}%`,
         top: `${f.yPct}%`,
@@ -184,11 +133,10 @@ function Floater({
         height: f.size,
         opacity: f.op,
         transform: `translateY(${parallaxY}px)`,
-        willChange: scattered ? "transform, opacity" : "auto",
         "--dx": `${f.dx}px`,
         "--dy": `${f.dy}px`,
         "--rot": `${f.rot}deg`,
-        animation: scattered ? "none" : `hero-float ${f.dur}s ease-in-out ${f.delay}s infinite`,
+        animation: `hero-float ${f.dur}s ease-in-out ${f.delay}s infinite`,
       } as React.CSSProperties}
     >
       <svg
@@ -202,24 +150,17 @@ function Floater({
       >
         <path d={icon.d} />
       </svg>
-    </motion.div>
+    </div>
   );
 }
 
 /* ── Main component ── */
 export function HeroBg() {
-  const [trigger, setTrigger] = useState<{ x: number; y: number; id: number } | null>(null);
   const [scrollY, setScrollY] = useState(0);
-  const idRef = useRef(0);
   const rafRef = useRef<number>(0);
 
-  const handleInteraction = useCallback((clientX: number, clientY: number) => {
-    idRef.current += 1;
-    setTrigger({ x: clientX, y: clientY, id: idRef.current });
-  }, []);
-
   useEffect(() => {
-    // Scroll handler with rAF for smooth 60fps parallax
+    // Scroll handler with rAF for smooth parallax
     let ticking = false;
     const onScroll = () => {
       if (!ticking) {
@@ -231,22 +172,12 @@ export function HeroBg() {
       }
     };
 
-    const onClickGlobal = (e: MouseEvent) => handleInteraction(e.clientX, e.clientY);
-    const onTouchGlobal = (e: TouchEvent) => {
-      const t = e.touches[0];
-      if (t) handleInteraction(t.clientX, t.clientY);
-    };
-
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("click", onClickGlobal, { passive: true });
-    window.addEventListener("touchstart", onTouchGlobal, { passive: true });
     return () => {
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("click", onClickGlobal);
-      window.removeEventListener("touchstart", onTouchGlobal);
       cancelAnimationFrame(rafRef.current);
     };
-  }, [handleInteraction]);
+  }, []);
 
   return (
     <div
@@ -256,48 +187,40 @@ export function HeroBg() {
       <style>{`
         @keyframes hero-wave {
           0%   { transform: translateX(0) scaleY(1); }
-          50%  { transform: translateX(-4%) scaleY(1.04); }
+          50%  { transform: translateX(-3%) scaleY(1.03); }
           100% { transform: translateX(0) scaleY(1); }
         }
         @keyframes hero-float {
           0%, 100% { transform: translate(0px, 0px) rotate(0deg); }
           33%      { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); }
-          66%      { transform: translate(calc(var(--dx) * -0.6), calc(var(--dy) * -0.4)) rotate(calc(var(--rot) * -0.5)); }
+          66%      { transform: translate(calc(var(--dx) * -0.5), calc(var(--dy) * -0.3)) rotate(calc(var(--rot) * -0.4)); }
         }
         @media (prefers-reduced-motion: reduce) {
           .hero-floater, .hero-wave-el { animation: none !important; }
         }
       `}</style>
 
-      {/* Gradient wave layers — organic blobs at three depths */}
+      {/* Subtle gradient wave layers — two depths only */}
       <div
-        className="hero-wave-el absolute -left-[10%] h-[35%] w-[120%] rounded-[50%]"
+        className="hero-wave-el absolute -left-[10%] h-[30%] w-[120%] rounded-[50%]"
         style={{
-          top: `calc(3% + ${scrollY * 0.015}px)`,
-          background: "radial-gradient(ellipse at 25% 50%, rgba(111,175,143,0.13), transparent 70%)",
-          animation: "hero-wave 24s ease-in-out infinite",
+          top: `calc(5% + ${scrollY * 0.012}px)`,
+          background: "radial-gradient(ellipse at 30% 50%, rgba(111,175,143,0.07), transparent 75%)",
+          animation: "hero-wave 32s ease-in-out infinite",
         }}
       />
       <div
-        className="hero-wave-el absolute -right-[10%] h-[28%] w-[120%] rounded-[50%]"
+        className="hero-wave-el absolute -right-[10%] h-[26%] w-[120%] rounded-[50%]"
         style={{
-          top: `calc(38% + ${scrollY * 0.03}px)`,
-          background: "radial-gradient(ellipse at 75% 50%, rgba(76,140,109,0.10), transparent 70%)",
-          animation: "hero-wave 28s ease-in-out infinite reverse",
-        }}
-      />
-      <div
-        className="hero-wave-el absolute -left-[10%] h-[28%] w-[120%] rounded-[50%]"
-        style={{
-          top: `calc(68% + ${scrollY * 0.045}px)`,
-          background: "radial-gradient(ellipse at 40% 50%, rgba(111,175,143,0.09), transparent 70%)",
-          animation: "hero-wave 26s ease-in-out 3s infinite",
+          top: `calc(55% + ${scrollY * 0.025}px)`,
+          background: "radial-gradient(ellipse at 70% 50%, rgba(76,140,109,0.05), transparent 75%)",
+          animation: "hero-wave 38s ease-in-out infinite reverse",
         }}
       />
 
-      {/* Floating medical icons — Poisson-distributed with parallax */}
+      {/* Floating medical icons — evenly spaced, subtle parallax */}
       {floaters.map((f, i) => (
-        <Floater key={i} f={f} scrollY={scrollY} scatterTrigger={trigger} />
+        <Floater key={i} f={f} scrollY={scrollY} />
       ))}
     </div>
   );

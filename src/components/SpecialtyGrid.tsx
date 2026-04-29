@@ -110,9 +110,8 @@ export function SpecialtyGrid() {
                       background: isHovered ? spec.bg : "var(--card)",
                       border: `1px solid ${isHovered ? spec.color + "30" : "var(--card-border)"}`,
                       boxShadow: isHovered
-                        ? `0 8px 30px -4px ${spec.color}22, var(--shadow-card)`
+                        ? `0 4px 16px -2px ${spec.color}18, var(--shadow-card)`
                         : "var(--shadow-card)",
-                      transform: isHovered ? "translateY(-3px) scale(1.015)" : "none",
                     }}
                     onMouseEnter={() => setHovered(spec.id)}
                     onMouseLeave={() => setHovered(null)}
@@ -120,7 +119,7 @@ export function SpecialtyGrid() {
                   >
                     {/* Icon */}
                     <div
-                      className="flex h-9 w-9 sm:h-11 sm:w-11 lg:h-12 lg:w-12 items-center justify-center rounded-lg sm:rounded-xl shrink-0 transition-transform duration-200 group-hover:scale-110"
+                      className="flex h-9 w-9 sm:h-11 sm:w-11 lg:h-12 lg:w-12 items-center justify-center rounded-lg sm:rounded-xl shrink-0"
                       style={{ background: spec.bg }}
                     >
                       <Icon className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" style={{ color: spec.color }} aria-hidden="true" />
@@ -154,7 +153,7 @@ export function SpecialtyGrid() {
 
                       {/* Arrow — appears on hover */}
                       <ArrowRight
-                        className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-all duration-200 -translate-x-1 group-hover:translate-x-0"
+                        className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                         style={{ color: spec.color }}
                         aria-hidden="true"
                       />
