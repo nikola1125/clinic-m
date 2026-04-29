@@ -138,7 +138,7 @@ export default function PatientDashboard() {
                             </span>
                             {appt.status === "accepted" && (
                               <Link 
-                                href={`/meet/${appt.id}`}
+                                href={`/meet/${appt.id}?role=patient`}
                                 className="flex items-center justify-center gap-2 rounded-xl bg-primary/10 px-4 py-2 text-xs font-bold text-primary hover:bg-primary/20 transition-colors"
                               >
                                 <Video className="h-3 w-3" />

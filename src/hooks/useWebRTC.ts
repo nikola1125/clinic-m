@@ -22,6 +22,8 @@ interface UseWebRTCReturn {
   peerJoined: boolean;
   connectionState: string;
   sessionId: string | null;
+  /** Set when the signaling WebSocket closes abnormally (shows server reason). */
+  signalingError: string | null;
 }
 
 function buildWsBaseUrl(): string {
@@ -45,6 +47,7 @@ export function useWebRTC(
   const [peerJoined, setPeerJoined] = useState(false);
   const [connectionState, setConnectionState] = useState("new");
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [signalingError, setSignalingError] = useState<string | null>(null);
 
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
@@ -211,15 +214,27 @@ export function useWebRTC(
       wsRef.current = ws;
 
       ws.onopen = () => {
-        if (!isClosed) setWsConnected(true);
+        if (!isClosed) {
+          setWsConnected(true);
+          setSignalingError(null);
+        }
       };
 
-      ws.onclose = () => {
+      ws.onclose = (ev) => {
         if (!isClosed) {
           setWsConnected(false);
           setPeerJoined(false);
           setSessionId(null);
           sessionIdRef.current = null;
+          if (ev.code !== 1000) {
+            const reason = ev.reason?.trim();
+            setSignalingError(
+              reason ||
+                (ev.code === 1008
+                  ? "Signaling rejected (wrong account, appointment, or join window)."
+                  : `Disconnected (${ev.code})`)
+            );
+          }
         }
       };
 
@@ -356,5 +371,6 @@ export function useWebRTC(
     peerJoined,
     connectionState,
     sessionId,
+    signalingError,
   };
 }
