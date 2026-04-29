@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useClinicStore } from "@/store/clinicStore";
+import { setToken } from "@/lib/api";
 
 const signupSchema = z.object({
   fullName: z.string().min(2, "Emri duhet të ketë të paktën 2 karaktere"),
@@ -50,8 +51,8 @@ export default function SignupPage() {
         password: data.password,
       });
       
-      sessionStorage.setItem("access_token", result.access_token);
-      setSession({ role: result.role, patientId: result.patient_id });
+      setToken("patient", result.access_token);
+      setSession({ role: "patient", patientId: result.patient_id });
       router.push("/patient/dashboard");
     } catch (e: any) {
       setErrorMsg(e.message || "Dështoi krijimi i llogarisë. Ju lutem provoni përsëri.");

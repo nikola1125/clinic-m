@@ -10,7 +10,11 @@ import { LanguageToggle } from "./LanguageToggle";
 import { useTranslations } from "next-intl";
 
 export function Navbar() {
-  const session = useClinicStore((s) => s.session);
+  const adminSession = useClinicStore((s) => s.adminSession);
+  const doctorSession = useClinicStore((s) => s.doctorSession);
+  const patientSession = useClinicStore((s) => s.patientSession);
+  // Show whichever session is active (prefer patient for the public Navbar)
+  const session = patientSession || doctorSession || adminSession;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const t = useTranslations("Navbar");
 
@@ -96,7 +100,7 @@ export function Navbar() {
                   className="h-7 w-7 rounded-full border border-white shadow-sm"
                 />
                 <span style={{ color: "var(--foreground)" }} className="hidden xl:inline">{t("dashboard")}</span>
-                <span style={{ color: "var(--foreground)" }} className="xl:hidden">{t("dashboard_short") || t("dashboard")}</span>
+                <span style={{ color: "var(--foreground)" }} className="xl:hidden">{t.has("dashboard_short") ? t("dashboard_short") : t("dashboard")}</span>
               </Link>
             ) : (
               <>

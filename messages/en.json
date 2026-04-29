@@ -4,6 +4,7 @@
     "specialists": "Specialists",
     "about": "About",
     "dashboard": "Dashboard",
+    "dashboard_short": "Panel",
     "login": "Log in",
     "join": "Join Clinic",
     "book_btn": "Book Appointment",
@@ -204,6 +205,23 @@
     "d3_spec": "Pediatric Oncology",
     "years": "Over {years} Years Experience",
     "profile_btn": "View Profile"
+  },
+  "doctors": {
+    "registry_label": "Doctor Registry",
+    "hero_heading": "Find Your Specialist",
+    "hero_subhead": "Browse our verified medical professionals",
+    "search_placeholder": "Search by name, specialty...",
+    "sort_label": "Sort:",
+    "sort_name": "Name",
+    "sort_experience": "Experience",
+    "sort_response": "Response time",
+    "results_count": "{count} results",
+    "filter_specialty": "Specialty",
+    "filter_language": "Language",
+    "filter_country": "Country",
+    "empty_label": "No results",
+    "empty_title": "No doctors found",
+    "empty_body": "Try adjusting your filters or search terms."
   },
   "WorkingHours": {
     "title_live": "Working Hours",

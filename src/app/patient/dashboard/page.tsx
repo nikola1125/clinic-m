@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
 import { useClinicStore } from "@/store/clinicStore";
+import { api } from "@/lib/api";
 import { Calendar, Clock, User, Video, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
@@ -11,7 +12,7 @@ import { motion } from "framer-motion";
 
 export default function PatientDashboard() {
   const router = useRouter();
-  const session = useClinicStore((s) => s.session);
+  const session = useClinicStore((s) => s.patientSession);
   const patients = useClinicStore((s) => s.patients);
   const appointments = useClinicStore((s) => s.appointments);
   const doctors = useClinicStore((s) => s.doctors);
@@ -22,19 +23,20 @@ export default function PatientDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!session || session.role !== "patient") {
+    if (!session) {
       router.replace("/login");
       return;
     }
-    
+    api.setRole("patient");
     Promise.all([
       refreshPatients(),
       refreshAppointments(),
       refreshDoctors()
     ]).finally(() => setLoading(false));
-  }, [session, router, refreshPatients, refreshAppointments, refreshDoctors]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session]);
 
-  if (!session || session.role !== "patient") return null;
+  if (!session) return null;
   
   const patient = patients.find(p => p.id === session.patientId);
   const myAppointments = appointments

@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useClinicStore } from "@/store/clinicStore";
+import { setToken } from "@/lib/api";
 
 const loginSchema = z.object({
   email: z.string().email("Adresë emaili e pavlefshme"),
@@ -34,16 +35,17 @@ export default function LoginPage() {
     try {
       const { api } = await import("@/lib/api");
       const result = await api.login(data);
-      sessionStorage.setItem("access_token", result.access_token);
-      
-      const session = { role: result.role, doctorId: result.doctor_id, patientId: result.patient_id };
-      setSession(session);
+      // Store token for the specific role
+      setToken(result.role, result.access_token);
       
       if (result.role === "admin") {
+        setSession({ role: "admin" });
         router.push("/hq-command");
       } else if (result.role === "doctor") {
+        setSession({ role: "doctor", doctorId: result.doctor_id });
         router.push("/portal");
       } else {
+        setSession({ role: "patient", patientId: result.patient_id });
         router.push("/patient/dashboard");
       }
     } catch (err: any) {

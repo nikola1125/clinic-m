@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useClinicStore } from "@/store/clinicStore";
+import { api, type RoleKey } from "@/lib/api";
 
 export function RequireRole({
   role,
@@ -12,9 +13,11 @@ export function RequireRole({
   children: React.ReactNode;
   fallback?: React.ReactNode;
 }) {
-  const session = useClinicStore((s) => s.session);
+  const session = useClinicStore((s) =>
+    role === "admin" ? s.adminSession : s.doctorSession
+  );
 
-  if (!session || session.role !== role) {
+  if (!session) {
     return (
       fallback ?? (
         <div className="rounded-3xl border border-zinc-200 bg-white p-10">
@@ -50,23 +53,23 @@ export function AutoSeed() {
   return null;
 }
 
-// New component to fetch data on mount for authenticated users
 export function DataLoader({ role }: { role: "admin" | "doctor" }) {
-  const session = useClinicStore((s) => s.session);
+  const session = useClinicStore((s) =>
+    role === "admin" ? s.adminSession : s.doctorSession
+  );
   const refreshDoctors = useClinicStore((s) => s.refreshDoctors);
   const refreshPatients = useClinicStore((s) => s.refreshPatients);
   const refreshAppointments = useClinicStore((s) => s.refreshAppointments);
 
   useEffect(() => {
-    if (!session || session.role !== role) return;
-    // Always refresh doctors first (admin/doctor)
+    if (!session) return;
+    // Set API role context so the right token is used
+    api.setRole(role);
     refreshDoctors();
     if (role === "doctor") {
-      // Doctor-specific refreshes
       refreshPatients();
       refreshAppointments();
     }
-    // Admin revenue and consults are fetched on-demand in their pages
   }, [session, role, refreshDoctors, refreshPatients, refreshAppointments]);
 
   return null;

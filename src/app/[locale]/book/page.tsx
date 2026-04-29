@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatDateTime } from "@/lib/format";
 import { useClinicStore } from "@/store/clinicStore";
+import { api } from "@/lib/api";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Activity, Calendar, CheckCircle2, ChevronLeft, ChevronRight, Clock, Stethoscope, User } from "lucide-react";
@@ -17,7 +18,7 @@ export default function BookPage() {
   const router = useRouter();
 
   const doctors = useClinicStore((s) => s.doctors);
-  const session = useClinicStore((s) => s.session);
+  const session = useClinicStore((s) => s.patientSession);
   const patients = useClinicStore((s) => s.patients);
   const addAppointment = useClinicStore((s) => s.addAppointment);
   const refreshDoctors = useClinicStore((s) => s.refreshDoctors);
@@ -35,9 +36,11 @@ export default function BookPage() {
   const [confirmed, setConfirmed] = useState(false);
 
   useEffect(() => {
-    if (!session || session.role !== "patient") {
+    if (!session) {
       router.replace("/login");
+      return;
     }
+    api.setRole("patient");
   }, [session, router]);
 
   useEffect(() => {
@@ -52,7 +55,7 @@ export default function BookPage() {
 
   const doctor = doctors.find((d) => d.id === doctorId) ?? null;
   const consult = doctor?.consults.find((c) => c.id === consultId) ?? null;
-  const me = session?.role === "patient" ? patients.find((p) => p.id === session.patientId) : undefined;
+  const me = session ? patients.find((p) => p.id === session.patientId) : undefined;
 
   const canProceed = useMemo(() => {
     if (step === 0) return !!doctorId;
@@ -70,7 +73,7 @@ export default function BookPage() {
   };
 
   const book = async () => {
-    if (!doctor || !consult || !session || session.role !== "patient") return;
+    if (!doctor || !consult || !session) return;
     setIsBooking(true);
 
     try {
@@ -90,7 +93,7 @@ export default function BookPage() {
     }
   };
 
-  if (!session || session.role !== "patient") return null;
+  if (!session) return null;
 
   return (
     <div className="min-h-screen bg-background flex flex-col transition-colors duration-300">

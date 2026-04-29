@@ -4,9 +4,83 @@ export interface ApiError {
   detail: string;
 }
 
+// ── Registry types (mirror backend app/schemas.py) ──────────────────────────
+
+export interface TrainingItem {
+  degree: string;
+  institution: string;
+  year: number;
+}
+
+export interface PublicationItem {
+  title: string;
+  journal: string;
+  year: number;
+}
+
+export interface TestimonialItem {
+  quote: string;
+  patient: string;
+  detail: string;
+}
+
+export interface DoctorListItem {
+  id: string;
+  slug: string;
+  name: string;
+  portrait_url: string | null;
+  specialty: string;
+  hospital: string;
+  country: string;
+  languages: string[];
+  license_authority: string;
+  years_experience: number;
+  avg_response_minutes: number;
+  bio: string;
+}
+
+export interface DoctorDetail extends DoctorListItem {
+  license_number: string;
+  training: TrainingItem[];
+  affiliations: string[];
+  publications: PublicationItem[];
+  cases: string[];
+  testimonials: TestimonialItem[];
+}
+
+export interface DoctorsPage {
+  total: number;
+  items: DoctorListItem[];
+}
+
+// ── Per-role token helpers ──────────────────────────────────────────────
+export type RoleKey = "admin" | "doctor" | "patient";
+
+const TOKEN_KEYS: Record<RoleKey, string> = {
+  admin: "clinic_admin_token",
+  doctor: "clinic_doctor_token",
+  patient: "clinic_patient_token",
+};
+
+export function setToken(role: RoleKey, token: string) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(TOKEN_KEYS[role], token);
+}
+
+export function getToken(role: RoleKey): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(TOKEN_KEYS[role]);
+}
+
+export function clearToken(role: RoleKey) {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(TOKEN_KEYS[role]);
+}
+
 export class ApiClient {
   private baseUrl: string;
   private headers: Record<string, string>;
+  public _role: RoleKey | null = null;
 
   constructor(baseUrl: string = API_BASE_URL) {
     this.baseUrl = baseUrl;
@@ -15,17 +89,19 @@ export class ApiClient {
     };
   }
 
+  /** Set which role's token to use for subsequent API calls */
+  setRole(role: RoleKey) {
+    this._role = role;
+  }
+
   private async getAuthHeaders(): Promise<Record<string, string>> {
     const h = { ...this.headers };
-    
-    // Attempt to get token from sessionStorage (client-side only)
-    if (typeof window !== "undefined") {
-      const token = sessionStorage.getItem("access_token");
+    if (typeof window !== "undefined" && this._role) {
+      const token = getToken(this._role);
       if (token) {
         h["Authorization"] = `Bearer ${token}`;
       }
     }
-    
     return h;
   }
 
@@ -43,7 +119,10 @@ export class ApiClient {
 
     if (!response.ok) {
       const err: ApiError = await response.json().catch(() => ({ detail: response.statusText }));
-      throw new Error(err.detail || `API error: ${response.status}`);
+      const detail = Array.isArray(err.detail)
+        ? err.detail.map((e: any) => e.msg ?? JSON.stringify(e)).join(", ")
+        : err.detail || `API error: ${response.status}`;
+      throw new Error(detail);
     }
 
     if (response.status === 204) {
@@ -109,9 +188,12 @@ export class ApiClient {
     specialty?: string;
     bio?: string;
   }) {
+    const body: Record<string, unknown> = { ...payload };
+    if (!body.password || (body.password as string).length < 8) delete body.password;
+    if (!body.username) delete body.username;
     return this.request<any>("/admin/doctors", {
       method: "POST",
-      body: JSON.stringify(payload),
+      body: JSON.stringify(body),
     });
   }
 
@@ -123,9 +205,12 @@ export class ApiClient {
     specialty?: string;
     bio?: string;
   }) {
+    const body: Record<string, unknown> = { ...payload };
+    if (!body.password || (body.password as string).length < 8) delete body.password;
+    if (!body.username) delete body.username;
     return this.request<any>(`/admin/doctors/${doctorId}`, {
       method: "PUT",
-      body: JSON.stringify(payload),
+      body: JSON.stringify(body),
     });
   }
 
@@ -192,6 +277,38 @@ export class ApiClient {
 
   public async myConsults() {
     return this.request<any[]>("/doctor/consults");
+  }
+
+  public async getTurnCredentials() {
+    return this.request<{
+      username: string;
+      password: string;
+      ttl: number;
+      uris: string[];
+      realm?: string;
+    }>("/turn-credentials");
+  }
+
+  // ── Public registry ──────────────────────────────────────────────────────
+  public async getDoctors(params: {
+    q?: string;
+    specialty?: string;
+    language?: string;
+    country?: string;
+    sort?: "name" | "years_experience" | "avg_response_minutes";
+    page?: number;
+    limit?: number;
+  } = {}) {
+    const qs = new URLSearchParams();
+    for (const [k, v] of Object.entries(params)) {
+      if (v !== undefined && v !== null && v !== "") qs.set(k, String(v));
+    }
+    const suffix = qs.toString() ? `?${qs.toString()}` : "";
+    return this.request<DoctorsPage>(`/registry/doctors${suffix}`);
+  }
+
+  public async getDoctor(slug: string) {
+    return this.request<DoctorDetail>(`/registry/doctors/${encodeURIComponent(slug)}`);
   }
 
   public async createAppointment(payload: {

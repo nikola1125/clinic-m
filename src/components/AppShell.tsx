@@ -21,8 +21,20 @@ export function AppShell({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const session = useClinicStore((s) => s.session);
-  const logout = useClinicStore((s) => s.logout);
+  const adminSession = useClinicStore((s) => s.adminSession);
+  const doctorSession = useClinicStore((s) => s.doctorSession);
+  const patientSession = useClinicStore((s) => s.patientSession);
+  const logoutFn = useClinicStore((s) => s.logout);
+
+  // Determine which session is relevant based on current path
+  const isPortal = pathname.startsWith("/portal");
+  const isAdmin = pathname.includes("/hq-command");
+  const isPatient = pathname.startsWith("/patient");
+
+  const session = isPortal ? doctorSession : isAdmin ? adminSession : isPatient ? patientSession : (adminSession || doctorSession || patientSession);
+  const currentRole = isPortal ? "doctor" as const : isAdmin ? "admin" as const : "patient" as const;
+
+  const logout = () => logoutFn(currentRole);
 
   return (
     <div className="min-h-screen bg-background flex flex-col transition-colors duration-300">
