@@ -53,6 +53,22 @@ export interface DoctorsPage {
   items: DoctorListItem[];
 }
 
+/** GET /meet/context/{id} — role is derived from JWT + appointment, not ?role= */
+export interface MeetContextResponse {
+  role: "doctor" | "patient";
+  appointment: {
+    id: string;
+    doctor_id: string;
+    patient_id: string;
+    consult_id: string;
+    scheduled_at: string;
+    status: string;
+    price_cents: number;
+  };
+  doctor_name: string;
+  patient_full_name: string;
+}
+
 // ── Per-role token helpers ──────────────────────────────────────────────
 export type RoleKey = "admin" | "doctor" | "patient";
 
@@ -287,6 +303,13 @@ export class ApiClient {
       uris: string[];
       realm?: string;
     }>("/turn-credentials");
+  }
+
+  /** Resolve your role (doctor vs patient) for this appointment using your JWT. */
+  public async getMeetContext(appointmentId: string) {
+    return this.request<MeetContextResponse>(
+      `/meet/context/${encodeURIComponent(appointmentId)}`
+    );
   }
 
   // ── Public registry ──────────────────────────────────────────────────────
