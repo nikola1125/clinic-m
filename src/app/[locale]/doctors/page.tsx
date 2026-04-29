@@ -326,7 +326,7 @@ export default function DoctorsPage({
               <EmptyState
                 label={t("empty_label")}
                 title={t("empty_title")}
-                body={t("empty_body")}
+                description={t("empty_body")}
                 action={
                   <button
                     onClick={() => { setQ(""); setSpecialty(""); setLanguage(""); setCountry(""); }}

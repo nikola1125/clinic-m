@@ -4,6 +4,55 @@ export interface ApiError {
   detail: string;
 }
 
+// ── Registry types (mirror backend app/schemas.py) ──────────────────────────
+
+export interface TrainingItem {
+  degree: string;
+  institution: string;
+  year: number;
+}
+
+export interface PublicationItem {
+  title: string;
+  journal: string;
+  year: number;
+}
+
+export interface TestimonialItem {
+  quote: string;
+  patient: string;
+  detail: string;
+}
+
+export interface DoctorListItem {
+  id: string;
+  slug: string;
+  name: string;
+  portrait_url: string | null;
+  specialty: string;
+  hospital: string;
+  country: string;
+  languages: string[];
+  license_authority: string;
+  years_experience: number;
+  avg_response_minutes: number;
+  bio: string;
+}
+
+export interface DoctorDetail extends DoctorListItem {
+  license_number: string;
+  training: TrainingItem[];
+  affiliations: string[];
+  publications: PublicationItem[];
+  cases: string[];
+  testimonials: TestimonialItem[];
+}
+
+export interface DoctorsPage {
+  total: number;
+  items: DoctorListItem[];
+}
+
 // ── Per-role token helpers ──────────────────────────────────────────────
 export type RoleKey = "admin" | "doctor" | "patient";
 
@@ -236,7 +285,30 @@ export class ApiClient {
       password: string;
       ttl: number;
       uris: string[];
+      realm?: string;
     }>("/turn-credentials");
+  }
+
+  // ── Public registry ──────────────────────────────────────────────────────
+  public async getDoctors(params: {
+    q?: string;
+    specialty?: string;
+    language?: string;
+    country?: string;
+    sort?: "name" | "years_experience" | "avg_response_minutes";
+    page?: number;
+    limit?: number;
+  } = {}) {
+    const qs = new URLSearchParams();
+    for (const [k, v] of Object.entries(params)) {
+      if (v !== undefined && v !== null && v !== "") qs.set(k, String(v));
+    }
+    const suffix = qs.toString() ? `?${qs.toString()}` : "";
+    return this.request<DoctorsPage>(`/registry/doctors${suffix}`);
+  }
+
+  public async getDoctor(slug: string) {
+    return this.request<DoctorDetail>(`/registry/doctors/${encodeURIComponent(slug)}`);
   }
 
   public async createAppointment(payload: {
