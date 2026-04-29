@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { useClinicStore } from "@/store/clinicStore";
+import { setToken } from "@/lib/api";
 import { Lock, Mail, ShieldAlert } from "lucide-react";
 
 export default function AdminLoginPage() {
@@ -22,7 +23,7 @@ export default function AdminLoginPage() {
         throw new Error("Invalid credentials or not an admin.");
       }
 
-      sessionStorage.setItem("access_token", result.access_token);
+      setToken("admin", result.access_token);
       setSession({ role: "admin" });
 
       window.location.href = "/hq-command";

@@ -4,6 +4,7 @@
     "specialists": "Specialisti",
     "about": "Chi Siamo",
     "dashboard": "Pannello",
+    "dashboard_short": "Menu",
     "login": "Accedi",
     "join": "Unisciti",
     "book_btn": "Prenota Appuntamento",
@@ -204,6 +205,23 @@
     "d3_spec": "Oncologia Pediatrica",
     "years": "Oltre {years} Anni di Esperienza",
     "profile_btn": "Vedi Profilo"
+  },
+  "doctors": {
+    "registry_label": "Registro Medici",
+    "hero_heading": "Trova il Tuo Specialista",
+    "hero_subhead": "Sfoglia i nostri professionisti medici verificati",
+    "search_placeholder": "Cerca per nome, specialità...",
+    "sort_label": "Ordina:",
+    "sort_name": "Nome",
+    "sort_experience": "Esperienza",
+    "sort_response": "Tempo di risposta",
+    "results_count": "{count} risultati",
+    "filter_specialty": "Specialità",
+    "filter_language": "Lingua",
+    "filter_country": "Paese",
+    "empty_label": "Nessun risultato",
+    "empty_title": "Nessun medico trovato",
+    "empty_body": "Prova a modificare i filtri o i termini di ricerca."
   },
   "WorkingHours": {
     "title_live": "Orari di Lavoro",

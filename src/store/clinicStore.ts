@@ -3,7 +3,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { uid } from "@/lib/ids";
-import { api } from "@/lib/api";
+import { api, setToken, clearToken, type RoleKey } from "@/lib/api";
 
 export type Consult = {
   id: string;
@@ -54,11 +54,11 @@ export type ChatMessage = {
   createdAt: string;
 };
 
-type Session =
-  | { role: "admin" }
-  | { role: "doctor"; doctorId: string }
-  | { role: "patient"; patientId: string }
-  | null;
+type AdminSession = { role: "admin" };
+type DoctorSession = { role: "doctor"; doctorId: string };
+type PatientSession = { role: "patient"; patientId: string };
+
+type Session = AdminSession | DoctorSession | PatientSession | null;
 
 // Helper to map API response to frontend types
 const mapApiDoctor = (d: any): Doctor => ({
@@ -109,14 +109,21 @@ const mapApiChatMessage = (m: any): ChatMessage => ({
 });
 
 type ClinicState = {
-  session: Session;
+  // Per-role sessions — independent of each other
+  adminSession: AdminSession | null;
+  doctorSession: DoctorSession | null;
+  patientSession: PatientSession | null;
+
+  /** Convenience: returns session for a given role */
+  getSessionForRole: (role: RoleKey) => Session;
+
   doctors: Doctor[];
   patients: Patient[];
   appointments: Appointment[];
   chat: ChatMessage[];
 
   setSession: (session: Session) => void;
-  logout: () => void;
+  logout: (role: RoleKey) => void;
   loginPatient: (email: string) => Promise<boolean>;
 
   seedIfEmpty: () => void;
@@ -200,21 +207,36 @@ const demoSeed = () => {
 export const useClinicStore = create<ClinicState>()(
   persist(
     (set, get) => ({
-      session: null,
+      adminSession: null,
+      doctorSession: null,
+      patientSession: null,
       doctors: [],
       patients: [],
       appointments: [],
       chat: [],
 
-      setSession: (session) => {
-        set({ session });
+      getSessionForRole: (role: RoleKey): Session => {
+        if (role === "admin") return get().adminSession;
+        if (role === "doctor") return get().doctorSession;
+        return get().patientSession;
       },
-      logout: () => {
-        set({ session: null });
-        // NextAuth signOut should be called by the component triggering this
+
+      setSession: (session) => {
+        if (!session) return;
+        if (session.role === "admin") set({ adminSession: session });
+        else if (session.role === "doctor") set({ doctorSession: session });
+        else if (session.role === "patient") set({ patientSession: session });
+      },
+
+      logout: (role: RoleKey) => {
+        clearToken(role);
+        if (role === "admin") set({ adminSession: null });
+        else if (role === "doctor") set({ doctorSession: null });
+        else if (role === "patient") set({ patientSession: null });
       },
 
       loginPatient: async (email: string) => {
+        api.setRole("patient");
         await get().refreshPatients();
         const patients = get().patients;
         const patient = patients.find((p) => p.email === email);
@@ -228,10 +250,9 @@ export const useClinicStore = create<ClinicState>()(
       seedIfEmpty: () => {
         const { doctors } = get();
         if (doctors.length > 0) return;
-        // No-op for API mode; data will be fetched
       },
 
-      // Refresh methods
+      // Refresh methods — api.setRole() must be called by the consumer before these
       refreshDoctors: async () => {
         try {
           const apiDocs = await api.listDoctors();
@@ -258,9 +279,10 @@ export const useClinicStore = create<ClinicState>()(
 
       refreshPatients: async () => {
         try {
-          const session = get().session;
+          // The consumer must call api.setRole() before this
+          const ps = get().patientSession;
           let apiPatients;
-          if (session?.role === "patient") {
+          if (ps && api["_role"] === "patient") {
             apiPatients = await api.getMyPatientProfile();
           } else {
             apiPatients = await api.listPatients();
@@ -273,9 +295,9 @@ export const useClinicStore = create<ClinicState>()(
 
       refreshAppointments: async () => {
         try {
-          const session = get().session;
+          const ps = get().patientSession;
           let apiAppts;
-          if (session?.role === "patient") {
+          if (ps && api["_role"] === "patient") {
             apiAppts = await api.getMyAppointments();
           } else {
             apiAppts = await api.listAppointments();
@@ -297,6 +319,7 @@ export const useClinicStore = create<ClinicState>()(
 
       // CRUD actions
       addDoctor: async (input) => {
+        api.setRole("admin");
         const d = await api.createDoctor({
           email: input.email,
           name: input.name,
@@ -317,6 +340,7 @@ export const useClinicStore = create<ClinicState>()(
       },
 
       updateDoctor: async (doctorId, patch) => {
+        api.setRole("admin");
         await api.updateDoctor(doctorId, {
           email: patch.email ?? "",
           name: patch.name ?? "",
@@ -350,22 +374,25 @@ export const useClinicStore = create<ClinicState>()(
       },
 
       removeDoctor: async (doctorId) => {
+        api.setRole("admin");
         await api.deleteDoctor(doctorId);
         await get().refreshDoctors();
       },
 
       addAppointment: async (input) => {
-        // For doctor: use doctor endpoint; for public: use public endpoint
-        const session = get().session;
-        if (session?.role === "doctor") {
-          await api.createAppointment({
+        if (input.doctorId) {
+          // Patient booking flow — doctorId is provided by the patient
+          api.setRole("patient");
+          await api.bookAppointment({
+            doctor_id: input.doctorId,
             patient_id: input.patientId,
             consult_id: input.consultId,
             scheduled_at: input.scheduledAt,
           });
         } else {
-          await api.bookAppointment({
-            doctor_id: input.doctorId,
+          // Doctor creating an appointment for their patient
+          api.setRole("doctor");
+          await api.createAppointment({
             patient_id: input.patientId,
             consult_id: input.consultId,
             scheduled_at: input.scheduledAt,
@@ -375,17 +402,19 @@ export const useClinicStore = create<ClinicState>()(
       },
 
       setAppointmentStatus: async (appointmentId, status) => {
+        api.setRole("doctor");
         await api.setAppointmentStatus(appointmentId, status);
         await get().refreshAppointments();
       },
 
       upsertPatient: async (patient) => {
-        const session = get().session;
-        if (!session || session.role !== "doctor") {
+        const ds = get().doctorSession;
+        if (!ds) {
           throw new Error("Only doctors can upsert patients");
         }
+        api.setRole("doctor");
         const payload = {
-          doctor_id: session.doctorId,
+          doctor_id: ds.doctorId,
           full_name: patient.fullName,
           email: patient.email,
           phone: patient.phone,
@@ -395,19 +424,19 @@ export const useClinicStore = create<ClinicState>()(
           const created = await api.createPatient(payload);
           id = created.id;
           if (!id) throw new Error("Failed to create patient: no ID returned");
-        } else {
-          // Update not supported by API; assume frontend only creates
         }
         await get().refreshPatients();
-        return id; // guaranteed string
+        return id;
       },
 
       addPatientEntry: async (patientId, kind, value) => {
+        api.setRole("doctor");
         await api.addPatientEntry(patientId, kind, value);
         await get().refreshPatients();
       },
 
       addChatMessage: async (msg) => {
+        api.setRole("doctor");
         await api.sendChat(msg.appointmentId, {
           message: msg.text ?? "",
           image_url: msg.imageDataUrl,
@@ -416,15 +445,17 @@ export const useClinicStore = create<ClinicState>()(
       },
 
       getRevenue: async (year?: number, month?: number) => {
+        api.setRole("admin");
         return api.getRevenue(year, month);
       },
     }),
     {
-      name: "clinic_store_v1",
-      storage: createJSONStorage(() => sessionStorage),
+      name: "clinic_sessions_v2",
+      storage: createJSONStorage(() => localStorage),
       partialize: (s) => ({
-        session: s.session,
-        // Do not persist API data; always fetch fresh
+        adminSession: s.adminSession,
+        doctorSession: s.doctorSession,
+        patientSession: s.patientSession,
       }),
     }
   )

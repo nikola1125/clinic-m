@@ -1,28 +1,27 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { use, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
-import { AutoSeed } from "@/components/RequireRole";
 import { formatDateTime } from "@/lib/format";
 import { useClinicStore } from "@/store/clinicStore";
+import { useWebRTC } from "@/hooks/useWebRTC";
 
 export default function MeetingPage({
   params,
 }: {
-  params: { appointmentId: string };
+  params: Promise<{ appointmentId: string }>;
 }) {
+  const { appointmentId } = use(params);
   const searchParams = useSearchParams();
   const role = (searchParams.get("role") as "doctor" | "patient") ?? "patient";
 
   const doctors = useClinicStore((s) => s.doctors);
   const patients = useClinicStore((s) => s.patients);
   const appointments = useClinicStore((s) => s.appointments);
-  const chat = useClinicStore((s) => s.chat);
-  const addChatMessage = useClinicStore((s) => s.addChatMessage);
 
-  const appt = appointments.find((a) => a.id === params.appointmentId) ?? null;
+  const appt = appointments.find((a) => a.id === appointmentId) ?? null;
 
   const doctor = useMemo(() => {
     if (!appt) return null;
@@ -34,48 +33,38 @@ export default function MeetingPage({
     return patients.find((p) => p.id === appt.patientId) ?? null;
   }, [appt, patients]);
 
-  const messages = chat
-    .filter((m) => m.appointmentId === params.appointmentId)
-    .sort((a, b) => (a.createdAt < b.createdAt ? -1 : 1));
-
-  const [text, setText] = useState("");
+  const {
+    localStream,
+    remoteStream,
+    wsConnected,
+    sendChatMessage,
+    wsMessages,
+    mediaError,
+    peerJoined,
+    connectionState,
+  } = useWebRTC(appointmentId, role);
 
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
-  const [mediaError, setMediaError] = useState<string | null>(null);
+  const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
-    let stream: MediaStream | null = null;
+    if (localVideoRef.current && localStream) {
+      localVideoRef.current.srcObject = localStream;
+    }
+  }, [localStream]);
 
-    const run = async () => {
-      setMediaError(null);
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-          audio: true,
-        });
-        if (localVideoRef.current) {
-          localVideoRef.current.srcObject = stream;
-        }
-      } catch {
-        setMediaError("Camera/mic permission denied (or unavailable).");
-      }
-    };
+  useEffect(() => {
+    if (remoteVideoRef.current && remoteStream) {
+      remoteVideoRef.current.srcObject = remoteStream;
+    }
+  }, [remoteStream]);
 
-    run();
-
-    return () => {
-      if (stream) stream.getTracks().forEach((t) => t.stop());
-    };
-  }, []);
+  const [text, setText] = useState("");
 
   const sendText = () => {
     const v = text.trim();
     if (!v) return;
-    addChatMessage({
-      appointmentId: params.appointmentId,
-      sender: role,
-      text: v,
-    });
+    sendChatMessage(v);
     setText("");
   };
 
@@ -86,17 +75,19 @@ export default function MeetingPage({
       r.onerror = () => reject(new Error("read error"));
       r.readAsDataURL(file);
     });
+    sendChatMessage("", dataUrl);
+  };
 
-    addChatMessage({
-      appointmentId: params.appointmentId,
-      sender: role,
-      imageDataUrl: dataUrl,
-    });
+  const statusBadge = () => {
+    if (!wsConnected) return <span className="text-xs text-red-600">● Offline</span>;
+    if (!peerJoined) return <span className="text-xs text-amber-600">● Waiting for peer</span>;
+    if (connectionState === "connected") return <span className="text-xs text-emerald-600">● Connected</span>;
+    if (connectionState === "connecting") return <span className="text-xs text-blue-600">● Connecting…</span>;
+    return <span className="text-xs text-zinc-500">● {connectionState}</span>;
   };
 
   return (
     <AppShell title="Meeting" nav={[]}> 
-      <AutoSeed />
       <div className="mx-auto w-full max-w-6xl">
         {!appt ? (
           <div className="rounded-3xl border border-zinc-200 bg-white p-8">
@@ -114,11 +105,11 @@ export default function MeetingPage({
                     {doctor ? doctor.name : "Doctor"} ↔ {patient ? patient.fullName : "Patient"}
                   </div>
                   <div className="mt-1 text-sm text-zinc-600">
-                    {formatDateTime(appt.scheduledAt)} • Role: {role}
+                    {formatDateTime(appt.scheduledAt)} • Role: {role} • {statusBadge()}
                   </div>
                 </div>
                 <a
-                  href={role === "doctor" ? "/doctor/appointments" : "/book"}
+                  href={role === "doctor" ? "/portal/appointments" : "/patient/dashboard"}
                   className="rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-900 hover:bg-zinc-50"
                 >
                   Leave
@@ -126,6 +117,7 @@ export default function MeetingPage({
               </div>
 
               <div className="mt-5 grid gap-4 lg:grid-cols-2">
+                {/* Local video */}
                 <div className="rounded-2xl border border-zinc-200 bg-black/95 p-3">
                   <video
                     ref={localVideoRef}
@@ -135,39 +127,56 @@ export default function MeetingPage({
                     className="aspect-video w-full rounded-xl bg-black object-cover"
                   />
                   <div className="mt-2 text-xs font-semibold text-white/80">
-                    Your camera (local preview)
+                    Your camera (local)
                   </div>
                   {mediaError ? (
                     <div className="mt-2 text-xs text-red-200">{mediaError}</div>
                   ) : null}
                 </div>
 
-                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
-                  <div className="text-sm font-semibold text-zinc-900">
-                    Remote video
-                  </div>
-                  <div className="mt-2 text-sm text-zinc-600">
-                    This MVP includes the full UI and local preview. For real
-                    doctor↔patient video you’ll plug in a signaling server (or a
-                    provider like LiveKit/Twilio) to connect peers.
-                  </div>
-                  <div className="mt-4 rounded-xl border border-dashed border-zinc-300 bg-white p-6 text-sm text-zinc-600">
-                    Placeholder
-                  </div>
+                {/* Remote video */}
+                <div className="rounded-2xl border border-zinc-200 bg-black/95 p-3">
+                  {remoteStream ? (
+                    <>
+                      <video
+                        ref={remoteVideoRef}
+                        autoPlay
+                        playsInline
+                        className="aspect-video w-full rounded-xl bg-black object-cover"
+                      />
+                      <div className="mt-2 text-xs font-semibold text-white/80">
+                        Remote camera
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex aspect-video flex-col items-center justify-center rounded-xl bg-zinc-900">
+                      <div className="text-sm font-semibold text-white/60">
+                        {peerJoined ? "Connecting…" : "Waiting for peer to join"}
+                      </div>
+                      <div className="mt-2 text-xs text-white/40">
+                        {wsConnected
+                          ? peerJoined
+                            ? "Establishing peer connection via WebRTC"
+                            : "Share this appointment link with the other party"
+                          : "Reconnecting to signaling server…"}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
 
+            {/* Live chat */}
             <div className="rounded-3xl border border-zinc-200 bg-white p-6">
               <div className="text-sm font-semibold text-zinc-900">Live chat</div>
               <div className="mt-4 h-[420px] overflow-auto rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
                 <div className="grid gap-3">
-                  {messages.length === 0 ? (
+                  {wsMessages.length === 0 ? (
                     <div className="text-sm text-zinc-600">
                       No messages yet.
                     </div>
                   ) : (
-                    messages.map((m) => (
+                    wsMessages.map((m) => (
                       <div
                         key={m.id}
                         className={`grid gap-2 ${m.sender === role ? "justify-items-end" : "justify-items-start"}`}
@@ -175,14 +184,14 @@ export default function MeetingPage({
                         <div className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
                           {m.sender}
                         </div>
-                        {m.text ? (
+                        {m.message ? (
                           <div className="max-w-[85%] rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
-                            {m.text}
+                            {m.message}
                           </div>
                         ) : null}
-                        {m.imageDataUrl ? (
+                        {m.image_url ? (
                           <Image
-                            src={m.imageDataUrl}
+                            src={m.image_url}
                             alt="uploaded"
                             width={640}
                             height={640}

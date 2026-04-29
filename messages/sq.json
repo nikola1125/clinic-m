@@ -4,6 +4,7 @@
     "specialists": "Specialistët",
     "about": "Rreth Nesh",
     "dashboard": "Paneli im",
+    "dashboard_short": "Paneli",
     "login": "Hyr",
     "join": "Bashkohu në Klinikë",
     "book_btn": "Rezervo Takim",
@@ -204,6 +205,23 @@
     "d3_spec": "Onkologji Pediatrike",
     "years": "Mbi {years} Vite Përvojë",
     "profile_btn": "Shiko Profilin"
+  },
+  "doctors": {
+    "registry_label": "Regjistri i Mjekëve",
+    "hero_heading": "Gjej Specialistin Tënd",
+    "hero_subhead": "Shfleto profesionistët tanë mjekësorë të verifikuar",
+    "search_placeholder": "Kërko sipas emrit, specialitetit...",
+    "sort_label": "Rendit:",
+    "sort_name": "Emri",
+    "sort_experience": "Përvoja",
+    "sort_response": "Koha e përgjigjes",
+    "results_count": "{count} rezultate",
+    "filter_specialty": "Specialiteti",
+    "filter_language": "Gjuha",
+    "filter_country": "Vendi",
+    "empty_label": "Asnjë rezultat",
+    "empty_title": "Asnjë mjek nuk u gjet",
+    "empty_body": "Provoni të ndryshoni filtrat ose termat e kërkimit."
   },
   "WorkingHours": {
     "title_live": "Oraret e Punës",

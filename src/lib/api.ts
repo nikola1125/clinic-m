@@ -4,9 +4,34 @@ export interface ApiError {
   detail: string;
 }
 
+// ── Per-role token helpers ──────────────────────────────────────────────
+export type RoleKey = "admin" | "doctor" | "patient";
+
+const TOKEN_KEYS: Record<RoleKey, string> = {
+  admin: "clinic_admin_token",
+  doctor: "clinic_doctor_token",
+  patient: "clinic_patient_token",
+};
+
+export function setToken(role: RoleKey, token: string) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(TOKEN_KEYS[role], token);
+}
+
+export function getToken(role: RoleKey): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(TOKEN_KEYS[role]);
+}
+
+export function clearToken(role: RoleKey) {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(TOKEN_KEYS[role]);
+}
+
 export class ApiClient {
   private baseUrl: string;
   private headers: Record<string, string>;
+  public _role: RoleKey | null = null;
 
   constructor(baseUrl: string = API_BASE_URL) {
     this.baseUrl = baseUrl;
@@ -15,17 +40,19 @@ export class ApiClient {
     };
   }
 
+  /** Set which role's token to use for subsequent API calls */
+  setRole(role: RoleKey) {
+    this._role = role;
+  }
+
   private async getAuthHeaders(): Promise<Record<string, string>> {
     const h = { ...this.headers };
-    
-    // Attempt to get token from sessionStorage (client-side only)
-    if (typeof window !== "undefined") {
-      const token = sessionStorage.getItem("access_token");
+    if (typeof window !== "undefined" && this._role) {
+      const token = getToken(this._role);
       if (token) {
         h["Authorization"] = `Bearer ${token}`;
       }
     }
-    
     return h;
   }
 
@@ -201,6 +228,15 @@ export class ApiClient {
 
   public async myConsults() {
     return this.request<any[]>("/doctor/consults");
+  }
+
+  public async getTurnCredentials() {
+    return this.request<{
+      username: string;
+      password: string;
+      ttl: number;
+      uris: string[];
+    }>("/turn-credentials");
   }
 
   public async createAppointment(payload: {

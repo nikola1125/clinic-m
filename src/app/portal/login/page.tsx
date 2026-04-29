@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { AutoSeed } from "@/components/RequireRole";
 import { useClinicStore } from "@/store/clinicStore";
+import { setToken } from "@/lib/api";
 import { Lock, Mail, Stethoscope } from "lucide-react";
 
 export default function DoctorLoginPage() {
@@ -24,7 +25,7 @@ export default function DoctorLoginPage() {
         throw new Error("Invalid credentials or not a doctor.");
       }
 
-      sessionStorage.setItem("access_token", result.access_token);
+      setToken("doctor", result.access_token);
       setSession({ role: "doctor", doctorId: result.doctor_id });
 
       window.location.href = "/portal";
@@ -99,10 +100,10 @@ export default function DoctorLoginPage() {
             </button>
 
             <a
-              href="/hq-command/doctors"
+              href="/hq-command/login"
               className="text-center text-sm font-semibold text-foreground/50 hover:text-primary transition-colors"
             >
-              Go create / edit doctors →
+              Admin login →
             </a>
           </div>
         </div>
