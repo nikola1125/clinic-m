@@ -1,12 +1,16 @@
 "use client";
 
-import { use, useEffect, useRef, useState } from "react";
+import { use, useEffect, useRef, useState, useCallback } from "react";
 import Image from "next/image";
 import { AppShell } from "@/components/AppShell";
 import { formatDateTime } from "@/lib/format";
 import { api, getToken, type MeetContextResponse } from "@/lib/api";
 import { useWebRTC } from "@/hooks/useWebRTC";
 import type { AppointmentStatus } from "@/store/clinicStore";
+import {
+  Mic, MicOff, Video, VideoOff, PhoneOff, MessageSquare,
+  X, Send, Paperclip, Users,
+} from "lucide-react";
 
 function mapMeetAppointment(a: MeetContextResponse["appointment"]) {
   return {
@@ -131,195 +135,242 @@ function MeetingSession({
     signalingError,
   } = useWebRTC(appointmentId, meetRole);
 
-  const localVideoRef = useRef<HTMLVideoElement | null>(null);
+  const localVideoRef  = useRef<HTMLVideoElement | null>(null);
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
+  const chatEndRef     = useRef<HTMLDivElement | null>(null);
 
+  const [text, setText]         = useState("");
+  const [chatOpen, setChatOpen] = useState(false);
+  const [micOn, setMicOn]       = useState(true);
+  const [camOn, setCamOn]       = useState(true);
+
+  /* ── wire streams to video elements ── */
   useEffect(() => {
-    if (localVideoRef.current && localStream) {
+    if (localVideoRef.current && localStream)
       localVideoRef.current.srcObject = localStream;
-    }
   }, [localStream]);
 
   useEffect(() => {
-    if (remoteVideoRef.current && remoteStream) {
+    if (remoteVideoRef.current && remoteStream)
       remoteVideoRef.current.srcObject = remoteStream;
-    }
   }, [remoteStream]);
 
-  const [text, setText] = useState("");
+  /* ── auto-scroll chat ── */
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [wsMessages]);
 
-  const sendText = () => {
+  /* ── mic / cam toggles via track enabled flag ── */
+  useEffect(() => {
+    localStream?.getAudioTracks().forEach(t => { t.enabled = micOn; });
+  }, [micOn, localStream]);
+
+  useEffect(() => {
+    localStream?.getVideoTracks().forEach(t => { t.enabled = camOn; });
+  }, [camOn, localStream]);
+
+  const sendText = useCallback(() => {
     const v = text.trim();
     if (!v) return;
     sendChatMessage(v);
     setText("");
-  };
+  }, [text, sendChatMessage]);
 
   const sendImage = async (file: File) => {
     const dataUrl = await new Promise<string>((resolve, reject) => {
       const r = new FileReader();
-      r.onload = () => resolve(String(r.result));
+      r.onload  = () => resolve(String(r.result));
       r.onerror = () => reject(new Error("read error"));
       r.readAsDataURL(file);
     });
     sendChatMessage("", dataUrl);
   };
 
-  const statusBadge = () => {
-    if (signalingError)
-      return <span className="text-xs text-red-600">● {signalingError}</span>;
-    if (!wsConnected) return <span className="text-xs text-red-600">● Offline</span>;
-    if (!peerJoined) return <span className="text-xs text-amber-600">● Waiting for peer</span>;
-    if (connectionState === "connected") return <span className="text-xs text-emerald-600">● Connected</span>;
-    if (connectionState === "connecting") return <span className="text-xs text-blue-600">● Connecting…</span>;
-    return <span className="text-xs text-zinc-500">● {connectionState}</span>;
-  };
+  const remoteName = meetRole === "doctor" ? patientName : doctorName;
+
+  const connLabel = signalingError
+    ? { text: signalingError,         dot: "bg-red-500" }
+    : !wsConnected
+    ? { text: "Reconnecting…",        dot: "bg-red-500 animate-pulse" }
+    : !peerJoined
+    ? { text: "Waiting for other side", dot: "bg-amber-400 animate-pulse" }
+    : connectionState === "connected"
+    ? { text: "Connected",            dot: "bg-emerald-400" }
+    : { text: connectionState,        dot: "bg-blue-400 animate-pulse" };
+
+  const leaveHref = meetRole === "doctor" ? "/portal/appointments" : "/patient/dashboard";
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_420px]">
-      <div className="rounded-3xl border border-zinc-200 bg-white p-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <div className="text-sm font-medium text-zinc-500">Meeting</div>
-            <div className="mt-1 text-lg font-semibold text-zinc-900">
-              {doctorName} ↔ {patientName}
+    /* ── full-viewport dark canvas ── */
+    <div className="fixed inset-0 z-50 flex flex-col bg-zinc-950 overflow-hidden">
+
+      {/* ── top bar ── */}
+      <div className="flex items-center justify-between px-4 py-2.5 bg-zinc-900/80 backdrop-blur-sm shrink-0 gap-4">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-white/80 shrink-0">
+            <span className={`h-2 w-2 rounded-full ${connLabel.dot}`} />
+            <span className="hidden xs:inline">{connLabel.text}</span>
+          </div>
+          <span className="hidden sm:inline text-white/20">·</span>
+          <span className="hidden sm:inline text-xs text-white/50 truncate">{formatDateTime(scheduledAt)}</span>
+        </div>
+        <div className="flex items-center gap-2 text-xs text-white/50 min-w-0">
+          <Users className="h-3.5 w-3.5 shrink-0" />
+          <span className="truncate max-w-[160px] sm:max-w-none">{doctorName} &amp; {patientName}</span>
+        </div>
+      </div>
+
+      {/* ── main area: remote video + pip ── */}
+      <div className="relative flex-1 overflow-hidden">
+
+        {/* Remote — full area */}
+        {remoteStream ? (
+          <video
+            ref={remoteVideoRef}
+            autoPlay
+            playsInline
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <div className="flex h-full w-full flex-col items-center justify-center gap-4">
+            <div className="h-24 w-24 rounded-full bg-zinc-700 flex items-center justify-center text-4xl font-bold text-white/40">
+              {remoteName.charAt(0).toUpperCase()}
             </div>
-            <div className="mt-1 text-sm text-zinc-600">
-              {formatDateTime(scheduledAt)} • Role: {meetRole} • {statusBadge()}
-            </div>
-            <div className="mt-1 text-xs text-zinc-500">
-              Appointment {appointment.status} · ensure both sides use the same link{" "}
-              <span className="font-mono text-[11px]">{appointmentId.slice(0, 8)}…</span>
+            <div className="text-base font-semibold text-white/60">{remoteName}</div>
+            <div className="text-sm text-white/30">
+              {peerJoined ? "Establishing connection…" : "Waiting to join…"}
             </div>
           </div>
-          <a
-            href={meetRole === "doctor" ? "/portal/appointments" : "/patient/dashboard"}
-            className="rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-900 hover:bg-zinc-50"
-          >
-            Leave
-          </a>
-        </div>
+        )}
 
-        <div className="mt-5 grid gap-4 lg:grid-cols-2">
-          <div className="rounded-2xl border border-zinc-200 bg-black/95 p-3">
+        {/* Remote name label */}
+        {remoteStream && (
+          <div className="absolute bottom-[88px] sm:bottom-[96px] left-3 sm:left-4 rounded-xl bg-black/50 px-3 py-1.5 text-sm font-semibold text-white backdrop-blur-sm">
+            {remoteName}
+          </div>
+        )}
+
+        {/* ── PiP: local camera (mirrored so face looks natural) ── */}
+        <div className="absolute bottom-[88px] sm:bottom-[96px] right-3 sm:right-4 w-[120px] sm:w-[160px] lg:w-[200px] overflow-hidden rounded-xl sm:rounded-2xl border-2 border-white/20 shadow-2xl bg-zinc-900">
+          {camOn ? (
             <video
               ref={localVideoRef}
               autoPlay
               playsInline
               muted
-              className="aspect-video w-full rounded-xl bg-black object-cover"
+              className="w-full rounded-2xl object-cover aspect-video"
+              style={{ transform: "scaleX(-1)" }}
             />
-            <div className="mt-2 text-xs font-semibold text-white/80">
-              Your camera (local)
+          ) : (
+            <div className="aspect-video flex items-center justify-center bg-zinc-800 rounded-2xl">
+              <VideoOff className="h-6 w-6 text-white/40" />
             </div>
-            {mediaError ? (
-              <div className="mt-2 text-xs text-red-200">{mediaError}</div>
-            ) : null}
+          )}
+          <div className="absolute bottom-1 left-2 text-[10px] font-bold text-white/70">You</div>
+        </div>
+
+        {/* media error */}
+        {mediaError && (
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 rounded-xl bg-red-900/80 px-4 py-2 text-xs font-semibold text-red-200 backdrop-blur-sm">
+            {mediaError}
+          </div>
+        )}
+
+        {/* ── chat slide-in panel ── */}
+        <div className={`absolute top-0 right-0 h-full w-full sm:w-[320px] bg-zinc-900/95 backdrop-blur-md flex flex-col transition-transform duration-300 ease-in-out ${chatOpen ? "translate-x-0" : "translate-x-full"}`}>
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 shrink-0">
+            <span className="text-sm font-bold text-white">Chat</span>
+            <button onClick={() => setChatOpen(false)} className="text-white/40 hover:text-white transition-colors">
+              <X className="h-5 w-5" />
+            </button>
           </div>
 
-          <div className="rounded-2xl border border-zinc-200 bg-black/95 p-3">
-            {remoteStream ? (
-              <>
-                <video
-                  ref={remoteVideoRef}
-                  autoPlay
-                  playsInline
-                  className="aspect-video w-full rounded-xl bg-black object-cover"
-                />
-                <div className="mt-2 text-xs font-semibold text-white/80">
-                  Remote camera
+          {/* messages */}
+          <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+            {wsMessages.length === 0 ? (
+              <p className="text-xs text-white/30 text-center mt-8">No messages yet</p>
+            ) : wsMessages.map((m) => {
+              const isMine = m.sender === meetRole;
+              return (
+                <div key={m.id} className={`flex flex-col gap-1 ${isMine ? "items-end" : "items-start"}`}>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-white/30">
+                    {isMine ? "You" : remoteName}
+                  </span>
+                  {m.message && (
+                    <div className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${isMine ? "bg-primary text-white" : "bg-zinc-700 text-white/90"}`}>
+                      {m.message}
+                    </div>
+                  )}
+                  {m.image_url && (
+                    <Image src={m.image_url} alt="img" width={240} height={240}
+                      className="max-w-[85%] rounded-2xl border border-white/10" />
+                  )}
                 </div>
-              </>
-            ) : (
-              <div className="flex aspect-video flex-col items-center justify-center rounded-xl bg-zinc-900">
-                <div className="text-sm font-semibold text-white/60">
-                  {peerJoined ? "Connecting…" : "Waiting for peer to join"}
-                </div>
-                <div className="mt-2 text-xs text-white/40">
-                  {signalingError
-                    ? signalingError
-                    : wsConnected
-                      ? peerJoined
-                        ? "Establishing peer connection via WebRTC"
-                        : "Share this appointment link with the other party"
-                      : "Reconnecting to signaling server…"}
-                </div>
-              </div>
-            )}
+              );
+            })}
+            <div ref={chatEndRef} />
+          </div>
+
+          {/* input */}
+          <div className="shrink-0 border-t border-white/10 p-3 flex flex-col gap-2">
+            <div className="flex gap-2">
+              <input
+                value={text}
+                onChange={e => setText(e.target.value)}
+                onKeyDown={e => { if (e.key === "Enter") sendText(); }}
+                placeholder="Message…"
+                className="flex-1 rounded-xl bg-zinc-800 px-3 py-2 text-sm text-white placeholder-white/30 outline-none focus:ring-1 focus:ring-primary"
+              />
+              <button onClick={sendText}
+                className="rounded-xl bg-primary px-3 py-2 text-white hover:bg-primary/90 transition-colors">
+                <Send className="h-4 w-4" />
+              </button>
+            </div>
+            <label className="flex items-center gap-2 cursor-pointer text-xs text-white/40 hover:text-white/70 transition-colors">
+              <Paperclip className="h-3.5 w-3.5" />
+              <span>Send image</span>
+              <input type="file" accept="image/*" className="hidden"
+                onChange={e => { const f = e.target.files?.[0]; if (f) void sendImage(f); e.currentTarget.value = ""; }} />
+            </label>
           </div>
         </div>
       </div>
 
-      <div className="rounded-3xl border border-zinc-200 bg-white p-6">
-        <div className="text-sm font-semibold text-zinc-900">Live chat</div>
-        <div className="mt-4 h-[420px] overflow-auto rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
-          <div className="grid gap-3">
-            {wsMessages.length === 0 ? (
-              <div className="text-sm text-zinc-600">No messages yet.</div>
-            ) : (
-              wsMessages.map((m) => (
-                <div
-                  key={m.id}
-                  className={`grid gap-2 ${m.sender === meetRole ? "justify-items-end" : "justify-items-start"}`}
-                >
-                  <div className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                    {m.sender}
-                  </div>
-                  {m.message ? (
-                    <div className="max-w-[85%] rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
-                      {m.message}
-                    </div>
-                  ) : null}
-                  {m.image_url ? (
-                    <Image
-                      src={m.image_url}
-                      alt="uploaded"
-                      width={640}
-                      height={640}
-                      className="h-auto w-auto max-w-[85%] rounded-2xl border border-zinc-200 bg-white"
-                    />
-                  ) : null}
-                </div>
-              ))
-            )}
-          </div>
-        </div>
+      {/* ── controls bar ── */}
+      <div className="shrink-0 flex items-center justify-center gap-3 sm:gap-5 py-3 sm:py-4 bg-zinc-900/80 backdrop-blur-sm">
 
-        <div className="mt-4 grid gap-3">
-          <div className="flex gap-2">
-            <input
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") sendText();
-              }}
-              className="h-10 flex-1 rounded-xl border border-zinc-200 px-3 text-sm"
-              placeholder="Type a message"
-            />
-            <button
-              onClick={sendText}
-              className="h-10 rounded-xl bg-zinc-900 px-4 text-sm font-semibold text-white hover:bg-zinc-800"
-            >
-              Send
-            </button>
-          </div>
+        {/* Mic */}
+        <button onClick={() => setMicOn(v => !v)}
+          className={`flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full transition-all active:scale-95 ${micOn ? "bg-zinc-700 hover:bg-zinc-600 text-white" : "bg-red-600 hover:bg-red-500 text-white"}`}
+          title={micOn ? "Mute mic" : "Unmute mic"}>
+          {micOn ? <Mic className="h-5 w-5 sm:h-6 sm:w-6" /> : <MicOff className="h-5 w-5 sm:h-6 sm:w-6" />}
+        </button>
 
-          <label className="grid gap-1">
-            <span className="text-xs font-semibold text-zinc-700">
-              Upload image
+        {/* Camera */}
+        <button onClick={() => setCamOn(v => !v)}
+          className={`flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full transition-all active:scale-95 ${camOn ? "bg-zinc-700 hover:bg-zinc-600 text-white" : "bg-red-600 hover:bg-red-500 text-white"}`}
+          title={camOn ? "Turn off camera" : "Turn on camera"}>
+          {camOn ? <Video className="h-5 w-5 sm:h-6 sm:w-6" /> : <VideoOff className="h-5 w-5 sm:h-6 sm:w-6" />}
+        </button>
+
+        {/* Leave */}
+        <a href={leaveHref}
+          className="flex h-12 w-14 sm:h-14 sm:w-16 items-center justify-center rounded-full bg-red-600 hover:bg-red-500 text-white transition-all active:scale-95 shadow-lg"
+          title="Leave call">
+          <PhoneOff className="h-5 w-5 sm:h-6 sm:w-6" />
+        </a>
+
+        {/* Chat toggle */}
+        <button onClick={() => setChatOpen(v => !v)}
+          className={`relative flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full transition-all active:scale-95 ${chatOpen ? "bg-primary text-white" : "bg-zinc-700 hover:bg-zinc-600 text-white"}`}
+          title="Toggle chat">
+          <MessageSquare className="h-5 w-5 sm:h-6 sm:w-6" />
+          {wsMessages.length > 0 && !chatOpen && (
+            <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary text-[10px] font-bold text-white flex items-center justify-center">
+              {wsMessages.length > 9 ? "9+" : wsMessages.length}
             </span>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) void sendImage(f);
-                e.currentTarget.value = "";
-              }}
-              className="block w-full text-sm"
-            />
-          </label>
-        </div>
+          )}
+        </button>
       </div>
     </div>
   );
