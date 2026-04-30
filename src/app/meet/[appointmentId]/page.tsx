@@ -200,173 +200,160 @@ function MeetingSession({
 
   const leaveHref = meetRole === "doctor" ? "/portal/appointments" : "/patient/dashboard";
 
-  return (
-    /* ── full-viewport dark canvas ── */
-    <div className="fixed inset-0 z-50 flex flex-col bg-zinc-950 overflow-hidden">
+  /* shared chat panel content — reused on both mobile overlay and desktop sidebar */
+  const ChatPanel = () => (
+    <>
+      <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 shrink-0">
+        <span className="text-sm font-bold text-white">Chat</span>
+        <button onClick={() => setChatOpen(false)} className="p-1 text-white/40 hover:text-white transition-colors">
+          <X className="h-5 w-5" />
+        </button>
+      </div>
+      <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+        {wsMessages.length === 0 ? (
+          <p className="text-xs text-white/30 text-center mt-10">No messages yet</p>
+        ) : wsMessages.map((m) => {
+          const isMine = m.sender === meetRole;
+          return (
+            <div key={m.id} className={`flex flex-col gap-1 ${isMine ? "items-end" : "items-start"}`}>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-white/30">
+                {isMine ? "You" : remoteName}
+              </span>
+              {m.message && (
+                <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm leading-relaxed ${isMine ? "bg-primary text-white" : "bg-zinc-700 text-white/90"}`}>
+                  {m.message}
+                </div>
+              )}
+              {m.image_url && (
+                <Image src={m.image_url} alt="img" width={240} height={240}
+                  className="max-w-[80%] rounded-2xl border border-white/10" />
+              )}
+            </div>
+          );
+        })}
+        <div ref={chatEndRef} />
+      </div>
+      <div className="shrink-0 border-t border-white/10 p-3 space-y-2">
+        <div className="flex gap-2">
+          <input
+            value={text}
+            onChange={e => setText(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter") sendText(); }}
+            placeholder="Message…"
+            className="flex-1 rounded-xl bg-zinc-800 px-3 py-2.5 text-sm text-white placeholder-white/30 outline-none focus:ring-2 focus:ring-primary"
+          />
+          <button onClick={sendText}
+            className="rounded-xl bg-primary px-3 py-2 text-white hover:bg-primary/90 active:scale-95 transition-all">
+            <Send className="h-4 w-4" />
+          </button>
+        </div>
+        <label className="flex items-center gap-2 cursor-pointer text-xs text-white/40 hover:text-white/60 transition-colors">
+          <Paperclip className="h-3.5 w-3.5" />
+          <span>Attach image</span>
+          <input type="file" accept="image/*" className="hidden"
+            onChange={e => { const f = e.target.files?.[0]; if (f) void sendImage(f); e.currentTarget.value = ""; }} />
+        </label>
+      </div>
+    </>
+  );
 
-      {/* ── top bar ── */}
-      <div className="flex items-center justify-between px-4 py-2.5 bg-zinc-900/80 backdrop-blur-sm shrink-0 gap-4">
-        <div className="flex items-center gap-2 min-w-0">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-white/80 shrink-0">
-            <span className={`h-2 w-2 rounded-full ${connLabel.dot}`} />
-            <span className="hidden xs:inline">{connLabel.text}</span>
-          </div>
-          <span className="hidden sm:inline text-white/20">·</span>
-          <span className="hidden sm:inline text-xs text-white/50 truncate">{formatDateTime(scheduledAt)}</span>
+  return (
+    /* ── full-viewport call canvas ── */
+    <div className="fixed inset-0 z-50 flex flex-col bg-zinc-950" style={{ height: "100dvh" }}>
+
+      {/* ── top status bar ── */}
+      <div className="flex items-center justify-between px-4 py-2 bg-zinc-900/90 backdrop-blur-sm shrink-0">
+        <div className="flex items-center gap-2">
+          <span className={`h-2 w-2 rounded-full shrink-0 ${connLabel.dot}`} />
+          <span className="text-xs font-semibold text-white/70 truncate max-w-[140px] sm:max-w-xs">{connLabel.text}</span>
         </div>
-        <div className="flex items-center gap-2 text-xs text-white/50 min-w-0">
-          <Users className="h-3.5 w-3.5 shrink-0" />
-          <span className="truncate max-w-[160px] sm:max-w-none">{doctorName} &amp; {patientName}</span>
-        </div>
+        <span className="text-xs text-white/40 truncate max-w-[160px] sm:max-w-none">
+          {doctorName} &amp; {patientName}
+        </span>
       </div>
 
-      {/* ── main area: remote video + pip ── */}
-      <div className="relative flex-1 overflow-hidden">
+      {/* ── video area ── */}
+      <div className="relative flex-1 min-h-0 bg-zinc-950">
 
-        {/* Remote — full area */}
+        {/* Remote — fills entire area */}
         {remoteStream ? (
-          <video
-            ref={remoteVideoRef}
-            autoPlay
-            playsInline
-            className="h-full w-full object-cover"
-          />
+          <video ref={remoteVideoRef} autoPlay playsInline
+            className="absolute inset-0 h-full w-full object-cover" />
         ) : (
-          <div className="flex h-full w-full flex-col items-center justify-center gap-4">
-            <div className="h-24 w-24 rounded-full bg-zinc-700 flex items-center justify-center text-4xl font-bold text-white/40">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+            <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-full bg-zinc-700 flex items-center justify-center text-3xl sm:text-4xl font-bold text-white/40">
               {remoteName.charAt(0).toUpperCase()}
             </div>
-            <div className="text-base font-semibold text-white/60">{remoteName}</div>
-            <div className="text-sm text-white/30">
+            <p className="text-sm sm:text-base font-semibold text-white/60">{remoteName}</p>
+            <p className="text-xs text-white/30">
               {peerJoined ? "Establishing connection…" : "Waiting to join…"}
-            </div>
+            </p>
           </div>
         )}
 
-        {/* Remote name label */}
-        {remoteStream && (
-          <div className="absolute bottom-[88px] sm:bottom-[96px] left-3 sm:left-4 rounded-xl bg-black/50 px-3 py-1.5 text-sm font-semibold text-white backdrop-blur-sm">
-            {remoteName}
-          </div>
-        )}
-
-        {/* ── PiP: local camera (mirrored so face looks natural) ── */}
-        <div className="absolute bottom-[88px] sm:bottom-[96px] right-3 sm:right-4 w-[120px] sm:w-[160px] lg:w-[200px] overflow-hidden rounded-xl sm:rounded-2xl border-2 border-white/20 shadow-2xl bg-zinc-900">
-          {camOn ? (
-            <video
-              ref={localVideoRef}
-              autoPlay
-              playsInline
-              muted
-              className="w-full rounded-2xl object-cover aspect-video"
-              style={{ transform: "scaleX(-1)" }}
-            />
-          ) : (
-            <div className="aspect-video flex items-center justify-center bg-zinc-800 rounded-2xl">
-              <VideoOff className="h-6 w-6 text-white/40" />
-            </div>
-          )}
-          <div className="absolute bottom-1 left-2 text-[10px] font-bold text-white/70">You</div>
-        </div>
-
-        {/* media error */}
+        {/* media error toast */}
         {mediaError && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 rounded-xl bg-red-900/80 px-4 py-2 text-xs font-semibold text-red-200 backdrop-blur-sm">
+          <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 rounded-xl bg-red-900/90 px-4 py-2 text-xs font-semibold text-red-200 backdrop-blur-sm whitespace-nowrap">
             {mediaError}
           </div>
         )}
 
-        {/* ── chat slide-in panel ── */}
-        <div className={`absolute top-0 right-0 h-full w-full sm:w-[320px] bg-zinc-900/95 backdrop-blur-md flex flex-col transition-transform duration-300 ease-in-out ${chatOpen ? "translate-x-0" : "translate-x-full"}`}>
-          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 shrink-0">
-            <span className="text-sm font-bold text-white">Chat</span>
-            <button onClick={() => setChatOpen(false)} className="text-white/40 hover:text-white transition-colors">
-              <X className="h-5 w-5" />
-            </button>
+        {/* remote name label */}
+        {remoteStream && (
+          <div className="absolute bottom-3 left-3 z-10 rounded-xl bg-black/50 px-3 py-1.5 text-sm font-semibold text-white backdrop-blur-sm">
+            {remoteName}
           </div>
+        )}
 
-          {/* messages */}
-          <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
-            {wsMessages.length === 0 ? (
-              <p className="text-xs text-white/30 text-center mt-8">No messages yet</p>
-            ) : wsMessages.map((m) => {
-              const isMine = m.sender === meetRole;
-              return (
-                <div key={m.id} className={`flex flex-col gap-1 ${isMine ? "items-end" : "items-start"}`}>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-white/30">
-                    {isMine ? "You" : remoteName}
-                  </span>
-                  {m.message && (
-                    <div className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${isMine ? "bg-primary text-white" : "bg-zinc-700 text-white/90"}`}>
-                      {m.message}
-                    </div>
-                  )}
-                  {m.image_url && (
-                    <Image src={m.image_url} alt="img" width={240} height={240}
-                      className="max-w-[85%] rounded-2xl border border-white/10" />
-                  )}
-                </div>
-              );
-            })}
-            <div ref={chatEndRef} />
-          </div>
-
-          {/* input */}
-          <div className="shrink-0 border-t border-white/10 p-3 flex flex-col gap-2">
-            <div className="flex gap-2">
-              <input
-                value={text}
-                onChange={e => setText(e.target.value)}
-                onKeyDown={e => { if (e.key === "Enter") sendText(); }}
-                placeholder="Message…"
-                className="flex-1 rounded-xl bg-zinc-800 px-3 py-2 text-sm text-white placeholder-white/30 outline-none focus:ring-1 focus:ring-primary"
-              />
-              <button onClick={sendText}
-                className="rounded-xl bg-primary px-3 py-2 text-white hover:bg-primary/90 transition-colors">
-                <Send className="h-4 w-4" />
-              </button>
+        {/* PiP — local (mirrored) */}
+        <div className="absolute bottom-3 right-3 z-10 w-[100px] sm:w-[140px] lg:w-[180px] rounded-xl sm:rounded-2xl overflow-hidden border-2 border-white/20 shadow-2xl bg-zinc-900">
+          {camOn ? (
+            <video ref={localVideoRef} autoPlay playsInline muted
+              className="w-full aspect-video object-cover"
+              style={{ transform: "scaleX(-1)" }} />
+          ) : (
+            <div className="aspect-video flex items-center justify-center bg-zinc-800">
+              <VideoOff className="h-5 w-5 text-white/30" />
             </div>
-            <label className="flex items-center gap-2 cursor-pointer text-xs text-white/40 hover:text-white/70 transition-colors">
-              <Paperclip className="h-3.5 w-3.5" />
-              <span>Send image</span>
-              <input type="file" accept="image/*" className="hidden"
-                onChange={e => { const f = e.target.files?.[0]; if (f) void sendImage(f); e.currentTarget.value = ""; }} />
-            </label>
-          </div>
+          )}
+          <div className="absolute bottom-1 left-1.5 text-[9px] font-bold text-white/60">You</div>
+        </div>
+
+        {/* ── Desktop chat sidebar (sm+) ── */}
+        <div className={`hidden sm:flex absolute top-0 right-0 h-full w-[300px] lg:w-[320px] flex-col bg-zinc-900/95 backdrop-blur-md border-l border-white/10 transition-transform duration-300 ${chatOpen ? "translate-x-0" : "translate-x-full"}`}>
+          <ChatPanel />
         </div>
       </div>
 
+      {/* ── Mobile chat overlay (below sm) — conditionally rendered, full-screen ── */}
+      {chatOpen && (
+        <div className="sm:hidden fixed inset-0 z-60 flex flex-col bg-zinc-950">
+          <ChatPanel />
+        </div>
+      )}
+
       {/* ── controls bar ── */}
-      <div className="shrink-0 flex items-center justify-center gap-3 sm:gap-5 py-3 sm:py-4 bg-zinc-900/80 backdrop-blur-sm">
-
-        {/* Mic */}
-        <button onClick={() => setMicOn(v => !v)}
-          className={`flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full transition-all active:scale-95 ${micOn ? "bg-zinc-700 hover:bg-zinc-600 text-white" : "bg-red-600 hover:bg-red-500 text-white"}`}
-          title={micOn ? "Mute mic" : "Unmute mic"}>
-          {micOn ? <Mic className="h-5 w-5 sm:h-6 sm:w-6" /> : <MicOff className="h-5 w-5 sm:h-6 sm:w-6" />}
+      <div className="shrink-0 flex items-center justify-center gap-3 sm:gap-4 py-3 sm:py-4 bg-zinc-900/90 backdrop-blur-sm">
+        <button onClick={() => setMicOn(v => !v)} title={micOn ? "Mute" : "Unmute"}
+          className={`flex h-12 w-12 items-center justify-center rounded-full transition-all active:scale-90 ${micOn ? "bg-zinc-700 text-white" : "bg-red-600 text-white"}`}>
+          {micOn ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}
         </button>
 
-        {/* Camera */}
-        <button onClick={() => setCamOn(v => !v)}
-          className={`flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full transition-all active:scale-95 ${camOn ? "bg-zinc-700 hover:bg-zinc-600 text-white" : "bg-red-600 hover:bg-red-500 text-white"}`}
-          title={camOn ? "Turn off camera" : "Turn on camera"}>
-          {camOn ? <Video className="h-5 w-5 sm:h-6 sm:w-6" /> : <VideoOff className="h-5 w-5 sm:h-6 sm:w-6" />}
+        <button onClick={() => setCamOn(v => !v)} title={camOn ? "Camera off" : "Camera on"}
+          className={`flex h-12 w-12 items-center justify-center rounded-full transition-all active:scale-90 ${camOn ? "bg-zinc-700 text-white" : "bg-red-600 text-white"}`}>
+          {camOn ? <Video className="h-5 w-5" /> : <VideoOff className="h-5 w-5" />}
         </button>
 
-        {/* Leave */}
-        <a href={leaveHref}
-          className="flex h-12 w-14 sm:h-14 sm:w-16 items-center justify-center rounded-full bg-red-600 hover:bg-red-500 text-white transition-all active:scale-95 shadow-lg"
-          title="Leave call">
-          <PhoneOff className="h-5 w-5 sm:h-6 sm:w-6" />
+        <a href={leaveHref} title="Leave call"
+          className="flex h-12 w-14 items-center justify-center rounded-full bg-red-600 text-white active:scale-90 transition-all shadow-lg">
+          <PhoneOff className="h-5 w-5" />
         </a>
 
-        {/* Chat toggle */}
-        <button onClick={() => setChatOpen(v => !v)}
-          className={`relative flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full transition-all active:scale-95 ${chatOpen ? "bg-primary text-white" : "bg-zinc-700 hover:bg-zinc-600 text-white"}`}
-          title="Toggle chat">
-          <MessageSquare className="h-5 w-5 sm:h-6 sm:w-6" />
+        <button onClick={() => setChatOpen(v => !v)} title="Chat"
+          className={`relative flex h-12 w-12 items-center justify-center rounded-full transition-all active:scale-90 ${chatOpen ? "bg-primary text-white" : "bg-zinc-700 text-white"}`}>
+          <MessageSquare className="h-5 w-5" />
           {wsMessages.length > 0 && !chatOpen && (
-            <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary text-[10px] font-bold text-white flex items-center justify-center">
+            <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-red-500 text-[9px] font-bold text-white flex items-center justify-center">
               {wsMessages.length > 9 ? "9+" : wsMessages.length}
             </span>
           )}
