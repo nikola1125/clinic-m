@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
 import { useClinicStore } from "@/store/clinicStore";
-import { api } from "@/lib/api";
 import { Calendar, Clock, User, Video, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
@@ -12,6 +11,7 @@ import { motion } from "framer-motion";
 
 export default function PatientDashboard() {
   const router = useRouter();
+  const hasHydrated = useClinicStore((s) => s._hasHydrated);
   const session = useClinicStore((s) => s.patientSession);
   const patients = useClinicStore((s) => s.patients);
   const appointments = useClinicStore((s) => s.appointments);
@@ -23,18 +23,27 @@ export default function PatientDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!hasHydrated) return; // wait for localStorage rehydration
     if (!session) {
       router.replace("/login");
       return;
     }
-    api.setRole("patient");
     Promise.all([
-      refreshPatients(),
-      refreshAppointments(),
+      refreshPatients("patient"),
+      refreshAppointments("patient"),
       refreshDoctors()
     ]).finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session]);
+  }, [hasHydrated, session]);
+
+  // Show spinner while store is rehydrating from localStorage
+  if (!hasHydrated) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-r-transparent" />
+      </div>
+    );
+  }
 
   if (!session) return null;
   

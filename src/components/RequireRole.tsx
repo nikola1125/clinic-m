@@ -67,8 +67,8 @@ export function DataLoader({ role }: { role: "admin" | "doctor" }) {
     api.setRole(role);
     refreshDoctors();
     if (role === "doctor") {
-      refreshPatients();
-      refreshAppointments();
+      refreshPatients("doctor");
+      refreshAppointments("doctor");
     }
   }, [session, role, refreshDoctors, refreshPatients, refreshAppointments]);
 
