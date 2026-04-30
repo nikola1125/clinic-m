@@ -114,6 +114,9 @@ type ClinicState = {
   doctorSession: DoctorSession | null;
   patientSession: PatientSession | null;
 
+  /** True once the persist middleware has finished reading from localStorage */
+  _hasHydrated: boolean;
+
   /** Convenience: returns session for a given role */
   getSessionForRole: (role: RoleKey) => Session;
 
@@ -131,8 +134,8 @@ type ClinicState = {
   // API-backed actions
   refreshDoctors: () => Promise<void>;
   refreshDoctorConsults: (doctorId: string) => Promise<void>;
-  refreshPatients: () => Promise<void>;
-  refreshAppointments: () => Promise<void>;
+  refreshPatients: (forRole?: RoleKey) => Promise<void>;
+  refreshAppointments: (forRole?: RoleKey) => Promise<void>;
   refreshChat: (appointmentId: string) => Promise<void>;
 
   addDoctor: (input: Omit<Doctor, "id" | "consults"> & { consults?: Consult[]; password?: string }) => Promise<void>;
@@ -210,6 +213,7 @@ export const useClinicStore = create<ClinicState>()(
       adminSession: null,
       doctorSession: null,
       patientSession: null,
+      _hasHydrated: false,
       doctors: [],
       patients: [],
       appointments: [],
@@ -237,7 +241,7 @@ export const useClinicStore = create<ClinicState>()(
 
       loginPatient: async (email: string) => {
         api.setRole("patient");
-        await get().refreshPatients();
+        await get().refreshPatients("patient");
         const patients = get().patients;
         const patient = patients.find((p) => p.email === email);
         if (patient) {
@@ -277,15 +281,24 @@ export const useClinicStore = create<ClinicState>()(
         }
       },
 
-      refreshPatients: async () => {
+      refreshPatients: async (forRole?: RoleKey) => {
         try {
-          // The consumer must call api.setRole() before this
-          const ps = get().patientSession;
+          const { patientSession, adminSession, doctorSession } = get();
+          // forRole lets the caller force a specific path, ignoring other tabs' sessions
+          const role = forRole ?? (patientSession ? "patient" : adminSession ? "admin" : doctorSession ? "doctor" : null);
+          if (!role) return;
           let apiPatients;
-          if (ps && api["_role"] === "patient") {
+          if (role === "patient" && patientSession) {
+            api.setRole("patient");
             apiPatients = await api.getMyPatientProfile();
-          } else {
+          } else if (role === "admin" && adminSession) {
+            api.setRole("admin");
             apiPatients = await api.listPatients();
+          } else if (role === "doctor" && doctorSession) {
+            api.setRole("doctor");
+            apiPatients = await api.listPatients();
+          } else {
+            return;
           }
           set({ patients: apiPatients.map(mapApiPatient) });
         } catch (e) {
@@ -293,14 +306,23 @@ export const useClinicStore = create<ClinicState>()(
         }
       },
 
-      refreshAppointments: async () => {
+      refreshAppointments: async (forRole?: RoleKey) => {
         try {
-          const ps = get().patientSession;
+          const { patientSession, adminSession, doctorSession } = get();
+          const role = forRole ?? (patientSession ? "patient" : adminSession ? "admin" : doctorSession ? "doctor" : null);
+          if (!role) return;
           let apiAppts;
-          if (ps && api["_role"] === "patient") {
+          if (role === "patient" && patientSession) {
+            api.setRole("patient");
             apiAppts = await api.getMyAppointments();
-          } else {
+          } else if (role === "admin" && adminSession) {
+            api.setRole("admin");
             apiAppts = await api.listAppointments();
+          } else if (role === "doctor" && doctorSession) {
+            api.setRole("doctor");
+            apiAppts = await api.listAppointments();
+          } else {
+            return;
           }
           set({ appointments: apiAppts.map(mapApiAppointment) });
         } catch (e) {
@@ -398,13 +420,13 @@ export const useClinicStore = create<ClinicState>()(
             scheduled_at: input.scheduledAt,
           });
         }
-        await get().refreshAppointments();
+        await get().refreshAppointments("doctor");
       },
 
       setAppointmentStatus: async (appointmentId, status) => {
         api.setRole("doctor");
         await api.setAppointmentStatus(appointmentId, status);
-        await get().refreshAppointments();
+        await get().refreshAppointments("doctor");
       },
 
       upsertPatient: async (patient) => {
@@ -425,14 +447,14 @@ export const useClinicStore = create<ClinicState>()(
           id = created.id;
           if (!id) throw new Error("Failed to create patient: no ID returned");
         }
-        await get().refreshPatients();
+        await get().refreshPatients("doctor");
         return id;
       },
 
       addPatientEntry: async (patientId, kind, value) => {
         api.setRole("doctor");
         await api.addPatientEntry(patientId, kind, value);
-        await get().refreshPatients();
+        await get().refreshPatients("doctor");
       },
 
       addChatMessage: async (msg) => {
@@ -457,6 +479,9 @@ export const useClinicStore = create<ClinicState>()(
         doctorSession: s.doctorSession,
         patientSession: s.patientSession,
       }),
+      onRehydrateStorage: () => () => {
+        useClinicStore.setState({ _hasHydrated: true });
+      },
     }
   )
 );

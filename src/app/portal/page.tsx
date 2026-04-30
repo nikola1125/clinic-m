@@ -109,7 +109,7 @@ export default function DoctorHomePage() {
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
-    await Promise.all([refreshAppointments(), refreshPatients()]);
+    await Promise.all([refreshAppointments("doctor"), refreshPatients("doctor")]);
     setTimeout(() => setIsRefreshing(false), 600);
   }, [refreshAppointments, refreshPatients]);
 

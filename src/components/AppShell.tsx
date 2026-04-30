@@ -31,7 +31,7 @@ export function AppShell({
   const isAdmin = pathname.includes("/hq-command");
   const isPatient = pathname.startsWith("/patient");
 
-  const session = isPortal ? doctorSession : isAdmin ? adminSession : isPatient ? patientSession : (adminSession || doctorSession || patientSession);
+  const session = isPortal ? doctorSession : isAdmin ? adminSession : isPatient ? patientSession : (patientSession || adminSession || doctorSession);
   const currentRole = isPortal ? "doctor" as const : isAdmin ? "admin" as const : "patient" as const;
 
   const logout = () => logoutFn(currentRole);
