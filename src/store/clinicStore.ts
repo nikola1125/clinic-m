@@ -116,6 +116,7 @@ type ClinicState = {
 
   /** True once the persist middleware has finished reading from localStorage */
   _hasHydrated: boolean;
+  setHasHydrated: (val: boolean) => void;
 
   /** Convenience: returns session for a given role */
   getSessionForRole: (role: RoleKey) => Session;
@@ -214,6 +215,7 @@ export const useClinicStore = create<ClinicState>()(
       doctorSession: null,
       patientSession: null,
       _hasHydrated: false,
+      setHasHydrated: (val: boolean) => set({ _hasHydrated: val }),
       doctors: [],
       patients: [],
       appointments: [],
@@ -479,8 +481,8 @@ export const useClinicStore = create<ClinicState>()(
         doctorSession: s.doctorSession,
         patientSession: s.patientSession,
       }),
-      onRehydrateStorage: () => () => {
-        useClinicStore.setState({ _hasHydrated: true });
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
       },
     }
   )
