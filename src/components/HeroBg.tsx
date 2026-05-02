@@ -169,15 +169,20 @@ function Floater({
 /* ── Main component ── */
 export function HeroBg() {
   const [scrollY, setScrollY] = useState(0);
+  const [docHeight, setDocHeight] = useState(0);
   const rafRef = useRef<number>(0);
 
   useEffect(() => {
-    // Scroll handler with rAF for smooth parallax
+    // Measure full document height and update on resize / DOM changes
+    const measure = () => setDocHeight(document.documentElement.scrollHeight);
+    measure();
+
     let ticking = false;
     const onScroll = () => {
       if (!ticking) {
         rafRef.current = requestAnimationFrame(() => {
           setScrollY(window.scrollY);
+          measure();
           ticking = false;
         });
         ticking = true;
@@ -185,8 +190,16 @@ export function HeroBg() {
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", measure);
+
+    // Observe DOM changes that may alter page height
+    const ro = new ResizeObserver(measure);
+    ro.observe(document.body);
+
     return () => {
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", measure);
+      ro.disconnect();
       cancelAnimationFrame(rafRef.current);
     };
   }, []);
@@ -194,8 +207,8 @@ export function HeroBg() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute top-0 left-0 w-full h-full"
-      style={{ zIndex: 3, minHeight: "100%" }}
+      className="pointer-events-none absolute top-0 left-0 w-full overflow-hidden"
+      style={{ zIndex: 3, height: docHeight || "100%" }}
     >
       <style>{`
         @keyframes hero-wave {
