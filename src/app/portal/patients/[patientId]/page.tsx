@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useCallback } from "react";
+import { use, useMemo, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { AppShell } from "@/components/AppShell";
@@ -15,14 +15,15 @@ import {
 export default function DoctorPatientDetailsPage({
   params,
 }: {
-  params: { patientId: string };
+  params: Promise<{ patientId: string }>;
 }) {
+  const { patientId } = use(params);
   const patients = useClinicStore((s) => s.patients);
   const refreshPatients = useClinicStore((s) => s.refreshPatients);
 
   const patient = useMemo(
-    () => patients.find((x) => x.id === params.patientId) ?? null,
-    [patients, params.patientId]
+    () => patients.find((x) => x.id === patientId) ?? null,
+    [patients, patientId]
   );
 
   const [linking, setLinking] = useState(false);
@@ -32,7 +33,7 @@ export default function DoctorPatientDetailsPage({
     setLinking(true);
     try {
       api.setRole("doctor");
-      await api.linkPatient(params.patientId);
+      await api.linkPatient(patientId);
       setIsLinked(true);
       await refreshPatients("doctor");
     } catch (e) {
@@ -40,13 +41,13 @@ export default function DoctorPatientDetailsPage({
     } finally {
       setLinking(false);
     }
-  }, [params.patientId, refreshPatients]);
+  }, [patientId, refreshPatients]);
 
   const handleUnlink = useCallback(async () => {
     setLinking(true);
     try {
       api.setRole("doctor");
-      await api.unlinkPatient(params.patientId);
+      await api.unlinkPatient(patientId);
       setIsLinked(false);
       await refreshPatients("doctor");
     } catch (e) {
@@ -54,7 +55,7 @@ export default function DoctorPatientDetailsPage({
     } finally {
       setLinking(false);
     }
-  }, [params.patientId, refreshPatients]);
+  }, [patientId, refreshPatients]);
 
   return (
     <AppShell
@@ -115,7 +116,7 @@ export default function DoctorPatientDetailsPage({
 
               {/* Action Buttons */}
               <div className="mt-6 flex flex-wrap gap-3">
-                <Link href={`/portal/patients/${params.patientId}/medical-profile`}
+                <Link href={`/portal/patients/${patientId}/medical-profile`}
                   className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-white hover:bg-primary/90 transition-colors">
                   <FileText className="h-4 w-4" /> Medical Profile
                 </Link>
