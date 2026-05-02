@@ -7,7 +7,7 @@ export default function PatientLayout({ children }: { children: ReactNode }) {
     <SessionWrapper>
       <div className="relative min-h-screen">
         <HeroBg />
-        <div className="relative z-10">{children}</div>
+        {children}
       </div>
     </SessionWrapper>
   );

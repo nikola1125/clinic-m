@@ -182,7 +182,7 @@ export function HeroBg() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute inset-0 z-1 overflow-hidden"
+      className="pointer-events-none absolute inset-0 overflow-hidden"
     >
       <style>{`
         @keyframes hero-wave {

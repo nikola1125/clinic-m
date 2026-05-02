@@ -33,7 +33,7 @@ export default async function LocaleLayout({
         <LocaleHtmlLang />
         <div className="relative min-h-screen">
           <HeroBg />
-          <div className="relative z-10">{children}</div>
+          {children}
         </div>
       </SessionWrapper>
     </NextIntlClientProvider>
