@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Playfair_Display, Inter } from "next/font/google";
+import { HeroBg } from "@/components/HeroBg";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -74,11 +75,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           }}
         />
       </head>
-      <body className="min-h-full flex flex-col bg-background text-foreground">
+      <body className="min-h-full flex flex-col bg-background text-foreground relative">
         {/* Skip to main content — WCAG 2.4.1 */}
         <a href="#main-content" className="skip-nav">
           Skip to main content
         </a>
+        <HeroBg />
         {children}
       </body>
     </html>

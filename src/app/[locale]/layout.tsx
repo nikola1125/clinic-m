@@ -1,6 +1,5 @@
 import { SessionWrapper } from "@/components/SessionWrapper";
 import { LocaleHtmlLang } from "@/components/LocaleHtmlLang";
-import { HeroBg } from "@/components/HeroBg";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
@@ -31,10 +30,7 @@ export default async function LocaleLayout({
     <NextIntlClientProvider messages={messages}>
       <SessionWrapper>
         <LocaleHtmlLang />
-        <div className="relative min-h-screen">
-          <HeroBg />
-          {children}
-        </div>
+        {children}
       </SessionWrapper>
     </NextIntlClientProvider>
   );
