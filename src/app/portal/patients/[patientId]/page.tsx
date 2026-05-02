@@ -121,6 +121,12 @@ export default function DoctorPatientDetailsPage({
                 })}
               </div>
 
+              <div className="mt-4">
+                <Link href={`/portal/patients/${params.patientId}/medical-profile`}
+                  className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-white hover:bg-primary/90 transition-colors">
+                  <FileText className="h-4 w-4" /> Open Medical Profile
+                </Link>
+              </div>
               <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/3 w-[300px] h-[300px] bg-primary/5 rounded-full blur-[80px] pointer-events-none" />
             </div>
 

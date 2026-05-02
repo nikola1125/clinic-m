@@ -7,11 +7,12 @@ import { useClinicStore } from "@/store/clinicStore";
 import { 
   Calendar, Clock, User, Video, FileText, Plus, Pill, 
   HeartPulse, ChevronRight, Phone, Mail, Activity, 
-  ShieldCheck, Sparkles, Stethoscope, ArrowRight
+  ShieldCheck, Sparkles, Stethoscope, ArrowRight, ClipboardList, AlertCircle
 } from "lucide-react";
 import Link from "next/link";
-import { format, isToday, isTomorrow, isPast } from "date-fns";
+import { format, isToday, isTomorrow } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
+import { api, type Prescription, type Diagnosis } from "@/lib/api";
 
 const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
 const staggerContainer = { show: { transition: { staggerChildren: 0.08 } } };
@@ -42,7 +43,9 @@ export default function PatientDashboard() {
   const refreshAppointments = useClinicStore((s) => s.refreshAppointments);
   const refreshDoctors = useClinicStore((s) => s.refreshDoctors);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"upcoming" | "past">("upcoming");
+  const [activeTab, setActiveTab] = useState<"upcoming" | "accepted" | "history">("upcoming");
+  const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
+  const [diagnoses, setDiagnoses] = useState<Diagnosis[]>([]);
 
   useEffect(() => {
     if (!hasHydrated) {
@@ -57,11 +60,17 @@ export default function PatientDashboard() {
       router.replace("/login");
       return;
     }
+    api.setRole("patient");
     Promise.all([
       refreshPatients("patient"),
       refreshAppointments("patient"),
-      refreshDoctors()
-    ]).finally(() => setLoading(false));
+      refreshDoctors(),
+      api.getMyPrescriptions().catch(() => []),
+      api.getMyDiagnoses().catch(() => []),
+    ]).then(([, , , rx, dx]) => {
+      setPrescriptions(rx as Prescription[]);
+      setDiagnoses(dx as Diagnosis[]);
+    }).finally(() => setLoading(false));
   }, [hasHydrated, session, router, refreshPatients, refreshAppointments, refreshDoctors]);
 
   if (!hasHydrated || !session) return (
@@ -78,26 +87,28 @@ export default function PatientDashboard() {
     [appointments, session.patientId]
   );
 
-  const upcoming = myAppts.filter(a => !isPast(new Date(a.scheduledAt)) && a.status !== "rejected");
-  const past = myAppts.filter(a => isPast(new Date(a.scheduledAt)) || a.status === "completed" || a.status === "rejected");
-  const nextAppt = upcoming[0];
+  const pendingAppts  = myAppts.filter(a => a.status === "pending");
+  const acceptedAppts = myAppts.filter(a => a.status === "accepted");
+  const historyAppts  = myAppts.filter(a => a.status === "completed" || a.status === "rejected");
+  const nextAccepted  = acceptedAppts[0];
+  const nextAppt      = nextAccepted ?? pendingAppts[0];
   const getDoctor = (id: string) => doctors.find(d => d.id === id);
 
   const quickActions = [
     { icon: Plus, label: "Book Visit", href: "/book", color: "bg-primary text-white" },
-    { icon: Video, label: "Join Call", href: nextAppt ? `/meet/${nextAppt.id}?role=patient` : "#", color: nextAppt?.status === "accepted" ? "bg-emerald-500 text-white" : "bg-foreground/10 text-foreground/40", disabled: !nextAppt || nextAppt.status !== "accepted" },
-    { icon: FileText, label: "Records", href: "#", color: "bg-amber-100 text-amber-700" },
-    { icon: Pill, label: "Prescriptions", href: "#", color: "bg-rose-100 text-rose-700" },
+    { icon: Video, label: "Join Call", href: nextAccepted ? `/meet/${nextAccepted.id}?role=patient` : "#", color: nextAccepted ? "bg-emerald-500 text-white" : "bg-foreground/10 text-foreground/40", disabled: !nextAccepted },
+    { icon: FileText, label: "Records", href: "/patient/medical-record", color: "bg-amber-100 text-amber-700" },
+    { icon: Pill, label: "Prescriptions", href: "/patient/medical-record", color: "bg-rose-100 text-rose-700" },
   ];
 
   const healthStats = [
     { label: "Total Visits", value: myAppts.length, icon: Activity, color: "text-blue-600" },
-    { label: "Upcoming", value: upcoming.length, icon: Calendar, color: "text-emerald-600" },
+    { label: "Upcoming", value: pendingAppts.length + acceptedAppts.length, icon: Calendar, color: "text-emerald-600" },
     { label: "My Doctors", value: new Set(myAppts.map(a => a.doctorId)).size, icon: Stethoscope, color: "text-purple-600" },
   ];
 
   return (
-    <AppShell title="My Health" nav={[{ label: "Dashboard", href: "/patient/dashboard" }, { label: "Book Appointment", href: "/book" }]}>
+    <AppShell title="My Health" nav={[{ label: "Dashboard", href: "/patient/dashboard" }, { label: "Medical Record", href: "/patient/medical-record" }, { label: "Book Appointment", href: "/book" }]}>
       <motion.div className="max-w-6xl mx-auto pb-12" variants={staggerContainer} initial="hidden" animate="show">
         
         {/* ── Hero Welcome ── */}
@@ -194,9 +205,9 @@ export default function PatientDashboard() {
                   <h2 className="text-lg font-bold text-foreground">Appointments</h2>
                 </div>
                 <div className="flex gap-1 p-1 rounded-xl bg-foreground/5">
-                  {(["upcoming", "past"] as const).map(tab => (
+                  {(["upcoming", "accepted", "history"] as const).map(tab => (
                     <button key={tab} onClick={() => setActiveTab(tab)} className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all ${activeTab === tab ? "bg-white shadow-sm text-foreground" : "text-foreground/50 hover:text-foreground"}`}>
-                      {tab} ({tab === "upcoming" ? upcoming.length : past.length})
+                      {tab === "upcoming" ? `Pending (${pendingAppts.length})` : tab === "accepted" ? `Accepted (${acceptedAppts.length})` : `History (${historyAppts.length})`}
                     </button>
                   ))}
                 </div>
@@ -204,16 +215,16 @@ export default function PatientDashboard() {
 
               <AnimatePresence mode="wait">
                 <motion.div key={activeTab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
-                  {(activeTab === "upcoming" ? upcoming : past.slice().reverse()).length === 0 ? (
+                  {(activeTab === "upcoming" ? pendingAppts : activeTab === "accepted" ? acceptedAppts : historyAppts.slice().reverse()).length === 0 ? (
                     <div className="text-center py-12 rounded-2xl border border-dashed border-foreground/10">
                       <Calendar className="h-10 w-10 text-foreground/20 mx-auto mb-3" />
-                      <p className="text-sm font-medium text-foreground/40">No {activeTab} appointments</p>
+                      <p className="text-sm font-medium text-foreground/40">No {activeTab === "upcoming" ? "pending" : activeTab} appointments</p>
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {(activeTab === "upcoming" ? upcoming : past.slice().reverse()).slice(0, 5).map((appt, i) => {
+                      {(activeTab === "upcoming" ? pendingAppts : activeTab === "accepted" ? acceptedAppts : historyAppts.slice().reverse()).slice(0, 5).map((appt, i) => {
                         const doc = getDoctor(appt.doctorId);
-                        const isLive = activeTab === "upcoming" && appt.status === "accepted";
+                        const isLive = appt.status === "accepted";
                         return (
                           <motion.div key={appt.id} initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }} className="group flex items-center gap-4 rounded-2xl border border-foreground/5 bg-white p-4 hover:border-primary/20 hover:shadow-sm transition-all">
                             <div className={`h-14 w-14 shrink-0 rounded-2xl flex flex-col items-center justify-center ${isLive ? "bg-emerald-50 text-emerald-600" : "bg-foreground/5 text-foreground/60"}`}>
@@ -242,6 +253,75 @@ export default function PatientDashboard() {
                 </motion.div>
               </AnimatePresence>
             </motion.div>
+
+            {/* ── Prescriptions & Diagnoses ── */}
+            {(prescriptions.length > 0 || diagnoses.length > 0) && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+                {/* Prescriptions */}
+                <motion.div variants={fadeUp} className="glass rounded-3xl p-6 shadow-premium">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <ClipboardList className="h-5 w-5 text-rose-500" />
+                      <h2 className="text-base font-bold">Active Prescriptions</h2>
+                    </div>
+                    <Link href="/patient/medical-record" className="text-xs text-primary hover:underline flex items-center gap-1">
+                      View all <ArrowRight className="h-3 w-3" />
+                    </Link>
+                  </div>
+                  {prescriptions.filter(rx => rx.status === "active").length === 0 ? (
+                    <p className="text-sm text-foreground/40 text-center py-6">No active prescriptions</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {prescriptions.filter(rx => rx.status === "active").slice(0, 4).map((rx) => (
+                        <div key={rx.id} className="flex items-center gap-3 rounded-xl bg-rose-50/50 border border-rose-100 p-3">
+                          <div className="h-9 w-9 rounded-xl bg-rose-100 flex items-center justify-center shrink-0">
+                            <Pill className="h-4 w-4 text-rose-600" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-foreground truncate">{rx.medication_name}</p>
+                            <p className="text-xs text-foreground/50">{rx.dosage} · {rx.frequency}</p>
+                          </div>
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-bold shrink-0">Active</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </motion.div>
+
+                {/* Diagnoses */}
+                <motion.div variants={fadeUp} className="glass rounded-3xl p-6 shadow-premium">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <Stethoscope className="h-5 w-5 text-purple-500" />
+                      <h2 className="text-base font-bold">My Diagnoses</h2>
+                    </div>
+                    <Link href="/patient/medical-record" className="text-xs text-primary hover:underline flex items-center gap-1">
+                      View all <ArrowRight className="h-3 w-3" />
+                    </Link>
+                  </div>
+                  {diagnoses.length === 0 ? (
+                    <p className="text-sm text-foreground/40 text-center py-6">No diagnoses on record</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {diagnoses.slice(0, 4).map((dx) => (
+                        <div key={dx.id} className="flex items-center gap-3 rounded-xl bg-purple-50/50 border border-purple-100 p-3">
+                          <div className="h-9 w-9 rounded-xl bg-purple-100 flex items-center justify-center shrink-0">
+                            <AlertCircle className="h-4 w-4 text-purple-600" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-foreground truncate">{dx.description}</p>
+                            {dx.icd_code && <p className="text-xs text-foreground/50 font-mono">{dx.icd_code}</p>}
+                          </div>
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold shrink-0 ${dx.status === "active" ? "bg-amber-100 text-amber-700" : dx.status === "resolved" ? "bg-blue-100 text-blue-700" : "bg-purple-100 text-purple-700"}`}>
+                            {dx.status}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </motion.div>
+              </div>
+            )}
 
             {/* ── My Doctors & Profile ── */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
