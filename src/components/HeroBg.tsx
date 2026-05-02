@@ -194,8 +194,8 @@ export function HeroBg() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed inset-0"
-      style={{ zIndex: 3 }}
+      className="pointer-events-none absolute top-0 left-0 w-full h-full"
+      style={{ zIndex: 3, minHeight: "100%" }}
     >
       <style>{`
         @keyframes hero-wave {
