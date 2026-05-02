@@ -81,7 +81,7 @@ export function DoctorSpotlight() {
                 className="group flex flex-col rounded-2xl lg:rounded-3xl bg-card shadow-card ring-1 ring-foreground/5 transition-all hover:shadow-premium overflow-hidden w-72 lg:w-auto shrink-0 lg:shrink snap-center lg:snap-align-none"
               >
                 {/* Photo */}
-                <div className="relative aspect-4/3 overflow-hidden">
+                <div className="relative aspect-4/3 overflow-hidden img-above-floaters">
                   <Image
                     src={doctor.image}
                     alt={doctor.name}

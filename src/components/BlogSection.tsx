@@ -99,7 +99,7 @@ export function BlogSection() {
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
               className="group relative flex flex-col rounded-2xl sm:rounded-3xl overflow-hidden bg-card shadow-card ring-1 ring-foreground/5 transition-shadow duration-300 hover:shadow-premium"
             >
-              <div className="relative flex-1 sm:flex-none sm:aspect-16/10 overflow-hidden min-h-0 bg-foreground/5">
+              <div className="relative flex-1 sm:flex-none sm:aspect-16/10 overflow-hidden min-h-0 bg-foreground/5 img-above-floaters">
                 <Image
                   src={featured.image}
                   alt={featured.title}
@@ -149,7 +149,7 @@ export function BlogSection() {
                 transition={{ delay: idx * 0.08, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
                 className="group flex gap-2 sm:gap-4 lg:gap-5 rounded-xl sm:rounded-2xl bg-card p-2 sm:p-4 shadow-card ring-1 ring-foreground/5 transition-shadow duration-300 hover:shadow-premium"
               >
-                <div className="relative h-14 w-14 sm:h-20 sm:w-20 lg:h-24 lg:w-24 shrink-0 overflow-hidden rounded-lg sm:rounded-xl bg-foreground/5">
+                <div className="relative h-14 w-14 sm:h-20 sm:w-20 lg:h-24 lg:w-24 shrink-0 overflow-hidden rounded-lg sm:rounded-xl bg-foreground/5 img-above-floaters">
                   <Image
                     src={article.image}
                     alt={article.title}

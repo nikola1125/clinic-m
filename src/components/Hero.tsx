@@ -107,7 +107,7 @@ export function Hero() {
                 <div className="text-xs text-foreground sm:text-sm">{t("stat_doctors")}</div>
               </div>
               <div className="hidden sm:block h-10 w-px bg-foreground/10" />
-              <div className="flex -space-x-2 overflow-hidden col-span-2 sm:col-auto justify-start mt-2 sm:mt-0 sm:-space-x-3">
+              <div className="flex -space-x-2 overflow-hidden col-span-2 sm:col-auto justify-start mt-2 sm:mt-0 sm:-space-x-3 img-above-floaters">
                 {[1, 2, 3, 4].map((i) => (
                   <div key={i} className="relative inline-block h-8 w-8 rounded-full border-2 border-background bg-zinc-200 overflow-hidden sm:h-10 sm:w-10">
                     <Image src={`https://i.pravatar.cc/100?img=${i+20}`} alt="" fill sizes="40px" className="object-cover" />
@@ -126,7 +126,7 @@ export function Hero() {
             transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
             className="relative"
           >
-            <div className="relative z-10 aspect-4/5 overflow-hidden rounded-[3rem] shadow-premium bg-primary/10">
+            <div className="relative z-10 aspect-4/5 overflow-hidden rounded-[3rem] shadow-premium bg-primary/10 img-above-floaters">
               <img
                 src="https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=2000&auto=format&fit=crop"
                 alt="MjekOn Clinic"

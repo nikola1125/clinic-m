@@ -3,10 +3,16 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * HeroBg — full-page ambient medical background.
- * Icons are placed via Poisson-disk rejection for even, organic spacing
- * across the entire page height. Three depth layers provide subtle
- * scroll parallax. Motion is slow and unobtrusive; no interactions.
+ * HeroBg — full-viewport ambient medical background.
+ * Uses position:fixed to cover the entire visible page at all times,
+ * regardless of scroll position. Icons are placed via Poisson-disk
+ * rejection for even, organic spacing. Three depth layers provide
+ * subtle scroll parallax. Motion is slow and unobtrusive.
+ *
+ * z-index strategy:
+ *   - This layer sits at z-index:1 (behind content)
+ *   - Images get `relative z-[2]` to stay above floaters
+ *   - Text stays at default stacking (floaters visible behind/through)
  */
 
 type Icon = { vb: string; render: "stroke" | "fill"; d: string };
@@ -20,17 +26,21 @@ const icons: Icon[] = [
   { vb: "0 0 24 24", render: "stroke", d: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM9 12l2 2 4-4" },
   { vb: "0 0 24 24", render: "stroke", d: "M22 12h-4l-3 9L9 3l-3 9H2" },
   { vb: "0 0 24 24", render: "stroke", d: "M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8zM12 9a3 3 0 100 6 3 3 0 000-6z" },
+  /* Additional medical icons for variety */
+  { vb: "0 0 24 24", render: "stroke", d: "M12 2a10 10 0 100 20 10 10 0 000-20zM12 6v6l4 2" }, /* clock */
+  { vb: "0 0 24 24", render: "stroke", d: "M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0016.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 002 8.5c0 2.3 1.5 4.05 3 5.5l7 7 7-7z" }, /* heart outline */
+  { vb: "0 0 24 24", render: "stroke", d: "M3 12h4l3-9 4 18 3-9h4" }, /* pulse */
 ];
 
-/* ── Depth layer config — each layer has its own parallax speed, opacity, size ── */
+/* ── Depth layer config ── */
 type DepthLayer = "far" | "mid" | "near";
 const LAYER_CFG: Record<DepthLayer, {
   parallax: number; opRange: [number, number];
   sizeRange: [number, number]; floatRange: [number, number];
 }> = {
-  far:  { parallax: 0.015, opRange: [0.10, 0.18],  sizeRange: [18, 24], floatRange: [28, 40] },
-  mid:  { parallax: 0.04,  opRange: [0.15, 0.25],  sizeRange: [24, 32], floatRange: [22, 32] },
-  near: { parallax: 0.08,  opRange: [0.22, 0.35],  sizeRange: [30, 42], floatRange: [16, 24] },
+  far:  { parallax: 0.015, opRange: [0.08, 0.15],  sizeRange: [16, 22], floatRange: [28, 40] },
+  mid:  { parallax: 0.04,  opRange: [0.12, 0.22],  sizeRange: [22, 30], floatRange: [22, 32] },
+  near: { parallax: 0.08,  opRange: [0.18, 0.30],  sizeRange: [28, 38], floatRange: [16, 24] },
 };
 
 /* ── Seeded PRNG (mulberry32) — deterministic randomness so SSR = client ── */
@@ -46,7 +56,7 @@ function mulberry32(seed: number) {
 type FloaterConfig = {
   icon: number; xPct: number; yPct: number;
   delay: number; dur: number; dx: number; dy: number; rot: number;
-  op: number; size: number; layer: DepthLayer; desktopOnly: boolean;
+  op: number; size: number; layer: DepthLayer; mobileVisible: boolean;
 };
 
 /* ── Poisson-disk–inspired placement for organic even spread ── */
@@ -55,7 +65,7 @@ function buildFloaters(): FloaterConfig[] {
   const out: FloaterConfig[] = [];
   const layers: DepthLayer[] = ["far","far","far","mid","mid","mid","mid","near","near","near"];
 
-  function placeSet(count: number, desktopOnly: boolean, minDist: number) {
+  function placeSet(count: number, mobileVisible: boolean, minDist: number) {
     const placed: { x: number; y: number }[] = [];
     const bands = Math.ceil(Math.sqrt(count * 1.5));
     const bandH = 100 / bands;
@@ -95,7 +105,7 @@ function buildFloaters(): FloaterConfig[] {
             op: c.opRange[0] + rand() * (c.opRange[1] - c.opRange[0]),
             size: Math.round(c.sizeRange[0] + rand() * (c.sizeRange[1] - c.sizeRange[0])),
             layer,
-            desktopOnly,
+            mobileVisible,
           });
           remaining--;
         }
@@ -103,8 +113,10 @@ function buildFloaters(): FloaterConfig[] {
     }
   }
 
+  /* Mobile-visible: 32 floaters spread across the viewport */
+  placeSet(32, true, 10);
+  /* Desktop-only extra density: 24 more */
   placeSet(24, false, 12);
-  placeSet(18, true, 14);
   return out;
 }
 
@@ -125,7 +137,7 @@ function Floater({
 
   return (
     <div
-      className={`absolute hero-floater${f.desktopOnly ? " hidden lg:block" : ""}`}
+      className={`absolute hero-floater${f.mobileVisible ? "" : " hidden lg:block"}`}
       style={{
         left: `${f.xPct}%`,
         top: `${f.yPct}%`,
@@ -182,8 +194,8 @@ export function HeroBg() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute inset-0"
-      style={{ zIndex: 1 }}
+      className="pointer-events-none fixed inset-0"
+      style={{ zIndex: 3 }}
     >
       <style>{`
         @keyframes hero-wave {

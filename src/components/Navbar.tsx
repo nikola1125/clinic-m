@@ -97,7 +97,7 @@ export function Navbar() {
                       : session.patientId
                   }`}
                   alt="Profile"
-                  className="h-7 w-7 rounded-full border border-white shadow-sm"
+                  className="h-7 w-7 rounded-full border border-white shadow-sm img-above-floaters"
                 />
                 <span style={{ color: "var(--foreground)" }} className="hidden xl:inline">{t("dashboard")}</span>
                 <span style={{ color: "var(--foreground)" }} className="xl:hidden">{t.has("dashboard_short") ? t("dashboard_short") : t("dashboard")}</span>
@@ -202,7 +202,7 @@ export function Navbar() {
                         : session.patientId
                     }`}
                     alt="Profile"
-                    className="h-10 w-10 rounded-full border-2 border-white"
+                    className="h-10 w-10 rounded-full border-2 border-white img-above-floaters"
                   />
                   <div className="flex flex-col">
                     <span className="font-bold" style={{ color: "var(--foreground)" }}>

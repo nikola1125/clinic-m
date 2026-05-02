@@ -1,4 +1,4 @@
-﻿import type { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { SessionWrapper } from "@/components/SessionWrapper";
 import { HeroBg } from "@/components/HeroBg";
 
