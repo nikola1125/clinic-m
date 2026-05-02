@@ -28,9 +28,9 @@ const LAYER_CFG: Record<DepthLayer, {
   parallax: number; opRange: [number, number];
   sizeRange: [number, number]; floatRange: [number, number];
 }> = {
-  far:  { parallax: 0.015, opRange: [0.04, 0.07],  sizeRange: [16, 22], floatRange: [28, 40] },
-  mid:  { parallax: 0.04,  opRange: [0.06, 0.10],  sizeRange: [22, 28], floatRange: [22, 32] },
-  near: { parallax: 0.08,  opRange: [0.09, 0.14],  sizeRange: [28, 34], floatRange: [16, 24] },
+  far:  { parallax: 0.015, opRange: [0.10, 0.18],  sizeRange: [18, 24], floatRange: [28, 40] },
+  mid:  { parallax: 0.04,  opRange: [0.15, 0.25],  sizeRange: [24, 32], floatRange: [22, 32] },
+  near: { parallax: 0.08,  opRange: [0.22, 0.35],  sizeRange: [30, 42], floatRange: [16, 24] },
 };
 
 /* ── Seeded PRNG (mulberry32) — deterministic randomness so SSR = client ── */
@@ -103,8 +103,8 @@ function buildFloaters(): FloaterConfig[] {
     }
   }
 
-  placeSet(18, false, 14);
-  placeSet(12, true, 16);
+  placeSet(24, false, 12);
+  placeSet(18, true, 14);
   return out;
 }
 
@@ -182,7 +182,7 @@ export function HeroBg() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed inset-0"
+      className="pointer-events-none absolute inset-0"
       style={{ zIndex: 1 }}
     >
       <style>{`
