@@ -35,13 +35,10 @@ export type Appointment = {
 
 export type Patient = {
   id: string;
-  doctorId: string;
+  doctorId: string | null;
   fullName: string;
   email: string;
   phone?: string;
-  notes: string[];
-  medicines: string[];
-  prescriptions: string[];
   createdAt: string;
 };
 
@@ -79,13 +76,10 @@ const mapApiConsult = (c: any): Consult => ({
 
 const mapApiPatient = (p: any): Patient => ({
   id: p.id,
-  doctorId: p.doctor_id,
+  doctorId: p.doctor_id ?? null,
   fullName: p.full_name,
   email: p.email,
   phone: p.phone,
-  notes: p.notes,
-  medicines: p.medicines,
-  prescriptions: p.prescriptions,
   createdAt: p.created_at,
 });
 
@@ -147,16 +141,8 @@ type ClinicState = {
   setAppointmentStatus: (appointmentId: string, status: AppointmentStatus) => Promise<void>;
 
   upsertPatient: (
-    patient: Omit<
-      Patient,
-      "id" | "createdAt" | "notes" | "medicines" | "prescriptions"
-    > & { id?: string }
+    patient: Omit<Patient, "id" | "createdAt"> & { id?: string }
   ) => Promise<string>;
-  addPatientEntry: (
-    patientId: string,
-    kind: "notes" | "medicines" | "prescriptions",
-    value: string
-  ) => Promise<void>;
 
   addChatMessage: (msg: Omit<ChatMessage, "id" | "createdAt">) => Promise<void>;
 
@@ -184,9 +170,6 @@ const demoSeed = () => {
     fullName: "Omar Ali",
     email: "omar.patient@demo",
     phone: "+20 100 000 0000",
-    notes: ["Initial intake: mild acne"],
-    medicines: [],
-    prescriptions: [],
     createdAt: new Date().toISOString(),
   };
 
@@ -451,12 +434,6 @@ export const useClinicStore = create<ClinicState>()(
         }
         await get().refreshPatients("doctor");
         return id;
-      },
-
-      addPatientEntry: async (patientId, kind, value) => {
-        api.setRole("doctor");
-        await api.addPatientEntry(patientId, kind, value);
-        await get().refreshPatients("doctor");
       },
 
       addChatMessage: async (msg) => {

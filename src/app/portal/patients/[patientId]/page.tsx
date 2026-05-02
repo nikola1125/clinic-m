@@ -1,52 +1,60 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useMemo, useState, useCallback } from "react";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import { AppShell } from "@/components/AppShell";
 import { AutoSeed, RequireRole, DataLoader } from "@/components/RequireRole";
 import { useClinicStore } from "@/store/clinicStore";
+import { api } from "@/lib/api";
 import {
-  ArrowLeft, UserCircle, Mail, Phone, FileText, Pill, ClipboardList,
-  Plus, Send, Calendar,
+  ArrowLeft, UserCircle, Mail, Phone, FileText,
+  Calendar, UserPlus, UserMinus, Loader2,
 } from "lucide-react";
-
-type Tab = "notes" | "medicines" | "prescriptions";
-
-const TAB_CFG: Record<Tab, { label: string; icon: typeof FileText; color: string; bg: string; placeholder: string }> = {
-  notes:         { label: "Notes",         icon: FileText,     color: "text-blue-600",    bg: "bg-blue-50",    placeholder: "Add a clinical note..." },
-  medicines:     { label: "Medicines",     icon: Pill,         color: "text-emerald-600", bg: "bg-emerald-50", placeholder: "Add a medicine..." },
-  prescriptions: { label: "Prescriptions", icon: ClipboardList, color: "text-violet-600", bg: "bg-violet-50",  placeholder: "Add a prescription..." },
-};
 
 export default function DoctorPatientDetailsPage({
   params,
 }: {
   params: { patientId: string };
 }) {
-  const session = useClinicStore((s) => s.doctorSession);
   const patients = useClinicStore((s) => s.patients);
-  const addPatientEntry = useClinicStore((s) => s.addPatientEntry);
+  const refreshPatients = useClinicStore((s) => s.refreshPatients);
 
-  const doctorId = session?.role === "doctor" ? session.doctorId : null;
+  const patient = useMemo(
+    () => patients.find((x) => x.id === params.patientId) ?? null,
+    [patients, params.patientId]
+  );
 
-  const patient = useMemo(() => {
-    const p = patients.find((x) => x.id === params.patientId) ?? null;
-    if (!p) return null;
-    if (p.doctorId !== doctorId) return null;
-    return p;
-  }, [patients, params.patientId, doctorId]);
+  const [linking, setLinking] = useState(false);
+  const [isLinked, setIsLinked] = useState(true);
 
-  const [activeTab, setActiveTab] = useState<Tab>("notes");
-  const [input, setInput] = useState("");
+  const handleLink = useCallback(async () => {
+    setLinking(true);
+    try {
+      api.setRole("doctor");
+      await api.linkPatient(params.patientId);
+      setIsLinked(true);
+      await refreshPatients("doctor");
+    } catch (e) {
+      console.error("Failed to link patient", e);
+    } finally {
+      setLinking(false);
+    }
+  }, [params.patientId, refreshPatients]);
 
-  const handleAdd = () => {
-    if (!patient) return;
-    const v = input.trim();
-    if (!v) return;
-    addPatientEntry(patient.id, activeTab, v);
-    setInput("");
-  };
+  const handleUnlink = useCallback(async () => {
+    setLinking(true);
+    try {
+      api.setRole("doctor");
+      await api.unlinkPatient(params.patientId);
+      setIsLinked(false);
+      await refreshPatients("doctor");
+    } catch (e) {
+      console.error("Failed to unlink patient", e);
+    } finally {
+      setLinking(false);
+    }
+  }, [params.patientId, refreshPatients]);
 
   return (
     <AppShell
@@ -64,6 +72,9 @@ export default function DoctorPatientDetailsPage({
           <div className="glass rounded-4xl p-12 text-center shadow-premium">
             <UserCircle className="h-10 w-10 text-foreground/15 mx-auto mb-4" />
             <div className="text-lg font-bold text-foreground/40">Patient not found</div>
+            <p className="mt-2 text-sm text-foreground/30 max-w-sm mx-auto">
+              This patient may not be in your care yet. You can add them from the appointments page.
+            </p>
             <Link href="/portal/patients"
               className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-primary px-6 py-3 text-sm font-bold text-white transition-all hover:bg-primary/90">
               <ArrowLeft className="h-4 w-4" /> Back to Patients
@@ -102,93 +113,29 @@ export default function DoctorPatientDetailsPage({
                 </div>
               </div>
 
-              {/* Summary Stats */}
-              <div className="mt-6 grid grid-cols-3 gap-3">
-                {(["notes", "medicines", "prescriptions"] as Tab[]).map((key) => {
-                  const cfg = TAB_CFG[key];
-                  const Icon = cfg.icon;
-                  const count = patient[key].length;
-                  return (
-                    <button key={key} onClick={() => setActiveTab(key)}
-                      className={`rounded-2xl p-4 text-left transition-all border-2 ${
-                        activeTab === key ? "border-primary/30 shadow-sm" : "border-transparent hover:border-foreground/5"
-                      } ${cfg.bg}`}>
-                      <Icon className={`h-5 w-5 ${cfg.color} mb-2`} />
-                      <div className="text-2xl font-bold text-foreground">{count}</div>
-                      <div className="text-xs font-bold uppercase tracking-wider text-foreground/40">{cfg.label}</div>
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div className="mt-4">
+              {/* Action Buttons */}
+              <div className="mt-6 flex flex-wrap gap-3">
                 <Link href={`/portal/patients/${params.patientId}/medical-profile`}
                   className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-white hover:bg-primary/90 transition-colors">
-                  <FileText className="h-4 w-4" /> Open Medical Profile
+                  <FileText className="h-4 w-4" /> Medical Profile
                 </Link>
+
+                {isLinked ? (
+                  <button onClick={handleUnlink} disabled={linking}
+                    className="inline-flex items-center gap-2 rounded-xl border-2 border-red-200 bg-red-50 px-5 py-2.5 text-sm font-bold text-red-600 hover:bg-red-100 transition-colors disabled:opacity-50">
+                    {linking ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserMinus className="h-4 w-4" />}
+                    Remove from my patients
+                  </button>
+                ) : (
+                  <button onClick={handleLink} disabled={linking}
+                    className="inline-flex items-center gap-2 rounded-xl border-2 border-emerald-200 bg-emerald-50 px-5 py-2.5 text-sm font-bold text-emerald-600 hover:bg-emerald-100 transition-colors disabled:opacity-50">
+                    {linking ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
+                    Add to my patients
+                  </button>
+                )}
               </div>
+
               <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/3 w-[300px] h-[300px] bg-primary/5 rounded-full blur-[80px] pointer-events-none" />
-            </div>
-
-            {/* Tab Content */}
-            <div className="glass rounded-4xl p-6 lg:p-8 shadow-premium border-2 border-foreground/5">
-              {/* Tab Switcher */}
-              <div className="flex gap-1 p-1 rounded-2xl bg-foreground/5 mb-6 w-fit">
-                {(["notes", "medicines", "prescriptions"] as Tab[]).map((tab) => {
-                  const cfg = TAB_CFG[tab];
-                  const Icon = cfg.icon;
-                  return (
-                    <button key={tab} onClick={() => { setActiveTab(tab); setInput(""); }}
-                      className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
-                        activeTab === tab ? "bg-white shadow-sm text-foreground" : "text-foreground/40 hover:text-foreground"
-                      }`}>
-                      <Icon className="h-3 w-3" /> {cfg.label} ({patient[tab].length})
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Entries List */}
-              <AnimatePresence mode="wait">
-                <motion.div key={activeTab}
-                  initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -8 }}
-                  transition={{ duration: 0.2 }}>
-                  <div className="grid gap-2 mb-4 max-h-[400px] overflow-y-auto pr-1">
-                    {patient[activeTab].length === 0 ? (
-                      <div className="rounded-2xl border border-dashed border-foreground/10 bg-foreground/2 p-8 text-center">
-                        {(() => { const Icon = TAB_CFG[activeTab].icon; return <Icon className="h-6 w-6 text-foreground/15 mx-auto mb-2" />; })()}
-                        <div className="text-sm font-bold text-foreground/30">No {activeTab} yet</div>
-                        <div className="text-xs text-foreground/20 mt-1">Add one below to get started</div>
-                      </div>
-                    ) : (
-                      patient[activeTab].map((entry, i) => (
-                        <motion.div key={i}
-                          initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: i * 0.03 }}
-                          className={`rounded-2xl border border-foreground/5 ${TAB_CFG[activeTab].bg}/50 px-4 py-3 text-sm text-foreground`}>
-                          {entry}
-                        </motion.div>
-                      ))
-                    )}
-                  </div>
-
-                  {/* Add Input */}
-                  <div className="flex gap-2">
-                    <input
-                      value={input}
-                      onChange={(e) => setInput(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-                      className="flex-1 h-11 rounded-2xl border border-foreground/10 bg-white px-4 text-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
-                      placeholder={TAB_CFG[activeTab].placeholder}
-                    />
-                    <button onClick={handleAdd}
-                      disabled={!input.trim()}
-                      className="flex items-center gap-2 h-11 rounded-2xl bg-primary px-5 text-sm font-bold text-white transition-all hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed">
-                      <Send className="h-4 w-4" /> Add
-                    </button>
-                  </div>
-                </motion.div>
-              </AnimatePresence>
             </div>
 
           </motion.div>

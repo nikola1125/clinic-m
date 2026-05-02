@@ -391,13 +391,6 @@ export class ApiClient {
     return this.request<any[]>("/doctor/patients");
   }
 
-  public async addPatientEntry(patientId: string, kind: "notes" | "medicines" | "prescriptions", value: string) {
-    return this.request<any>(`/doctor/patients/${patientId}/entries`, {
-      method: "POST",
-      body: JSON.stringify({ kind, value }),
-    });
-  }
-
   public async listAppointments() {
     return this.request<any[]>("/doctor/appointments");
   }

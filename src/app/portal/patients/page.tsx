@@ -1,25 +1,19 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { AppShell } from "@/components/AppShell";
 import { AutoSeed, RequireRole, DataLoader } from "@/components/RequireRole";
 import { useClinicStore } from "@/store/clinicStore";
-import { Users, Search, Mail, Phone, FileText, ChevronRight, X } from "lucide-react";
+import { Users, Search, Mail, Phone, Calendar, ChevronRight, X } from "lucide-react";
 import Link from "next/link";
 
 export default function DoctorPatientsPage() {
   const session = useClinicStore((s) => s.doctorSession);
   const patients = useClinicStore((s) => s.patients);
 
-  const doctorId = session?.role === "doctor" ? session.doctorId : null;
-  const myPatients = useMemo(
-    () => patients.filter((p) => p.doctorId === doctorId),
-    [patients, doctorId]
-  );
-
   const [q, setQ] = useState("");
-  const filtered = myPatients.filter((p) =>
+  const filtered = patients.filter((p) =>
     `${p.fullName} ${p.email}`.toLowerCase().includes(q.toLowerCase())
   );
 
@@ -44,7 +38,7 @@ export default function DoctorPatientsPage() {
                 Patient Directory
               </h1>
               <p className="mt-1 text-sm text-foreground/50">
-                {myPatients.length} patient{myPatients.length !== 1 ? "s" : ""} in your care
+                {patients.length} patient{patients.length !== 1 ? "s" : ""} in your care
               </p>
             </div>
 
@@ -106,14 +100,9 @@ export default function DoctorPatientsPage() {
                     </div>
 
                     <div className="mt-auto pt-3 border-t border-foreground/5 flex items-center justify-between">
-                      <div className="flex gap-3">
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-foreground/30">
-                          <FileText className="h-3 w-3" /> {p.notes.length} notes
-                        </span>
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-foreground/30">
-                          {p.prescriptions.length} Rx
-                        </span>
-                      </div>
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-foreground/30">
+                        <Calendar className="h-3 w-3" /> Since {new Date(p.createdAt).toLocaleDateString()}
+                      </span>
                       <ChevronRight className="h-4 w-4 text-foreground/20 group-hover:text-primary transition-colors" />
                     </div>
                   </Link>
