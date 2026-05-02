@@ -1,6 +1,5 @@
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
-import { HeroBg } from "@/components/HeroBg";
 import dynamic from "next/dynamic";
 
 /* Below-fold components — lazy-loaded for smaller initial bundle */
@@ -15,7 +14,6 @@ import { ChatWidgetLazy } from "@/components/ChatWidgetLazy";
 export default function Home() {
   return (
     <div className="relative flex flex-col min-h-screen">
-      <HeroBg />
       <Navbar />
 
       <main id="main-content" className="grow" tabIndex={-1}>
