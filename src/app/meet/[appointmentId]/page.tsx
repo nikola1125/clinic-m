@@ -4,12 +4,12 @@ import { use, useEffect, useRef, useState, useCallback } from "react";
 import Image from "next/image";
 import { AppShell } from "@/components/AppShell";
 import { formatDateTime } from "@/lib/format";
-import { api, getToken, type MeetContextResponse } from "@/lib/api";
+import { api, getToken, type MeetContextResponse, type MeetingRecord } from "@/lib/api";
 import { useWebRTC } from "@/hooks/useWebRTC";
 import type { AppointmentStatus } from "@/store/clinicStore";
 import {
   Mic, MicOff, Video, VideoOff, PhoneOff, MessageSquare,
-  X, Send, Paperclip, Users,
+  X, Send, Paperclip, Users, Clock, Loader2,
 } from "lucide-react";
 
 function mapMeetAppointment(a: MeetContextResponse["appointment"]) {
@@ -49,6 +49,7 @@ export default function MeetingPage({
 }) {
   const { appointmentId } = use(params);
   const [ctx, setCtx] = useState<MeetContextResponse | null>(null);
+  const [meeting, setMeeting] = useState<MeetingRecord | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -59,37 +60,44 @@ export default function MeetingPage({
     void (async () => {
       try {
         const data = await loadMeetContext(appointmentId);
-        if (!cancelled) setCtx(data);
+        if (!cancelled) {
+          setCtx(data);
+          setMeeting(data.meeting ?? null);
+          // Record join immediately
+          try {
+            const m = await api.joinMeeting(appointmentId);
+            if (!cancelled) setMeeting(m);
+          } catch (_) { /* non-fatal */ }
+        }
       } catch (e) {
-        const msg =
-          e instanceof Error ? e.message : "Could not load meeting context.";
+        const msg = e instanceof Error ? e.message : "Could not load meeting context.";
         if (!cancelled) setLoadError(msg);
       } finally {
         if (!cancelled) setLoading(false);
       }
     })();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
+  }, [appointmentId]);
+
+  const handleLeave = useCallback(async () => {
+    try { await api.endMeeting(appointmentId); } catch (_) { /* non-fatal */ }
   }, [appointmentId]);
 
   return (
     <AppShell title="Meeting" nav={[]}>
       <div className="mx-auto w-full max-w-6xl">
         {loading ? (
-          <div className="rounded-3xl border border-zinc-200 bg-white p-8">
+          <div className="rounded-3xl border border-zinc-200 bg-white p-8 flex items-center gap-3">
+            <Loader2 className="h-5 w-5 animate-spin text-zinc-400" />
             <div className="text-sm text-zinc-600">Loading meeting…</div>
           </div>
         ) : loadError ? (
           <div className="rounded-3xl border border-zinc-200 bg-white p-8">
-            <div className="text-base font-semibold text-zinc-900">
-              Cannot open meeting
-            </div>
+            <div className="text-base font-semibold text-zinc-900">Cannot open meeting</div>
             <p className="mt-2 text-sm text-zinc-600">{loadError}</p>
             <p className="mt-4 text-sm text-zinc-500">
-              Sign in as the doctor or the patient who booked this appointment,
-              then open the link again. The site picks the correct role from your
-              account — you do not need{" "}
+              Sign in as the doctor or the patient who booked this appointment, then open the link again.
+              The site picks the correct role from your account — you do not need{" "}
               <code className="rounded bg-zinc-100 px-1">?role=</code> in the URL.
             </p>
           </div>
@@ -101,6 +109,8 @@ export default function MeetingPage({
             patientName={ctx.patient_full_name}
             scheduledAt={ctx.appointment.scheduled_at}
             appointment={mapMeetAppointment(ctx.appointment)}
+            meetingStatus={meeting?.status ?? "waiting"}
+            onLeave={handleLeave}
           />
         ) : null}
       </div>
@@ -115,6 +125,8 @@ function MeetingSession({
   patientName,
   scheduledAt,
   appointment,
+  meetingStatus,
+  onLeave,
 }: {
   appointmentId: string;
   meetRole: "doctor" | "patient";
@@ -122,6 +134,8 @@ function MeetingSession({
   patientName: string;
   scheduledAt: string;
   appointment: ReturnType<typeof mapMeetAppointment>;
+  meetingStatus: "waiting" | "active" | "ended";
+  onLeave: () => Promise<void>;
 }) {
   const {
     localStream,
@@ -200,6 +214,11 @@ function MeetingSession({
 
   const leaveHref = meetRole === "doctor" ? "/portal/appointments" : "/patient/dashboard";
 
+  const handleLeaveClick = async () => {
+    await onLeave();
+    window.location.href = leaveHref;
+  };
+
   /* shared chat panel content — reused on both mobile overlay and desktop sidebar */
   const ChatPanel = () => (
     <>
@@ -275,6 +294,30 @@ function MeetingSession({
       {/* ── video area ── */}
       <div className="relative flex-1 min-h-0 bg-zinc-950">
 
+        {/* Waiting room overlay */}
+        {meetingStatus === "waiting" && !peerJoined && (
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-zinc-950/90 backdrop-blur-sm">
+            <div className="flex flex-col items-center gap-4 p-8 rounded-3xl bg-zinc-900 border border-white/10 max-w-sm w-full mx-4">
+              <div className="h-16 w-16 rounded-full bg-amber-500/20 flex items-center justify-center">
+                <Clock className="h-8 w-8 text-amber-400 animate-pulse" />
+              </div>
+              <div className="text-center">
+                <p className="text-lg font-bold text-white">Waiting Room</p>
+                <p className="text-sm text-white/50 mt-1">
+                  {meetRole === "doctor"
+                    ? `Waiting for ${patientName} to join…`
+                    : `Waiting for ${doctorName} to join…`}
+                </p>
+              </div>
+              <div className="flex gap-1.5">
+                {[0, 1, 2].map((i) => (
+                  <span key={i} className="h-2 w-2 rounded-full bg-amber-400 animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Remote — fills entire area */}
         {remoteStream ? (
           <video ref={remoteVideoRef} autoPlay playsInline
@@ -344,10 +387,10 @@ function MeetingSession({
           {camOn ? <Video className="h-5 w-5" /> : <VideoOff className="h-5 w-5" />}
         </button>
 
-        <a href={leaveHref} title="Leave call"
+        <button onClick={handleLeaveClick} title="Leave call"
           className="flex h-12 w-14 items-center justify-center rounded-full bg-red-600 text-white active:scale-90 transition-all shadow-lg">
           <PhoneOff className="h-5 w-5" />
-        </a>
+        </button>
 
         <button onClick={() => setChatOpen(v => !v)} title="Chat"
           className={`relative flex h-12 w-12 items-center justify-center rounded-full transition-all active:scale-90 ${chatOpen ? "bg-primary text-white" : "bg-zinc-700 text-white"}`}>

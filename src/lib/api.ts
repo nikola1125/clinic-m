@@ -67,6 +67,122 @@ export interface MeetContextResponse {
   };
   doctor_name: string;
   patient_full_name: string;
+  meeting: MeetingRecord | null;
+}
+
+export interface MeetingRecord {
+  id: string;
+  appointment_id: string;
+  status: "waiting" | "active" | "ended";
+  started_at: string | null;
+  ended_at: string | null;
+  duration_seconds: number | null;
+  doctor_joined_at: string | null;
+  patient_joined_at: string | null;
+  recording_url: string | null;
+}
+
+export interface MedicalProfile {
+  id: string;
+  patient_id: string;
+  date_of_birth: string | null;
+  gender: "male" | "female" | "other" | null;
+  blood_type: string | null;
+  height_cm: number | null;
+  weight_kg: number | null;
+  allergies: unknown[];
+  chronic_conditions: unknown[];
+  emergency_contact: Record<string, unknown>;
+  insurance_info: Record<string, unknown>;
+  updated_at: string;
+  updated_by_doctor_id: string | null;
+}
+
+export interface MedicalNote {
+  id: string;
+  patient_id: string;
+  doctor_id: string;
+  appointment_id: string | null;
+  category: string;
+  content: string;
+  is_private: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Prescription {
+  id: string;
+  patient_id: string;
+  doctor_id: string;
+  appointment_id: string | null;
+  medication_name: string;
+  dosage: string;
+  frequency: string;
+  duration_days: number | null;
+  refills_remaining: number;
+  instructions: string | null;
+  status: "active" | "expired" | "cancelled";
+  issued_at: string;
+  expires_at: string | null;
+}
+
+export interface ActiveMedication {
+  id: string;
+  patient_id: string;
+  doctor_id: string;
+  name: string;
+  dosage: string;
+  frequency: string;
+  started_at: string;
+  ends_at: string | null;
+  status: "active" | "stopped";
+  notes: string | null;
+}
+
+export interface Diagnosis {
+  id: string;
+  patient_id: string;
+  doctor_id: string;
+  appointment_id: string | null;
+  icd_code: string | null;
+  description: string;
+  severity: "mild" | "moderate" | "severe" | null;
+  status: "active" | "resolved" | "chronic";
+  diagnosed_at: string;
+}
+
+export interface PatientDocument {
+  id: string;
+  patient_id: string;
+  doctor_id: string | null;
+  title: string;
+  file_url: string;
+  file_type: string;
+  category: "lab" | "imaging" | "report" | "prescription" | "other";
+  uploaded_by: "doctor" | "patient";
+  uploaded_at: string;
+}
+
+export interface AvailabilitySlot {
+  id: string;
+  doctor_id: string;
+  day_of_week: number;
+  start_time: string;
+  end_time: string;
+  slot_duration_min: number;
+  is_active: boolean;
+}
+
+export interface Notification {
+  id: string;
+  user_id: string;
+  type: string;
+  title: string;
+  body: string;
+  read: boolean;
+  related_entity_id: string | null;
+  related_entity_type: string | null;
+  created_at: string;
 }
 
 // ── Per-role token helpers ──────────────────────────────────────────────
@@ -351,6 +467,185 @@ export class ApiClient {
 
   public async sendChat(appointmentId: string, payload: { message: string; image_url?: string }) {
     return this.request<any>(`/doctor/appointments/${appointmentId}/chat`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  }
+
+  // ── Meeting join/end ─────────────────────────────────────────────────────
+  public async joinMeeting(appointmentId: string) {
+    return this.request<MeetingRecord>(`/meet/${encodeURIComponent(appointmentId)}/join`, { method: "POST" });
+  }
+
+  public async endMeeting(appointmentId: string) {
+    return this.request<MeetingRecord>(`/meet/${encodeURIComponent(appointmentId)}/end`, { method: "POST" });
+  }
+
+  // ── Doctor: Medical records ───────────────────────────────────────────────
+  public async getMedicalProfile(patientId: string) {
+    return this.request<MedicalProfile>(`/doctor/patients/${patientId}/medical-profile`);
+  }
+
+  public async upsertMedicalProfile(patientId: string, payload: Partial<MedicalProfile>) {
+    return this.request<MedicalProfile>(`/doctor/patients/${patientId}/medical-profile`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
+  }
+
+  public async getNotes(patientId: string) {
+    return this.request<MedicalNote[]>(`/doctor/patients/${patientId}/notes`);
+  }
+
+  public async createNote(patientId: string, payload: { category: string; content: string; is_private?: boolean; appointment_id?: string }) {
+    return this.request<MedicalNote>(`/doctor/patients/${patientId}/notes`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  }
+
+  public async updateNote(patientId: string, noteId: string, payload: Partial<MedicalNote>) {
+    return this.request<MedicalNote>(`/doctor/patients/${patientId}/notes/${noteId}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    });
+  }
+
+  public async deleteNote(patientId: string, noteId: string) {
+    return this.request<void>(`/doctor/patients/${patientId}/notes/${noteId}`, { method: "DELETE" });
+  }
+
+  public async getPrescriptions(patientId: string) {
+    return this.request<Prescription[]>(`/doctor/patients/${patientId}/prescriptions`);
+  }
+
+  public async createPrescription(patientId: string, payload: Partial<Prescription>) {
+    return this.request<Prescription>(`/doctor/patients/${patientId}/prescriptions`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  }
+
+  public async updatePrescriptionStatus(patientId: string, rxId: string, status: "active" | "expired" | "cancelled") {
+    return this.request<Prescription>(`/doctor/patients/${patientId}/prescriptions/${rxId}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    });
+  }
+
+  public async getMedications(patientId: string) {
+    return this.request<ActiveMedication[]>(`/doctor/patients/${patientId}/medications`);
+  }
+
+  public async createMedication(patientId: string, payload: Partial<ActiveMedication>) {
+    return this.request<ActiveMedication>(`/doctor/patients/${patientId}/medications`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  }
+
+  public async updateMedicationStatus(patientId: string, medId: string, status: "active" | "stopped") {
+    return this.request<ActiveMedication>(`/doctor/patients/${patientId}/medications/${medId}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    });
+  }
+
+  public async getDiagnoses(patientId: string) {
+    return this.request<Diagnosis[]>(`/doctor/patients/${patientId}/diagnoses`);
+  }
+
+  public async createDiagnosis(patientId: string, payload: Partial<Diagnosis>) {
+    return this.request<Diagnosis>(`/doctor/patients/${patientId}/diagnoses`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  }
+
+  public async getDocuments(patientId: string) {
+    return this.request<PatientDocument[]>(`/doctor/patients/${patientId}/documents`);
+  }
+
+  public async createDocument(patientId: string, payload: { title: string; file_url: string; file_type: string; category: string }) {
+    return this.request<PatientDocument>(`/doctor/patients/${patientId}/documents`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  }
+
+  public async getTimeline(patientId: string) {
+    return this.request<Array<{ type: string; date: string; data: unknown }>>(`/doctor/patients/${patientId}/timeline`);
+  }
+
+  public async getAvailability() {
+    return this.request<AvailabilitySlot[]>(`/doctor/availability`);
+  }
+
+  public async upsertAvailability(slots: Array<{ day_of_week: number; start_time: string; end_time: string; slot_duration_min?: number; is_active?: boolean }>) {
+    return this.request<AvailabilitySlot[]>(`/doctor/availability`, {
+      method: "PUT",
+      body: JSON.stringify(slots),
+    });
+  }
+
+  public async startMeetingDoctor(appointmentId: string) {
+    return this.request<MeetingRecord>(`/doctor/meetings/${appointmentId}/start`, { method: "POST" });
+  }
+
+  public async linkPatient(patientId: string) {
+    return this.request<any>(`/doctor/patients/${patientId}/link`, { method: "POST" });
+  }
+
+  public async unlinkPatient(patientId: string) {
+    return this.request<void>(`/doctor/patients/${patientId}/link`, { method: "DELETE" });
+  }
+
+  // ── Patient: Medical records ──────────────────────────────────────────────
+  public async getMyMedicalProfile() {
+    return this.request<MedicalProfile>(`/patient/medical-profile`);
+  }
+
+  public async getMyNotes() {
+    return this.request<MedicalNote[]>(`/patient/notes`);
+  }
+
+  public async getMyPrescriptions() {
+    return this.request<Prescription[]>(`/patient/prescriptions`);
+  }
+
+  public async getMyMedications() {
+    return this.request<ActiveMedication[]>(`/patient/medications`);
+  }
+
+  public async getMyDiagnoses() {
+    return this.request<Diagnosis[]>(`/patient/diagnoses`);
+  }
+
+  public async getMyDocuments() {
+    return this.request<PatientDocument[]>(`/patient/documents`);
+  }
+
+  public async uploadMyDocument(payload: { title: string; file_url: string; file_type: string; category: string }) {
+    return this.request<PatientDocument>(`/patient/documents`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  }
+
+  public async getMyNotifications() {
+    return this.request<Notification[]>(`/patient/notifications`);
+  }
+
+  public async markNotificationRead(notificationId: string) {
+    return this.request<Notification>(`/patient/notifications/${notificationId}/read`, { method: "PATCH" });
+  }
+
+  public async getPatientChat(appointmentId: string) {
+    return this.request<any[]>(`/patient/appointments/${appointmentId}/chat`);
+  }
+
+  public async sendPatientChat(appointmentId: string, payload: { message: string; image_url?: string }) {
+    return this.request<any>(`/patient/appointments/${appointmentId}/chat`, {
       method: "POST",
       body: JSON.stringify(payload),
     });
