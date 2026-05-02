@@ -348,14 +348,14 @@ function MeetingSession({
           </div>
         )}
 
-        {/* PiP — local (mirrored) */}
-        <div className="absolute bottom-3 right-3 z-10 w-[100px] sm:w-[140px] lg:w-[180px] rounded-xl sm:rounded-2xl overflow-hidden border-2 border-white/20 shadow-2xl bg-zinc-900">
+        {/* PiP — local (mirrored, portrait like WhatsApp) */}
+        <div className="absolute bottom-3 right-3 z-10 w-[100px] h-[140px] sm:w-[130px] sm:h-[180px] lg:w-[160px] lg:h-[220px] rounded-xl sm:rounded-2xl overflow-hidden border-2 border-white/20 shadow-2xl bg-zinc-900">
           {camOn ? (
             <video ref={localVideoRef} autoPlay playsInline muted
-              className="w-full aspect-video object-cover"
+              className="w-full h-full object-cover"
               style={{ transform: "scaleX(-1)" }} />
           ) : (
-            <div className="aspect-video flex items-center justify-center bg-zinc-800">
+            <div className="w-full h-full flex items-center justify-center bg-zinc-800">
               <VideoOff className="h-5 w-5 text-white/30" />
             </div>
           )}
