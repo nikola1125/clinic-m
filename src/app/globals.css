@@ -101,6 +101,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* ── Image z-index elevation — keeps images above floating bg animations ── */
+.img-above-floaters {
+  position: relative;
+  z-index: 5;
+}
+
 /* Heading font utility */
 .font-heading {
   font-family: var(--font-heading);

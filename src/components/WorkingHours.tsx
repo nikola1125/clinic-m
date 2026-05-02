@@ -217,7 +217,7 @@ export function WorkingHours() {
                 className="mt-6 flex items-center gap-4 rounded-2xl px-5 py-4"
                 style={{ background: "rgba(111,175,143,0.05)" }}
               >
-                <div className="flex -space-x-2">
+                <div className="flex -space-x-2 img-above-floaters">
                   {[1, 2, 3, 4].map((i) => (
                     <div
                       key={i}
