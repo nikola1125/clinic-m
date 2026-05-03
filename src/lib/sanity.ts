@@ -1,20 +1,26 @@
-import { createClient } from "next-sanity";
+import { createClient, type SanityClient } from "next-sanity";
 import imageUrlBuilder from "@sanity/image-url";
 
-export const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!;
+export const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || "";
 export const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || "production";
 export const apiVersion = "2024-01-01";
 
-export const client = createClient({
-  projectId,
-  dataset,
-  apiVersion,
-  useCdn: true,
-});
+export const sanityConfigured = Boolean(projectId);
 
-const builder = imageUrlBuilder(client);
+export const client: SanityClient = sanityConfigured
+  ? createClient({ projectId, dataset, apiVersion, useCdn: true })
+  : (new Proxy({} as SanityClient, {
+      get: (_t, prop) => {
+        if (prop === "fetch") return async () => null;
+        return undefined;
+      },
+    }) as SanityClient);
 
-export function urlFor(source: Parameters<typeof builder.image>[0]) {
+const builder = sanityConfigured ? imageUrlBuilder(client) : null;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function urlFor(source: any) {
+  if (!builder) return { width: () => ({ height: () => ({ url: () => "" }) }), url: () => "" } as any;
   return builder.image(source);
 }
 
