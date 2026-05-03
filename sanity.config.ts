@@ -10,6 +10,7 @@ export default defineConfig({
   title: "MjekOn Studio",
   projectId,
   dataset,
+  basePath: "/studio",
   plugins: [structureTool()],
   schema: { types: schemaTypes },
 });
