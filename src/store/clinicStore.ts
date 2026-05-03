@@ -21,6 +21,8 @@ export type Doctor = {
   consults: Consult[];
 };
 
+
+
 export type AppointmentStatus = "pending" | "accepted" | "rejected" | "completed";
 
 export type Appointment = {
