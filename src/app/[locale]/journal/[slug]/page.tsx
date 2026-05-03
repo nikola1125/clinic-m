@@ -6,18 +6,34 @@ import { Link } from "@/i18n/routing";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ReadingProgressBar } from "@/components/ReadingProgressBar";
+import { SanityBlockRenderer } from "@/components/SanityBlockRenderer";
 import {
   JOURNAL_ARTICLES,
   getArticle,
   getArticlesByCategory,
   type JournalSection,
 } from "@/lib/journal";
+import {
+  client,
+  ARTICLE_BY_SLUG_QUERY,
+  ARTICLES_QUERY,
+  urlFor,
+  type SanityArticleFull,
+  type SanityArticleCard,
+} from "@/lib/sanity";
 import { ArrowLeft } from "lucide-react";
 
 // ── Static params ──────────────────────────────────────────────────────────
 
-export function generateStaticParams() {
-  return JOURNAL_ARTICLES.map((a) => ({ slug: a.slug }));
+export async function generateStaticParams() {
+  const localSlugs = JOURNAL_ARTICLES.map((a) => ({ slug: a.slug }));
+  try {
+    const sanityArticles = await client.fetch<SanityArticleCard[]>(ARTICLES_QUERY);
+    const sanitySlugs = (sanityArticles || []).map((a) => ({ slug: a.slug.current }));
+    return [...sanitySlugs, ...localSlugs];
+  } catch {
+    return localSlugs;
+  }
 }
 
 // ── Metadata + JSON-LD ─────────────────────────────────────────────────────
@@ -27,10 +43,28 @@ export async function generateMetadata({
 }: {
   params: { slug: string };
 }): Promise<Metadata> {
+  // Try Sanity first
+  try {
+    const sa = await client.fetch<SanityArticleFull>(ARTICLE_BY_SLUG_QUERY, { slug: params.slug });
+    if (sa) {
+      return {
+        title: `${sa.title} | MjekOn Journal`,
+        description: sa.dek,
+        openGraph: {
+          title: sa.title,
+          description: sa.dek,
+          type: "article",
+          publishedTime: sa.publishedAt,
+          authors: [sa.author?.name || "MjekOn"],
+        },
+      };
+    }
+  } catch { /* fallback */ }
+
   const article = getArticle(params.slug);
   if (!article) return {};
   return {
-    title: `${article.title} | Mirea Journal`,
+    title: `${article.title} | MjekOn Journal`,
     description: article.dek,
     openGraph: {
       title: article.title,
