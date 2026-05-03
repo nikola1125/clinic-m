@@ -191,6 +191,117 @@ function RenderSection({ section, isFirst }: { section: JournalSection; isFirst:
   );
 }
 
+// ── Shared layout pieces ─────────────────────────────────────────────────
+
+function Breadcrumb({ category, t }: { category: string; t: (k: string) => string }) {
+  return (
+    <div className="flex items-center gap-2 py-4" style={{ borderBottom: "1px solid var(--line)" }}>
+      <Link
+        href="/journal"
+        className="label-mono flex items-center gap-1 transition-opacity hover:opacity-60"
+        style={{ color: "var(--muted)" }}
+      >
+        <ArrowLeft className="h-[11px] w-[11px]" aria-hidden="true" />
+        {t("back")}
+      </Link>
+      <span className="label-mono" style={{ color: "var(--line)" }}>/</span>
+      <span
+        className="label-mono px-2 h-5 flex items-center"
+        style={{ border: "1px solid var(--line)", borderRadius: "var(--r)", color: "var(--oxblood)" }}
+      >
+        {category.toUpperCase()}
+      </span>
+    </div>
+  );
+}
+
+function AuthorFooter({
+  name, role, bio, portraitUrl, linkedIn, doctorSlug, t,
+}: {
+  name: string; role: string; bio?: string;
+  portraitUrl?: string | null; linkedIn?: string | null; doctorSlug?: string | null;
+  t: (k: string, v?: Record<string, string>) => string;
+}) {
+  return (
+    <div className="py-12" style={{ borderTop: "1px solid var(--line)" }}>
+      <p className="label-mono mb-6" style={{ color: "var(--muted)" }}>{t("written_by")}</p>
+      <div className="flex items-start gap-5">
+        <div
+          className="shrink-0 overflow-hidden"
+          style={{ width: 72, height: 72, borderRadius: "var(--r)", background: "var(--bone-2)", filter: "grayscale(20%)", position: "relative" }}
+        >
+          {portraitUrl ? (
+            <Image src={portraitUrl} alt={name} fill className="object-cover" sizes="72px" />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="font-heading text-[28px] opacity-20" style={{ color: "var(--ink)" }}>
+                {name.charAt(0)}
+              </span>
+            </div>
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-heading text-[20px] mb-1" style={{ color: "var(--ink)" }}>{name}</p>
+          <p className="label-mono mb-3" style={{ color: "var(--muted)" }}>{role}</p>
+          {bio && (
+            <p className="text-[14px] leading-relaxed mb-4" style={{ color: "var(--muted)", fontFamily: "var(--font-sans)" }}>
+              {bio}
+            </p>
+          )}
+          <div className="flex flex-wrap items-center gap-4">
+            {linkedIn && (
+              <a href={linkedIn} target="_blank" rel="noopener noreferrer" className="label-mono transition-opacity hover:opacity-60" style={{ color: "var(--ink)" }}>
+                LinkedIn →
+              </a>
+            )}
+            {doctorSlug && (
+              <Link
+                href={`/doctors/${doctorSlug}`}
+                className="label-mono flex h-8 items-center px-4 transition-opacity hover:opacity-80"
+                style={{ background: "var(--ink)", color: "var(--bone)", borderRadius: "var(--r)" }}
+              >
+                {t("book_author", { name: name.split(" ").pop() ?? name })}
+              </Link>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RelatedArticles({
+  related, t,
+}: {
+  related: { slug: string; title: string; dek: string; date: string; readMinutes: number }[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  t: (k: string, v?: any) => string;
+}) {
+  if (related.length === 0) return null;
+  return (
+    <div className="py-12" style={{ borderTop: "1px solid var(--line)" }}>
+      <p className="label-mono mb-6" style={{ color: "var(--muted)" }}>{t("also_read")}</p>
+      <div className="flex flex-col gap-0">
+        {related.map((rel) => (
+          <Link key={rel.slug} href={`/journal/${rel.slug}`} className="group py-5" style={{ borderBottom: "1px solid var(--line)" }}>
+            <p className="label-mono mb-1" style={{ color: "var(--muted)" }}>
+              {new Date(rel.date).toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "numeric" })}
+              {" · "}
+              {t("min_read", { n: rel.readMinutes })}
+            </p>
+            <h3 className="font-heading text-[20px] leading-tight transition-colors duration-200 group-hover:opacity-70" style={{ color: "var(--ink)" }}>
+              {rel.title}
+            </h3>
+            <p className="text-[14px] italic mt-1" style={{ color: "var(--muted)", fontFamily: "var(--font-sans)" }}>
+              {rel.dek}
+            </p>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────
 
 export default async function JournalArticlePage({
@@ -198,20 +309,94 @@ export default async function JournalArticlePage({
 }: {
   params: { slug: string; locale: string };
 }) {
+  const t = await getTranslations("journal");
+
+  // ── Try Sanity first ──
+  let sanityDoc: SanityArticleFull | null = null;
+  try {
+    sanityDoc = await client.fetch<SanityArticleFull>(ARTICLE_BY_SLUG_QUERY, { slug: params.slug });
+  } catch { /* Sanity not configured — fallback to local */ }
+
+  if (sanityDoc) {
+    const formattedDate = new Date(sanityDoc.publishedAt).toLocaleDateString("en-GB", {
+      year: "numeric", month: "long", day: "numeric",
+    });
+    const authorPortraitUrl = sanityDoc.author?.portrait
+      ? urlFor(sanityDoc.author.portrait).width(144).height(144).url()
+      : null;
+
+    // Related: local articles in same category
+    const related = getArticlesByCategory(sanityDoc.category as any)
+      .filter((a) => a.slug !== sanityDoc!.slug.current)
+      .slice(0, 3);
+
+    return (
+      <>
+        <ArticleJsonLd
+          title={sanityDoc.title}
+          dek={sanityDoc.dek || ""}
+          date={sanityDoc.publishedAt}
+          authorName={sanityDoc.author?.name || "MjekOn"}
+          slug={sanityDoc.slug.current}
+        />
+        <ReadingProgressBar />
+        <Navbar />
+        <main style={{ paddingTop: 72 }}>
+          <div className="mx-auto px-4 sm:px-6 lg:px-8" style={{ maxWidth: "68ch" }}>
+            <Breadcrumb category={sanityDoc.category || ""} t={t} />
+
+            <header className="pt-12 pb-8" style={{ borderBottom: "1px solid var(--line)" }}>
+              <h1 className="font-heading leading-tight mb-6" style={{ fontSize: "clamp(32px, 5vw, 52px)", color: "var(--ink)" }}>
+                {sanityDoc.title}
+              </h1>
+              {sanityDoc.dek && (
+                <p className="text-[16px] italic leading-relaxed mb-6" style={{ color: "var(--muted)", fontFamily: "var(--font-sans)" }}>
+                  {sanityDoc.dek}
+                </p>
+              )}
+              <div className="flex flex-wrap items-center gap-4">
+                <span className="label-mono" style={{ color: "var(--muted)" }}>{formattedDate}</span>
+                <span className="label-mono" style={{ color: "var(--muted)" }}>
+                  {t("min_read", { n: sanityDoc.readMinutes || 5 })}
+                </span>
+                <span className="label-mono" style={{ color: "var(--muted)" }}>
+                  {t("by")} {sanityDoc.author?.name || "MjekOn"}
+                </span>
+              </div>
+            </header>
+
+            <div className="py-12">
+              <SanityBlockRenderer body={sanityDoc.body} />
+            </div>
+
+            <AuthorFooter
+              name={sanityDoc.author?.name || "MjekOn"}
+              role={sanityDoc.author?.role || ""}
+              bio={sanityDoc.author?.bio}
+              portraitUrl={authorPortraitUrl}
+              linkedIn={sanityDoc.author?.linkedIn}
+              doctorSlug={sanityDoc.author?.doctorSlug}
+              t={t}
+            />
+            <RelatedArticles related={related} t={t} />
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  // ── Fallback: local hardcoded article ──
   const article = getArticle(params.slug);
   if (!article) notFound();
   const doc = article!;
-
-  const [t] = await Promise.all([getTranslations("journal")]);
 
   const related = getArticlesByCategory(doc.category)
     .filter((a) => a.slug !== doc.slug)
     .slice(0, 3);
 
   const formattedDate = new Date(doc.date).toLocaleDateString("en-GB", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
+    year: "numeric", month: "long", day: "numeric",
   });
 
   let paragraphCount = 0;
@@ -229,51 +414,17 @@ export default async function JournalArticlePage({
       <Navbar />
       <main style={{ paddingTop: 72 }}>
         <div className="mx-auto px-4 sm:px-6 lg:px-8" style={{ maxWidth: "68ch" }}>
+          <Breadcrumb category={doc.category} t={t} />
 
-          {/* ── Breadcrumb ── */}
-          <div
-            className="flex items-center gap-2 py-4"
-            style={{ borderBottom: "1px solid var(--line)" }}
-          >
-            <Link
-              href="/journal"
-              className="label-mono flex items-center gap-1 transition-opacity hover:opacity-60"
-              style={{ color: "var(--muted)" }}
-            >
-              <ArrowLeft className="h-[11px] w-[11px]" aria-hidden="true" />
-              {t("back")}
-            </Link>
-            <span className="label-mono" style={{ color: "var(--line)" }}>/</span>
-            <span
-              className="label-mono px-2 h-5 flex items-center"
-              style={{
-                border: "1px solid var(--line)",
-                borderRadius: "var(--r)",
-                color: "var(--oxblood)",
-              }}
-            >
-              {doc.category.toUpperCase()}
-            </span>
-          </div>
-
-          {/* ── Article header ── */}
           <header className="pt-12 pb-8" style={{ borderBottom: "1px solid var(--line)" }}>
-            <h1
-              className="font-heading leading-tight mb-6"
-              style={{ fontSize: "clamp(32px, 5vw, 52px)", color: "var(--ink)" }}
-            >
+            <h1 className="font-heading leading-tight mb-6" style={{ fontSize: "clamp(32px, 5vw, 52px)", color: "var(--ink)" }}>
               {doc.title}
             </h1>
-            <p
-              className="text-[16px] italic leading-relaxed mb-6"
-              style={{ color: "var(--muted)", fontFamily: "var(--font-sans)" }}
-            >
+            <p className="text-[16px] italic leading-relaxed mb-6" style={{ color: "var(--muted)", fontFamily: "var(--font-sans)" }}>
               {doc.dek}
             </p>
             <div className="flex flex-wrap items-center gap-4">
-              <span className="label-mono" style={{ color: "var(--muted)" }}>
-                {formattedDate}
-              </span>
+              <span className="label-mono" style={{ color: "var(--muted)" }}>{formattedDate}</span>
               <span className="label-mono" style={{ color: "var(--muted)" }}>
                 {t("min_read", { n: doc.readMinutes })}
               </span>
@@ -283,152 +434,24 @@ export default async function JournalArticlePage({
             </div>
           </header>
 
-          {/* ── Article body ── */}
           <div className="py-12">
             {doc.content.map((section, i) => {
               const isFirstParagraph = section.type === "paragraph" && paragraphCount === 0;
               if (section.type === "paragraph") paragraphCount++;
-              return (
-                <RenderSection
-                  key={i}
-                  section={section}
-                  isFirst={isFirstParagraph}
-                />
-              );
+              return <RenderSection key={i} section={section} isFirst={isFirstParagraph} />;
             })}
           </div>
 
-          {/* ── Author footer ── */}
-          <div
-            className="py-12"
-            style={{ borderTop: "1px solid var(--line)" }}
-          >
-            <p className="label-mono mb-6" style={{ color: "var(--muted)" }}>
-              {t("written_by")}
-            </p>
-            <div className="flex items-start gap-5">
-              {/* Portrait */}
-              <div
-                className="shrink-0 overflow-hidden"
-                style={{
-                  width: 72,
-                  height: 72,
-                  borderRadius: "var(--r)",
-                  background: "var(--bone-2)",
-                  filter: "grayscale(20%)",
-                  position: "relative",
-                }}
-              >
-                {doc.author.portraitUrl ? (
-                  <Image
-                    src={doc.author.portraitUrl}
-                    alt={doc.author.name}
-                    fill
-                    className="object-cover"
-                    sizes="72px"
-                  />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span
-                      className="font-heading text-[28px] opacity-20"
-                      style={{ color: "var(--ink)" }}
-                    >
-                      {doc.author.name.charAt(0)}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {/* Bio block */}
-              <div className="flex-1 min-w-0">
-                <p
-                  className="font-heading text-[20px] mb-1"
-                  style={{ color: "var(--ink)" }}
-                >
-                  {doc.author.name}
-                </p>
-                <p className="label-mono mb-3" style={{ color: "var(--muted)" }}>
-                  {doc.author.role}
-                </p>
-                <p
-                  className="text-[14px] leading-relaxed mb-4"
-                  style={{ color: "var(--muted)", fontFamily: "var(--font-sans)" }}
-                >
-                  {doc.author.bio}
-                </p>
-                <div className="flex flex-wrap items-center gap-4">
-                  {doc.author.linkedIn && (
-                    <a
-                      href={doc.author.linkedIn}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="label-mono transition-opacity hover:opacity-60"
-                      style={{ color: "var(--ink)" }}
-                    >
-                      LinkedIn →
-                    </a>
-                  )}
-                  {doc.author.doctorSlug && (
-                    <Link
-                      href={`/doctors/${doc.author.doctorSlug}`}
-                      className="label-mono flex h-8 items-center px-4 transition-opacity hover:opacity-80"
-                      style={{
-                        background: "var(--ink)",
-                        color: "var(--bone)",
-                        borderRadius: "var(--r)",
-                      }}
-                    >
-                      {t("book_author", { name: doc.author.name.split(" ").pop() ?? doc.author.name })}
-                    </Link>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* ── Related articles ── */}
-          {related.length > 0 && (
-            <div
-              className="py-12"
-              style={{ borderTop: "1px solid var(--line)" }}
-            >
-              <p className="label-mono mb-6" style={{ color: "var(--muted)" }}>
-                {t("also_read")}
-              </p>
-              <div className="flex flex-col gap-0">
-                {related.map((rel) => (
-                  <Link
-                    key={rel.slug}
-                    href={`/journal/${rel.slug}`}
-                    className="group py-5"
-                    style={{ borderBottom: "1px solid var(--line)" }}
-                  >
-                    <p className="label-mono mb-1" style={{ color: "var(--muted)" }}>
-                      {new Date(rel.date).toLocaleDateString("en-GB", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })}
-                      {" · "}
-                      {t("min_read", { n: rel.readMinutes })}
-                    </p>
-                    <h3
-                      className="font-heading text-[20px] leading-tight transition-colors duration-200 group-hover:opacity-70"
-                      style={{ color: "var(--ink)" }}
-                    >
-                      {rel.title}
-                    </h3>
-                    <p
-                      className="text-[14px] italic mt-1"
-                      style={{ color: "var(--muted)", fontFamily: "var(--font-sans)" }}
-                    >
-                      {rel.dek}
-                    </p>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
+          <AuthorFooter
+            name={doc.author.name}
+            role={doc.author.role}
+            bio={doc.author.bio}
+            portraitUrl={doc.author.portraitUrl}
+            linkedIn={doc.author.linkedIn}
+            doctorSlug={doc.author.doctorSlug}
+            t={t}
+          />
+          <RelatedArticles related={related} t={t} />
         </div>
       </main>
       <Footer />
