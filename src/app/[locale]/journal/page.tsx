@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { Navbar } from "@/components/Navbar";
@@ -10,6 +10,13 @@ import {
   JOURNAL_CATEGORIES,
   type JournalCategory,
 } from "@/lib/journal";
+import {
+  client,
+  ARTICLES_QUERY,
+  CATEGORIES_QUERY,
+  type SanityArticleCard,
+  type SanityCategory,
+} from "@/lib/sanity";
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-GB", {
@@ -19,24 +26,92 @@ function formatDate(iso: string) {
   });
 }
 
+type UnifiedArticle = {
+  slug: string;
+  title: string;
+  dek: string;
+  date: string;
+  readMinutes: number;
+  category: string;
+  authorName: string;
+  authorRole: string;
+  source: "sanity" | "local";
+};
+
+function sanityToUnified(a: SanityArticleCard): UnifiedArticle {
+  return {
+    slug: a.slug.current,
+    title: a.title,
+    dek: a.dek || "",
+    date: a.publishedAt,
+    readMinutes: a.readMinutes || 5,
+    category: a.category || "Uncategorized",
+    authorName: a.author?.name || "Unknown",
+    authorRole: a.author?.role || "",
+    source: "sanity",
+  };
+}
+
+function localToUnified(a: (typeof JOURNAL_ARTICLES)[number]): UnifiedArticle {
+  return {
+    slug: a.slug,
+    title: a.title,
+    dek: a.dek,
+    date: a.date,
+    readMinutes: a.readMinutes,
+    category: a.category,
+    authorName: a.author.name,
+    authorRole: a.author.role,
+    source: "local",
+  };
+}
+
 export default function JournalPage() {
   const t = useTranslations("journal");
-  const [activeCategory, setActiveCategory] = useState<JournalCategory | "All">("All");
+  const [activeCategory, setActiveCategory] = useState<string>("All");
   const [query, setQuery] = useState("");
+  const [articles, setArticles] = useState<UnifiedArticle[]>(
+    JOURNAL_ARTICLES.map(localToUnified)
+  );
+  const [categories, setCategories] = useState<string[]>([...JOURNAL_CATEGORIES]);
+
+  useEffect(() => {
+    async function fetchSanity() {
+      try {
+        const [sanityArticles, sanityCats] = await Promise.all([
+          client.fetch<SanityArticleCard[]>(ARTICLES_QUERY),
+          client.fetch<SanityCategory[]>(CATEGORIES_QUERY),
+        ]);
+        if (sanityArticles && sanityArticles.length > 0) {
+          const unified = sanityArticles.map(sanityToUnified);
+          const localArticles = JOURNAL_ARTICLES.map(localToUnified);
+          setArticles([...unified, ...localArticles]);
+        }
+        if (sanityCats && sanityCats.length > 0) {
+          const sanityNames = sanityCats.map((c) => c.title);
+          const all = [...new Set([...sanityNames, ...JOURNAL_CATEGORIES])];
+          setCategories(all);
+        }
+      } catch {
+        // Sanity not configured yet — use local fallback silently
+      }
+    }
+    fetchSanity();
+  }, []);
 
   const filtered = useMemo(() => {
-    return JOURNAL_ARTICLES.filter((a) => {
+    return articles.filter((a) => {
       const matchCat = activeCategory === "All" || a.category === activeCategory;
       const q = query.toLowerCase();
       const matchQ =
         !q ||
         a.title.toLowerCase().includes(q) ||
         a.dek.toLowerCase().includes(q) ||
-        a.author.name.toLowerCase().includes(q) ||
+        a.authorName.toLowerCase().includes(q) ||
         a.category.toLowerCase().includes(q);
       return matchCat && matchQ;
     });
-  }, [activeCategory, query]);
+  }, [activeCategory, query, articles]);
 
   return (
     <>
@@ -75,10 +150,10 @@ export default function JournalPage() {
           >
             {/* Category chips */}
             <div className="flex flex-wrap gap-2">
-              {(["All", ...JOURNAL_CATEGORIES] as const).map((cat) => (
+              {["All", ...categories].map((cat) => (
                 <button
                   key={cat}
-                  onClick={() => setActiveCategory(cat as JournalCategory | "All")}
+                  onClick={() => setActiveCategory(cat)}
                   className="label-mono px-3 h-7 transition-colors cursor-pointer"
                   style={{
                     border: "1px solid var(--line)",
@@ -161,7 +236,7 @@ export default function JournalPage() {
                     className="text-[14px] font-medium"
                     style={{ color: "var(--muted)", fontFamily: "var(--font-sans)" }}
                   >
-                    {t("by")} {article.author.name} — {article.author.role}
+                    {t("by")} {article.authorName} — {article.authorRole}
                   </span>
                 </div>
                 <p
