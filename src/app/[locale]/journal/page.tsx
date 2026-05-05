@@ -83,14 +83,10 @@ export default function JournalPage() {
           client.fetch<SanityCategory[]>(CATEGORIES_QUERY),
         ]);
         if (sanityArticles && sanityArticles.length > 0) {
-          const unified = sanityArticles.map(sanityToUnified);
-          const localArticles = JOURNAL_ARTICLES.map(localToUnified);
-          setArticles([...unified, ...localArticles]);
+          setArticles(sanityArticles.map(sanityToUnified));
         }
         if (sanityCats && sanityCats.length > 0) {
-          const sanityNames = sanityCats.map((c) => c.title);
-          const all = [...new Set([...sanityNames, ...JOURNAL_CATEGORIES])];
-          setCategories(all);
+          setCategories(sanityCats.map((c) => c.title));
         }
       } catch {
         // Sanity not configured yet — use local fallback silently
