@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
 import { AppShell } from "@/components/AppShell";
 import { RequireRole, DataLoader } from "@/components/RequireRole";
 import { formatDateTime } from "@/lib/format";
@@ -108,7 +107,10 @@ export default function DoctorHomePage() {
   const upcoming  = useMemo(() => myAppointments.filter((a) => a.status === "accepted"), [myAppointments]);
   const completed = useMemo(() => myAppointments.filter((a) => a.status === "completed"), [myAppointments]);
   const rejected  = useMemo(() => myAppointments.filter((a) => a.status === "rejected"), [myAppointments]);
-  const myPatients = useMemo(() => patients.filter((p) => p.doctorId === doctorId), [patients, doctorId]);
+  const myPatients = useMemo(() => {
+    const apptPatientIds = new Set(myAppointments.map(a => a.patientId));
+    return patients.filter((p) => p.doctorId === doctorId || apptPatientIds.has(p.id));
+  }, [patients, doctorId, myAppointments]);
 
   const totalRevenue   = useMemo(() => completed.reduce((s, a) => s + a.price, 0), [completed]);
   const monthlyRevenue = useMemo(() => {
@@ -135,9 +137,6 @@ export default function DoctorHomePage() {
     { count: rejected.length,  color: "#ef4444", label: "Rejected" },
   ];
 
-  const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } };
-  const fadeUp  = { hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: "easeOut" as const } } };
-
   return (
     <AppShell title="Doctor Portal" nav={[
       { label: "Dashboard",     href: "/portal" },
@@ -147,10 +146,10 @@ export default function DoctorHomePage() {
     ]}>
       <RequireRole role="doctor">
         <DataLoader role="doctor" />
-        <motion.div className="grid gap-6 max-w-7xl mx-auto pb-12" variants={stagger} initial="hidden" animate="show">
+        <div className="grid gap-6 max-w-7xl mx-auto pb-12">
 
           {/* ── Hero ── */}
-          <motion.div variants={fadeUp} className="glass rounded-3xl p-8 lg:p-10 shadow-premium relative overflow-hidden">
+          <div className="glass rounded-3xl p-8 lg:p-10 shadow-premium relative overflow-hidden">
             <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
@@ -191,18 +190,17 @@ export default function DoctorHomePage() {
                 </div>
               </div>
             </div>
-            <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/3 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[80px] pointer-events-none" />
-          </motion.div>
+          </div>
 
           {/* ── KPI Stats ── */}
-          <motion.div variants={fadeUp} className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
             {[
               { label: "Pending",   value: pending.length,   icon: Clock,         bg: "bg-amber-50",   border: "border-amber-200/60",   text: "text-amber-700" },
               { label: "Upcoming",  value: upcoming.length,  icon: CalendarCheck, bg: "bg-emerald-50", border: "border-emerald-200/60", text: "text-emerald-700" },
               { label: "Completed", value: completed.length, icon: Activity,      bg: "bg-blue-50",    border: "border-blue-200/60",    text: "text-blue-700" },
               { label: "Patients",  value: myPatients.length,icon: Heart,         bg: "bg-rose-50",    border: "border-rose-200/60",    text: "text-rose-700" },
             ].map((stat) => (
-              <motion.div key={stat.label} whileHover={{ y: -4, transition: { duration: 0.2 } }}
+              <div key={stat.label}
                 className={`rounded-3xl border-2 ${stat.border} ${stat.bg} p-5 shadow-sm`}>
                 <div className="flex items-center justify-between mb-3">
                   <div className={`h-10 w-10 rounded-xl ${stat.bg} ${stat.text} flex items-center justify-center`}>
@@ -214,12 +212,12 @@ export default function DoctorHomePage() {
                   <AnimatedCount value={stat.value} />
                 </div>
                 <div className="text-xs font-bold uppercase tracking-wider text-foreground/40 mt-1">{stat.label}</div>
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
+          </div>
 
           {/* ── Weekly Mini-Calendar ── */}
-          <motion.div variants={fadeUp} className="glass rounded-3xl p-3 sm:p-5 shadow-premium">
+          <div className="glass rounded-3xl p-3 sm:p-5 shadow-premium">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-bold text-foreground/50 uppercase tracking-wider">This Week</h3>
               {selectedDay && (
@@ -293,11 +291,11 @@ export default function DoctorHomePage() {
                 <div className="mt-4 text-center text-sm text-foreground/30 py-3">No appointments on {format(selectedDay, "EEEE")}</div>
               );
             })()}
-          </motion.div>
+          </div>
 
           {/* ── Today's Schedule ── */}
           {todayAppts.length > 0 && (
-            <motion.div variants={fadeUp} className="glass rounded-3xl p-6 shadow-premium border-2 border-emerald-100">
+            <div className="glass rounded-3xl p-6 shadow-premium border-2 border-emerald-100">
               <h3 className="font-bold text-foreground flex items-center gap-2 mb-4">
                 <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                 Today's Schedule — {format(new Date(), "EEEE, MMMM d")}
@@ -324,11 +322,11 @@ export default function DoctorHomePage() {
                   );
                 })}
               </div>
-            </motion.div>
+            </div>
           )}
 
           {/* ── Appointments Panel ── */}
-          <motion.div variants={fadeUp} className="glass rounded-3xl p-6 lg:p-8 shadow-premium">
+          <div className="glass rounded-3xl p-6 lg:p-8 shadow-premium">
             <div className="flex items-center justify-between mb-6">
               <div className="flex gap-1 p-1 rounded-2xl bg-foreground/5">
                 {(["pending", "upcoming", "history"] as const).map((tab) => (
@@ -343,8 +341,7 @@ export default function DoctorHomePage() {
               </Link>
             </div>
 
-            <AnimatePresence mode="wait">
-              <motion.div key={activeTab} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.2 }}>
+            <div>
 
                 {activeTab === "pending" && (
                   <div className="grid gap-3">
@@ -356,7 +353,7 @@ export default function DoctorHomePage() {
                     ) : pending.map((a, idx) => {
                       const pat = patients.find(p => p.id === a.patientId);
                       return (
-                        <motion.div key={a.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }}
+                        <div key={a.id}
                           className="rounded-2xl border border-foreground/5 bg-white p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:border-amber-200 hover:shadow-sm transition-all">
                           <div className="flex items-center gap-4">
                             <div className="h-12 w-12 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center shrink-0">
@@ -381,7 +378,7 @@ export default function DoctorHomePage() {
                               <XCircle className="h-3.5 w-3.5" /> Reject
                             </button>
                           </div>
-                        </motion.div>
+                        </div>
                       );
                     })}
                   </div>
@@ -399,7 +396,7 @@ export default function DoctorHomePage() {
                       const dt = new Date(a.scheduledAt);
                       const label = isToday(dt) ? "Today" : isTomorrow(dt) ? "Tomorrow" : format(dt, "MMM d");
                       return (
-                        <motion.div key={a.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }}
+                        <div key={a.id}
                           className="rounded-2xl border border-foreground/5 bg-white p-4 flex items-center gap-4 hover:border-emerald-200 hover:shadow-sm transition-all">
                           <div className="h-12 w-12 rounded-2xl bg-emerald-50 text-emerald-600 flex flex-col items-center justify-center shrink-0 text-[11px] font-bold">
                             <span>{label}</span>
@@ -416,7 +413,7 @@ export default function DoctorHomePage() {
                             className="flex items-center gap-1.5 rounded-xl bg-emerald-500 px-5 py-2.5 text-xs font-bold text-white hover:bg-emerald-600 transition-all hover:-translate-y-px shrink-0">
                             <Video className="h-3.5 w-3.5" /> Join
                           </Link>
-                        </motion.div>
+                        </div>
                       );
                     })}
                   </div>
@@ -432,7 +429,7 @@ export default function DoctorHomePage() {
                     ) : [...completed, ...rejected].sort((a,b) => new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime()).slice(0, 10).map((a, idx) => {
                       const pat = patients.find(p => p.id === a.patientId);
                       return (
-                        <motion.div key={a.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.04 }}
+                        <div key={a.id}
                           className="rounded-2xl border border-foreground/5 bg-white p-4 flex items-center gap-4">
                           <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${a.status === "completed" ? "bg-blue-50 text-blue-500" : "bg-rose-50 text-rose-400"}`}>
                             {a.status === "completed" ? <CheckCircle2 className="h-4.5 w-4.5" /> : <XCircle className="h-4 w-4" />}
@@ -446,20 +443,19 @@ export default function DoctorHomePage() {
                               ? <span className="text-sm font-bold text-emerald-600">+${a.price}</span>
                               : <span className="text-xs font-bold text-rose-400">Rejected</span>}
                           </div>
-                        </motion.div>
+                        </div>
                       );
                     })}
                   </div>
                 )}
-              </motion.div>
-            </AnimatePresence>
-          </motion.div>
+            </div>
+          </div>
 
           {/* ── Finance + Patients ── */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
             {/* Finance Card — links to dedicated page */}
-            <motion.div variants={fadeUp}>
+            <div>
               <Link href="/portal/finances"
                 className="group block glass rounded-3xl p-6 shadow-premium hover:shadow-xl transition-all hover:-translate-y-1 relative overflow-hidden">
                 <div className="relative z-10">
@@ -508,12 +504,11 @@ export default function DoctorHomePage() {
                     <Receipt className="h-3.5 w-3.5" /> View full financial report
                   </div>
                 </div>
-                <div className="absolute bottom-0 right-0 translate-y-1/3 translate-x-1/4 w-40 h-40 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
               </Link>
-            </motion.div>
+            </div>
 
             {/* Patients Panel */}
-            <motion.div variants={fadeUp} className="glass rounded-3xl p-6 shadow-premium">
+            <div className="glass rounded-3xl p-6 shadow-premium">
               <div className="flex items-center justify-between mb-5">
                 <h3 className="font-bold text-foreground flex items-center gap-2"><Users className="h-5 w-5 text-rose-500" /> My Patients ({myPatients.length})</h3>
                 <Link href="/portal/patients" className="text-xs font-bold text-primary flex items-center gap-1 hover:underline">All <ArrowRight className="h-3 w-3" /></Link>
@@ -529,7 +524,7 @@ export default function DoctorHomePage() {
                     const lastAppt = [...completed].filter(a => a.patientId === p.id).sort((a, b) => new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime())[0];
                     const patRevenue = completed.filter(a => a.patientId === p.id).reduce((s, a) => s + a.price, 0);
                     return (
-                      <motion.div key={p.id} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.05 }}>
+                      <div key={p.id}>
                         <Link href={`/portal/patients/${p.id}`}
                           className="group flex items-center gap-4 rounded-2xl border border-foreground/5 bg-white p-4 hover:border-primary/20 hover:shadow-sm transition-all">
                           <div className="h-11 w-11 rounded-full bg-linear-to-br from-primary/20 to-primary/10 text-primary font-bold flex items-center justify-center shrink-0">
@@ -544,15 +539,15 @@ export default function DoctorHomePage() {
                             <ChevronRight className="h-4 w-4 text-foreground/20 group-hover:text-primary ml-auto mt-0.5 transition-colors" />
                           </div>
                         </Link>
-                      </motion.div>
+                      </div>
                     );
                   })}
                 </div>
               )}
-            </motion.div>
+            </div>
           </div>
 
-        </motion.div>
+        </div>
       </RequireRole>
     </AppShell>
   );

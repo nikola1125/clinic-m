@@ -1,7 +1,6 @@
 "use client";
 
 import { use, useMemo, useState, useCallback } from "react";
-import { motion } from "framer-motion";
 import Link from "next/link";
 import { AppShell } from "@/components/AppShell";
 import { AutoSeed, RequireRole, DataLoader } from "@/components/RequireRole";
@@ -86,8 +85,7 @@ export default function DoctorPatientDetailsPage({
             </Link>
           </div>
         ) : (
-          <motion.div className="grid gap-6"
-            initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+          <div className="grid gap-6">
 
             {/* Patient Header */}
             <div className="glass rounded-4xl p-6 lg:p-8 shadow-premium border-2 border-foreground/5 relative overflow-hidden">
@@ -140,7 +138,6 @@ export default function DoctorPatientDetailsPage({
                 )}
               </div>
 
-              <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/3 w-[300px] h-[300px] bg-primary/5 rounded-full blur-[80px] pointer-events-none" />
             </div>
 
             {/* Patient Timeline */}
@@ -205,7 +202,7 @@ export default function DoctorPatientDetailsPage({
               })()}
             </div>
 
-          </motion.div>
+          </div>
         )}
       </RequireRole>
     </AppShell>

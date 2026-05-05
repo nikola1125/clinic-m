@@ -1,15 +1,16 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatDateTime } from "@/lib/format";
 import { useClinicStore } from "@/store/clinicStore";
-import { api } from "@/lib/api";
+import { api, type AvailabilitySlot } from "@/lib/api";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Activity, Calendar, CheckCircle2, ChevronLeft, ChevronRight, Clock, Stethoscope, User } from "lucide-react";
+import { format, addDays, startOfDay, getDay } from "date-fns";
 import Image from "next/image";
 
 const steps = ["Select Doctor", "Select Service", "Choose Date", "Confirm"];
@@ -26,11 +27,11 @@ export default function BookPage() {
   const [step, setStep] = useState(0);
   const [doctorId, setDoctorId] = useState<string>("");
   const [consultId, setConsultId] = useState<string>("");
-  const [scheduledAt, setScheduledAt] = useState(() => {
-    const d = new Date(Date.now() + 1000 * 60 * 60 * 24);
-    d.setMinutes(0, 0, 0);
-    return d.toISOString().slice(0, 16);
-  });
+  const [scheduledAt, setScheduledAt] = useState("");
+  const [selectedDate, setSelectedDate] = useState<string>("");
+  const [selectedTime, setSelectedTime] = useState<string>("");
+  const [availability, setAvailability] = useState<AvailabilitySlot[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
 
   const [isBooking, setIsBooking] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
@@ -47,15 +48,71 @@ export default function BookPage() {
     refreshDoctors();
   }, [refreshDoctors]);
 
+  const fetchAvailability = useCallback(async (docId: string) => {
+    setLoadingSlots(true);
+    try {
+      const slots = await api.getDoctorAvailability(docId);
+      setAvailability(slots ?? []);
+    } catch {
+      setAvailability([]);
+    } finally {
+      setLoadingSlots(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (doctorId) {
       useClinicStore.getState().refreshDoctorConsults(doctorId);
+      fetchAvailability(doctorId);
     }
-  }, [doctorId]);
+  }, [doctorId, fetchAvailability]);
 
   const doctor = doctors.find((d) => d.id === doctorId) ?? null;
   const consult = doctor?.consults.find((c) => c.id === consultId) ?? null;
   const me = session ? patients.find((p) => p.id === session.patientId) : undefined;
+
+  // Build next 14 days with availability info
+  const dateOptions = useMemo(() => {
+    const days: { date: Date; dateStr: string; slot: AvailabilitySlot | null; dayLabel: string }[] = [];
+    for (let i = 1; i <= 14; i++) {
+      const d = addDays(startOfDay(new Date()), i);
+      // getDay returns 0=Sun,1=Mon...6=Sat; backend uses 0=Mon...6=Sun
+      const jsDow = getDay(d);
+      const backendDow = jsDow === 0 ? 6 : jsDow - 1;
+      const slot = availability.find(s => s.day_of_week === backendDow && s.is_active) ?? null;
+      days.push({ date: d, dateStr: format(d, "yyyy-MM-dd"), slot, dayLabel: format(d, "EEE, MMM d") });
+    }
+    return days;
+  }, [availability]);
+
+  // Generate time slots for selected date
+  const timeSlots = useMemo(() => {
+    if (!selectedDate) return [];
+    const opt = dateOptions.find(d => d.dateStr === selectedDate);
+    if (!opt?.slot) return [];
+    const slot = opt.slot;
+    const dur = slot.slot_duration_min || 30;
+    const [sh, sm] = slot.start_time.split(":").map(Number);
+    const [eh, em] = slot.end_time.split(":").map(Number);
+    const startMin = sh * 60 + sm;
+    const endMin = eh * 60 + em;
+    const slots: string[] = [];
+    for (let m = startMin; m + dur <= endMin; m += dur) {
+      const h = Math.floor(m / 60);
+      const min = m % 60;
+      slots.push(`${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}`);
+    }
+    return slots;
+  }, [selectedDate, dateOptions]);
+
+  // Update scheduledAt when date+time selected
+  useEffect(() => {
+    if (selectedDate && selectedTime) {
+      setScheduledAt(`${selectedDate}T${selectedTime}`);
+    } else {
+      setScheduledAt("");
+    }
+  }, [selectedDate, selectedTime]);
 
   const canProceed = useMemo(() => {
     if (step === 0) return !!doctorId;
@@ -190,7 +247,7 @@ export default function BookPage() {
                         {doctors.map(d => (
                           <div
                             key={d.id}
-                            onClick={() => { setDoctorId(d.id); setConsultId(""); }}
+                            onClick={() => { setDoctorId(d.id); setConsultId(""); setSelectedDate(""); setSelectedTime(""); }}
                             className={`cursor-pointer rounded-2xl border-2 p-5 transition-all flex items-center gap-4
                               ${doctorId === d.id ? "border-primary bg-primary/5 shadow-md" : "border-foreground/5 bg-white hover:border-primary/30"}
                             `}
@@ -235,21 +292,83 @@ export default function BookPage() {
                     </div>
                   )}
 
-                  {/* Step 3: Date */}
+                  {/* Step 3: Date & Time Slots */}
                   {step === 2 && (
                     <div className="space-y-6">
                       <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
                         <Calendar className="h-5 w-5 text-primary" /> Choose Date & Time
                       </h3>
-                      <div className="bg-white p-6 rounded-2xl border border-foreground/5 shadow-sm">
-                        <input
-                          type="datetime-local"
-                          value={scheduledAt}
-                          onChange={(e) => setScheduledAt(e.target.value)}
-                          className="w-full text-lg outline-none bg-transparent"
-                        />
-                      </div>
-                      <p className="text-xs text-foreground/40 italic">* Please select a time during standard clinic hours (9 AM - 5 PM).</p>
+
+                      {loadingSlots ? (
+                        <div className="flex items-center justify-center py-12">
+                          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-r-transparent" />
+                        </div>
+                      ) : availability.filter(s => s.is_active).length === 0 ? (
+                        <div className="rounded-2xl border border-dashed border-foreground/10 p-10 text-center">
+                          <Calendar className="h-10 w-10 text-foreground/20 mx-auto mb-3" />
+                          <p className="text-sm font-bold text-foreground/40">This doctor has not set their availability yet.</p>
+                          <p className="text-xs text-foreground/30 mt-1">Please try another doctor or check back later.</p>
+                        </div>
+                      ) : (
+                        <>
+                          {/* Date selector */}
+                          <div>
+                            <p className="text-sm font-bold text-foreground/60 mb-3">Select a date</p>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                              {dateOptions.map(opt => (
+                                <button
+                                  key={opt.dateStr}
+                                  disabled={!opt.slot}
+                                  onClick={() => { setSelectedDate(opt.dateStr); setSelectedTime(""); }}
+                                  className={`rounded-xl border-2 p-3 text-sm font-bold transition-all text-center ${
+                                    !opt.slot
+                                      ? "border-foreground/5 text-foreground/20 cursor-not-allowed bg-foreground/2"
+                                      : selectedDate === opt.dateStr
+                                        ? "border-primary bg-primary/5 text-primary shadow-sm"
+                                        : "border-foreground/5 bg-white text-foreground hover:border-primary/30"
+                                  }`}
+                                >
+                                  {opt.dayLabel}
+                                  {!opt.slot && <span className="block text-[10px] font-normal text-foreground/30 mt-0.5">Unavailable</span>}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Time slots */}
+                          {selectedDate && (
+                            <div>
+                              <p className="text-sm font-bold text-foreground/60 mb-3">Select a time</p>
+                              {timeSlots.length === 0 ? (
+                                <p className="text-sm text-foreground/40">No available slots on this day.</p>
+                              ) : (
+                                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                                  {timeSlots.map(t => {
+                                    const [h, m] = t.split(":").map(Number);
+                                    const ampm = h >= 12 ? "PM" : "AM";
+                                    const h12 = h % 12 || 12;
+                                    const label = `${h12}:${String(m).padStart(2, "0")} ${ampm}`;
+                                    return (
+                                      <button
+                                        key={t}
+                                        onClick={() => setSelectedTime(t)}
+                                        className={`flex items-center justify-center gap-1 rounded-xl border-2 py-2.5 px-2 text-sm font-bold transition-all ${
+                                          selectedTime === t
+                                            ? "border-primary bg-primary text-white shadow-sm"
+                                            : "border-foreground/5 bg-white text-foreground hover:border-primary/30"
+                                        }`}
+                                      >
+                                        <Clock className="h-3.5 w-3.5" />
+                                        {label}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </>
+                      )}
                     </div>
                   )}
 

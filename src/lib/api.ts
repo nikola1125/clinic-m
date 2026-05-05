@@ -576,6 +576,10 @@ export class ApiClient {
     return this.request<AvailabilitySlot[]>(`/doctor/availability`);
   }
 
+  public async getDoctorAvailability(doctorId: string) {
+    return this.request<AvailabilitySlot[]>(`/doctors/${doctorId}/availability`);
+  }
+
   public async upsertAvailability(slots: Array<{ day_of_week: number; start_time: string; end_time: string; slot_duration_min?: number; is_active?: boolean }>) {
     return this.request<AvailabilitySlot[]>(`/doctor/availability`, {
       method: "PUT",

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { AppShell } from "@/components/AppShell";
 import { AutoSeed, RequireRole, DataLoader } from "@/components/RequireRole";
 import { useClinicStore } from "@/store/clinicStore";
@@ -106,17 +105,11 @@ export default function DoctorPatientsPage() {
           </div>
 
           {/* Add Patient Modal */}
-          <AnimatePresence>
             {showAdd && (
-              <motion.div
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+              <div
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
                 onClick={() => setShowAdd(false)}>
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                  transition={{ duration: 0.2 }}
+                <div
                   className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl border border-foreground/5"
                   onClick={(e) => e.stopPropagation()}>
                   <h2 className="text-lg font-bold text-foreground flex items-center gap-2 mb-5">
@@ -159,10 +152,9 @@ export default function DoctorPatientsPage() {
                       </button>
                     </div>
                   </div>
-                </motion.div>
-              </motion.div>
+                </div>
+              </div>
             )}
-          </AnimatePresence>
 
           {/* Patient Grid */}
           {filtered.length === 0 ? (
@@ -178,9 +170,7 @@ export default function DoctorPatientsPage() {
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((p, idx) => (
-                <motion.div key={p.id}
-                  initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.04, duration: 0.35 }}>
+                <div key={p.id}>
                   <Link href={`/portal/patients/${p.id}`}
                     className="group flex flex-col h-full rounded-3xl p-5 shadow-sm border-2 border-foreground/5 bg-white/80 transition-all hover:shadow-md hover:border-primary/20 hover:bg-white">
                     <div className="flex items-start gap-4 mb-4">
@@ -209,7 +199,7 @@ export default function DoctorPatientsPage() {
                       <ChevronRight className="h-4 w-4 text-foreground/20 group-hover:text-primary transition-colors" />
                     </div>
                   </Link>
-                </motion.div>
+                </div>
               ))}
             </div>
           )}
