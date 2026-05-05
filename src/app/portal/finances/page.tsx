@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { AppShell } from "@/components/AppShell";
 import { RequireRole, DataLoader } from "@/components/RequireRole";
 import { useClinicStore } from "@/store/clinicStore";
@@ -12,9 +11,6 @@ import {
   CalendarDays, ChevronRight,
 } from "lucide-react";
 import { format, startOfMonth, startOfYear, isAfter } from "date-fns";
-
-const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
-const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } };
 
 type FilterPeriod = "all" | "month" | "year";
 
@@ -78,10 +74,10 @@ export default function DoctorFinancesPage() {
     ]}>
       <RequireRole role="doctor">
         <DataLoader role="doctor" />
-        <motion.div className="max-w-6xl mx-auto pb-16" variants={stagger} initial="hidden" animate="show">
+        <div className="max-w-6xl mx-auto pb-16">
 
           {/* ── Header ── */}
-          <motion.div variants={fadeUp} className="flex items-center gap-4 mb-8">
+          <div className="flex items-center gap-4 mb-8">
             <Link href="/portal"
               className="flex items-center gap-2 rounded-2xl border border-foreground/10 bg-white px-4 py-2.5 text-sm font-bold text-foreground hover:bg-foreground/5 transition-all">
               <ArrowLeft className="h-4 w-4" /> Back
@@ -90,41 +86,41 @@ export default function DoctorFinancesPage() {
               <h1 className="text-2xl font-bold text-foreground">Financial Report</h1>
               <p className="text-sm text-foreground/50">Dr. {doctor?.name} · {doctor?.specialty}</p>
             </div>
-          </motion.div>
+          </div>
 
           {/* ── Period Filter ── */}
-          <motion.div variants={fadeUp} className="flex gap-2 mb-8">
+          <div className="flex gap-2 mb-8">
             {([["all", "All Time"], ["month", "This Month"], ["year", "This Year"]] as const).map(([val, label]) => (
               <button key={val} onClick={() => { setPeriod(val); setHistoryPage(0); }}
                 className={`px-5 py-2 rounded-2xl text-sm font-bold transition-all ${period === val ? "bg-primary text-white shadow-md" : "border border-foreground/10 bg-white text-foreground/60 hover:text-foreground"}`}>
                 {label}
               </button>
             ))}
-          </motion.div>
+          </div>
 
           {/* ── KPI Cards ── */}
-          <motion.div variants={fadeUp} className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             {[
               { label: "Total Earned",     value: `$${totalRevenue}`,     icon: BadgeDollarSign, bg: "bg-emerald-50", border: "border-emerald-200/60", text: "text-emerald-700" },
               { label: "Avg per Session",  value: `$${avgRevenue}`,       icon: TrendingUp,      bg: "bg-blue-50",    border: "border-blue-200/60",    text: "text-blue-700" },
               { label: "Completion Rate",  value: `${completionRate}%`,   icon: BarChart3,       bg: "bg-violet-50",  border: "border-violet-200/60",  text: "text-violet-700" },
               { label: "Lost (Rejected)",  value: `$${lostRevenue}`,      icon: XCircle,         bg: "bg-rose-50",    border: "border-rose-200/60",    text: "text-rose-700" },
             ].map(s => (
-              <motion.div key={s.label} whileHover={{ y: -3, transition: { duration: 0.15 } }}
+              <div key={s.label}
                 className={`rounded-3xl border-2 ${s.border} ${s.bg} p-5`}>
                 <div className={`h-10 w-10 rounded-xl ${s.bg} ${s.text} flex items-center justify-center mb-3`}>
                   <s.icon className="h-5 w-5" />
                 </div>
                 <div className={`text-3xl font-bold ${s.text} tabular-nums`}>{s.value}</div>
                 <div className="text-xs font-bold uppercase tracking-wider text-foreground/40 mt-1">{s.label}</div>
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
 
             {/* ── Revenue by Patient ── */}
-            <motion.div variants={fadeUp} className="lg:col-span-1 glass rounded-3xl p-6 shadow-premium">
+            <div className="lg:col-span-1 glass rounded-3xl p-6 shadow-premium">
               <h3 className="font-bold text-foreground flex items-center gap-2 mb-5">
                 <Users className="h-5 w-5 text-primary" /> Revenue by Patient
               </h3>
@@ -147,8 +143,8 @@ export default function DoctorFinancesPage() {
                           <span className="text-sm font-bold text-emerald-600 shrink-0">${rev}</span>
                         </div>
                         <div className="h-2 rounded-full bg-foreground/5">
-                          <motion.div
-                            initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.7, delay: i * 0.05 }}
+                          <div
+                            style={{ width: `${pct}%` }}
                             className="h-full rounded-full bg-emerald-400" />
                         </div>
                         <div className="text-[10px] text-foreground/30 mt-0.5">{pct}% of total</div>
@@ -157,10 +153,10 @@ export default function DoctorFinancesPage() {
                   })}
                 </div>
               )}
-            </motion.div>
+            </div>
 
             {/* ── Summary Stats ── */}
-            <motion.div variants={fadeUp} className="lg:col-span-2 glass rounded-3xl p-6 shadow-premium">
+            <div className="lg:col-span-2 glass rounded-3xl p-6 shadow-premium">
               <h3 className="font-bold text-foreground flex items-center gap-2 mb-5">
                 <CalendarDays className="h-5 w-5 text-primary" /> Summary
               </h3>
@@ -187,15 +183,11 @@ export default function DoctorFinancesPage() {
                 <div className="h-3 rounded-full bg-foreground/5 overflow-hidden flex">
                   {(totalRevenue + lostRevenue) > 0 && (
                     <>
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${Math.round((totalRevenue / (totalRevenue + lostRevenue)) * 100)}%` }}
-                        transition={{ duration: 0.9 }}
+                      <div
+                        style={{ width: `${Math.round((totalRevenue / (totalRevenue + lostRevenue)) * 100)}%` }}
                         className="h-full bg-emerald-400 rounded-l-full" />
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${Math.round((lostRevenue / (totalRevenue + lostRevenue)) * 100)}%` }}
-                        transition={{ duration: 0.9, delay: 0.1 }}
+                      <div
+                        style={{ width: `${Math.round((lostRevenue / (totalRevenue + lostRevenue)) * 100)}%` }}
                         className="h-full bg-rose-300 rounded-r-full" />
                     </>
                   )}
@@ -205,11 +197,11 @@ export default function DoctorFinancesPage() {
                   <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-rose-300 inline-block" /> Lost (rejected)</span>
                 </div>
               </div>
-            </motion.div>
+            </div>
           </div>
 
           {/* ── Full Transaction History ── */}
-          <motion.div variants={fadeUp} className="glass rounded-3xl p-6 lg:p-8 shadow-premium">
+          <div className="glass rounded-3xl p-6 lg:p-8 shadow-premium">
             <div className="flex items-center justify-between mb-6">
               <h3 className="font-bold text-foreground flex items-center gap-2">
                 <Receipt className="h-5 w-5 text-primary" /> Transaction History
@@ -237,8 +229,7 @@ export default function DoctorFinancesPage() {
                     const pat = patients.find(p => p.id === a.patientId);
                     const isComplete = a.status === "completed";
                     return (
-                      <motion.div key={a.id}
-                        initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}
+                      <div key={a.id}
                         className="grid grid-cols-1 sm:grid-cols-5 gap-2 sm:gap-4 items-center rounded-2xl border border-foreground/5 bg-white px-4 py-3.5 hover:border-foreground/10 transition-all">
                         {/* Patient */}
                         <div className="col-span-2 flex items-center gap-3">
@@ -268,7 +259,7 @@ export default function DoctorFinancesPage() {
                             {isComplete ? "+" : ""}${a.price}
                           </span>
                         </div>
-                      </motion.div>
+                      </div>
                     );
                   })}
                 </div>
@@ -293,9 +284,9 @@ export default function DoctorFinancesPage() {
                 )}
               </>
             )}
-          </motion.div>
+          </div>
 
-        </motion.div>
+        </div>
       </RequireRole>
     </AppShell>
   );

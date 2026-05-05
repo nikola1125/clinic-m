@@ -58,7 +58,6 @@ export default function AdminHomePage() {
                 This administration console gives you full control over the clinic's digital presence. Add or modify doctor profiles and track appointments.
               </p>
             </div>
-            <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/3 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
           </div>
 
           {/* Stats */}
@@ -105,7 +104,7 @@ export default function AdminHomePage() {
                       const rev = completed.reduce((s, a) => s + a.price, 0);
                       const rate = docAppts.length > 0 ? Math.round((completed.length / docAppts.length) * 100) : 0;
                       return (
-                        <tr key={doc.id} className="border-b border-foreground/5 last:border-0 hover:bg-foreground/[0.02] transition-colors">
+                        <tr key={doc.id} className="border-b border-foreground/5 last:border-0 hover:bg-foreground/2 transition-colors">
                           <td className="py-3 px-2">
                             <div className="flex items-center gap-3">
                               <div className="h-8 w-8 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-xs">{doc.name.charAt(0)}</div>

@@ -36,7 +36,6 @@ export default function AdminLoginPage() {
     <AppShell title="HQ Login" nav={[]}>
       <div className="mx-auto max-w-lg pt-12">
         <div className="glass rounded-4xl p-8 lg:p-10 border-2 border-primary/20 shadow-premium relative overflow-hidden">
-          <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-48 h-48 bg-primary/10 rounded-full blur-2xl pointer-events-none" />
           
           <div className="relative z-10 flex flex-col items-center text-center">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-foreground text-white mb-6 shadow-lg">

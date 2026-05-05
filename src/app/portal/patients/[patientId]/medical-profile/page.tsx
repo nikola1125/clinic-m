@@ -53,6 +53,8 @@ export default function DoctorMedicalProfilePage() {
     api.setRole("doctor");
     setLoading(true);
     try {
+      // Ensure patient is linked to this doctor so we can read/write their profile
+      await api.linkPatient(patientId).catch(() => {});
       const [p, n, rx, meds, dx] = await Promise.all([
         api.getMedicalProfile(patientId).catch(() => ({})),
         api.getNotes(patientId).catch(() => []),
@@ -75,6 +77,7 @@ export default function DoctorMedicalProfilePage() {
   const saveProfile = async () => {
     setSaving(true);
     try {
+      api.setRole("doctor");
       const saved = await api.upsertMedicalProfile(patientId, profile);
       setProfile(saved);
       showToast("success", "Medical profile saved");
@@ -197,6 +200,7 @@ export default function DoctorMedicalProfilePage() {
                       {note.is_private && <span className="text-xs text-foreground/40">Private</span>}
                       <span className="text-xs text-foreground/40">{format(new Date(note.created_at), "PP")}</span>
                       <button onClick={async () => {
+                        api.setRole("doctor");
                         await api.deleteNote(patientId, note.id);
                         setNotes(notes.filter((n) => n.id !== note.id));
                         showToast("success", "Note deleted");
@@ -230,6 +234,7 @@ export default function DoctorMedicalProfilePage() {
                       <span className={`px-2 py-0.5 text-xs rounded-full ${STATUS_COLOR[rx.status]}`}>{rx.status}</span>
                       {rx.status === "active" && (
                         <button onClick={async () => {
+                          api.setRole("doctor");
                           const updated = await api.updatePrescriptionStatus(patientId, rx.id, "cancelled");
                           setPrescriptions(prescriptions.map((r) => r.id === rx.id ? updated : r));
                         }} className="text-xs text-red-500 hover:underline">Cancel</button>
@@ -262,6 +267,7 @@ export default function DoctorMedicalProfilePage() {
                       <span className={`px-2 py-0.5 text-xs rounded-full ${STATUS_COLOR[med.status]}`}>{med.status}</span>
                       {med.status === "active" && (
                         <button onClick={async () => {
+                          api.setRole("doctor");
                           const updated = await api.updateMedicationStatus(patientId, med.id, "stopped");
                           setMedications(medications.map((m) => m.id === med.id ? updated : m));
                         }} className="text-xs text-red-500 hover:underline">Stop</button>
@@ -397,6 +403,7 @@ function NoteForm({ patientId, onCreated, showToast }: { patientId: string; onCr
           if (!content.trim()) return;
           setSaving(true);
           try {
+            api.setRole("doctor");
             const n = await api.createNote(patientId, { category, content: content.trim(), is_private: isPrivate });
             onCreated(n);
             setContent(""); setOpen(false);
@@ -443,6 +450,7 @@ function PrescriptionForm({ patientId, onCreated, showToast }: { patientId: stri
           if (!f.medication_name.trim() || !f.dosage.trim() || !f.frequency.trim()) return;
           setSaving(true);
           try {
+            api.setRole("doctor");
             const rx = await api.createPrescription(patientId, {
               medication_name: f.medication_name, dosage: f.dosage, frequency: f.frequency,
               duration_days: f.duration_days ? +f.duration_days : undefined,
@@ -489,6 +497,7 @@ function MedicationForm({ patientId, onCreated, showToast }: { patientId: string
           if (!f.name.trim() || !f.dosage.trim() || !f.frequency.trim()) return;
           setSaving(true);
           try {
+            api.setRole("doctor");
             const m = await api.createMedication(patientId, {
               name: f.name, dosage: f.dosage, frequency: f.frequency,
               started_at: new Date(f.started_at).toISOString(),
@@ -544,6 +553,7 @@ function DiagnosisForm({ patientId, onCreated, showToast }: { patientId: string;
           if (!f.description.trim()) return;
           setSaving(true);
           try {
+            api.setRole("doctor");
             const d = await api.createDiagnosis(patientId, {
               icd_code: f.icd_code || undefined,
               description: f.description,

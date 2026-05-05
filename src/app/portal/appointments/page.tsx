@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { AppShell } from "@/components/AppShell";
 import { AutoSeed, RequireRole, DataLoader } from "@/components/RequireRole";
 import { formatDateTime } from "@/lib/format";
@@ -52,8 +51,6 @@ export default function DoctorAppointmentsPage() {
     rejected: myAppointments.filter((a) => a.status === "rejected").length,
   };
 
-  const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { duration: 0.4 } } };
-
   return (
     <AppShell
       title="Doctor Portal"
@@ -97,8 +94,7 @@ export default function DoctorAppointmentsPage() {
           </div>
 
           {/* Appointment List */}
-          <AnimatePresence mode="wait">
-            <motion.div key={filter} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+            <div>
               <div className="grid gap-4">
                 {filtered.length === 0 ? (
                   <div className="glass rounded-4xl p-12 text-center shadow-premium bg-white/50">
@@ -118,9 +114,7 @@ export default function DoctorAppointmentsPage() {
                     const StatusIcon = cfg.icon;
 
                     return (
-                      <motion.div key={a.id}
-                        variants={fadeUp} initial="hidden" animate="show"
-                        transition={{ delay: idx * 0.04 }}
+                      <div key={a.id}
                         className={`glass rounded-3xl p-5 sm:p-6 shadow-sm border-2 ${cfg.border}/30 transition-all hover:shadow-md group`}>
                         <div className="flex flex-col lg:flex-row justify-between gap-5">
                           {/* Left Info */}
@@ -190,13 +184,12 @@ export default function DoctorAppointmentsPage() {
                             )}
                           </div>
                         </div>
-                      </motion.div>
+                      </div>
                     );
                   })
                 )}
               </div>
-            </motion.div>
-          </AnimatePresence>
+            </div>
         </div>
       </RequireRole>
     </AppShell>
