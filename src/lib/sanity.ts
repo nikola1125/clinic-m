@@ -8,7 +8,7 @@ export const apiVersion = "2024-01-01";
 export const sanityConfigured = Boolean(projectId);
 
 export const client: SanityClient = sanityConfigured
-  ? createClient({ projectId, dataset, apiVersion, useCdn: true })
+  ? createClient({ projectId, dataset, apiVersion, useCdn: false })
   : (new Proxy({} as SanityClient, {
       get: (_t, prop) => {
         if (prop === "fetch") return async () => null;
