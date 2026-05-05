@@ -12,7 +12,7 @@ import {
 import Link from "next/link";
 import { format, isToday, isTomorrow } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
-import { api, type Prescription, type Diagnosis } from "@/lib/api";
+import { api, type Prescription, type Diagnosis, type ActiveMedication, type MedicalProfile } from "@/lib/api";
 
 const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
 const staggerContainer = { show: { transition: { staggerChildren: 0.08 } } };
@@ -46,6 +46,9 @@ export default function PatientDashboard() {
   const [activeTab, setActiveTab] = useState<"upcoming" | "accepted" | "history">("upcoming");
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [diagnoses, setDiagnoses] = useState<Diagnosis[]>([]);
+  const [medications, setMedications] = useState<ActiveMedication[]>([]);
+  const [medicalProfile, setMedicalProfile] = useState<MedicalProfile | null>(null);
+  const [countdown, setCountdown] = useState("");
 
   useEffect(() => {
     if (!hasHydrated) {
@@ -67,11 +70,38 @@ export default function PatientDashboard() {
       refreshDoctors(),
       api.getMyPrescriptions().catch(() => []),
       api.getMyDiagnoses().catch(() => []),
-    ]).then(([, , , rx, dx]) => {
+      api.getMyMedications().catch(() => []),
+      api.getMyMedicalProfile().catch(() => null),
+    ]).then(([, , , rx, dx, meds, profile]) => {
       setPrescriptions(rx as Prescription[]);
       setDiagnoses(dx as Diagnosis[]);
+      setMedications((meds ?? []) as ActiveMedication[]);
+      setMedicalProfile((profile ?? null) as MedicalProfile | null);
     }).finally(() => setLoading(false));
   }, [hasHydrated, session, router, refreshPatients, refreshAppointments, refreshDoctors]);
+
+  // Countdown timer for next appointment
+  const patientId = session?.patientId ?? "";
+  useEffect(() => {
+    if (!patientId) return;
+    const updateCountdown = () => {
+      const next = appointments
+        .filter(a => a.patientId === patientId && (a.status === "accepted" || a.status === "pending"))
+        .sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime())[0];
+      if (!next) { setCountdown(""); return; }
+      const diff = new Date(next.scheduledAt).getTime() - Date.now();
+      if (diff <= 0) { setCountdown("Now"); return; }
+      const days = Math.floor(diff / 86400000);
+      const hrs = Math.floor((diff % 86400000) / 3600000);
+      const mins = Math.floor((diff % 3600000) / 60000);
+      if (days > 0) setCountdown(`${days}d ${hrs}h`);
+      else if (hrs > 0) setCountdown(`${hrs}h ${mins}m`);
+      else setCountdown(`${mins}m`);
+    };
+    updateCountdown();
+    const id = setInterval(updateCountdown, 30000);
+    return () => clearInterval(id);
+  }, [appointments, patientId]);
 
   if (!hasHydrated || !session) return (
     <div className="flex min-h-screen items-center justify-center">
@@ -112,31 +142,39 @@ export default function PatientDashboard() {
       <motion.div className="max-w-6xl mx-auto pb-12" variants={staggerContainer} initial="hidden" animate="show">
         
         {/* ── Hero Welcome ── */}
-        <motion.div variants={fadeUp} className="glass rounded-3xl p-8 lg:p-10 mb-8 shadow-premium relative overflow-hidden">
-          <div className="relative z-10 flex flex-col lg:flex-row gap-8">
+        <motion.div variants={fadeUp} className="glass rounded-3xl p-5 sm:p-8 lg:p-10 mb-6 sm:mb-8 shadow-premium relative overflow-hidden">
+          <div className="relative z-10 flex flex-col lg:flex-row gap-5 sm:gap-8">
             <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
                 <span className="text-sm font-bold text-primary">{getGreeting()}</span>
-                <span className="text-foreground/30">|</span>
-                <span className="text-sm text-foreground/60">{format(new Date(), "EEEE, MMMM d, yyyy")}</span>
+                <span className="text-foreground/30 hidden sm:inline">|</span>
+                <span className="text-xs sm:text-sm text-foreground/60">{format(new Date(), "EEE, MMM d, yyyy")}</span>
               </div>
-              <h1 className="text-3xl lg:text-4xl font-bold text-foreground">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">
                 {patient?.fullName || "Welcome back"}
               </h1>
-              <p className="mt-2 text-foreground/60 max-w-lg">
+              <p className="mt-2 text-sm sm:text-base text-foreground/60 max-w-lg">
                 Track your appointments, manage prescriptions, and stay connected with your healthcare team.
               </p>
             </div>
             
             {nextAppt && (
               <div className="lg:w-80 shrink-0">
-                <div className="rounded-2xl bg-primary text-white p-5 shadow-lg">
+                <div className="rounded-2xl bg-primary text-white p-4 sm:p-5 shadow-lg">
                   <div className="flex items-center gap-2 mb-3">
                     <Video className="h-4 w-4 opacity-80" />
                     <span className="text-xs font-bold uppercase tracking-wider opacity-80">Next Appointment</span>
                   </div>
-                  <div className="text-2xl font-bold">{getApptTimeLabel(nextAppt.scheduledAt)}</div>
-                  <div className="text-sm opacity-90">{format(new Date(nextAppt.scheduledAt), "h:mm a")}</div>
+                  <div className="text-xl sm:text-2xl font-bold">{getApptTimeLabel(nextAppt.scheduledAt)}</div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm opacity-90">{format(new Date(nextAppt.scheduledAt), "h:mm a")}</span>
+                    {countdown && (
+                      <span className="flex items-center gap-1 text-xs font-bold bg-white/20 px-2 py-0.5 rounded-full">
+                        <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+                        {countdown}
+                      </span>
+                    )}
+                  </div>
                   <div className="mt-3 flex items-center gap-2">
                     <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center text-sm font-bold">
                       {getDoctor(nextAppt.doctorId)?.name?.charAt(0) || "D"}
@@ -323,6 +361,105 @@ export default function PatientDashboard() {
               </div>
             )}
 
+            {/* ── Medical Profile + Medications ── */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+              {/* Medical Profile Summary */}
+              <motion.div variants={fadeUp} className="glass rounded-3xl p-6 shadow-premium">
+                <div className="flex items-center gap-2 mb-4">
+                  <HeartPulse className="h-5 w-5 text-primary" />
+                  <h2 className="text-base font-bold">Medical Profile</h2>
+                </div>
+                {medicalProfile ? (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                      {medicalProfile.blood_type && (
+                        <div className="rounded-xl bg-red-50 border border-red-100 p-2 sm:p-3 text-center">
+                          <div className="text-base sm:text-lg font-bold text-red-600">{medicalProfile.blood_type}</div>
+                          <div className="text-[9px] sm:text-[10px] font-bold text-red-400 uppercase">Blood Type</div>
+                        </div>
+                      )}
+                      {medicalProfile.height_cm && (
+                        <div className="rounded-xl bg-blue-50 border border-blue-100 p-2 sm:p-3 text-center">
+                          <div className="text-base sm:text-lg font-bold text-blue-600">{medicalProfile.height_cm}<span className="text-xs">cm</span></div>
+                          <div className="text-[9px] sm:text-[10px] font-bold text-blue-400 uppercase">Height</div>
+                        </div>
+                      )}
+                      {medicalProfile.weight_kg && (
+                        <div className="rounded-xl bg-emerald-50 border border-emerald-100 p-2 sm:p-3 text-center">
+                          <div className="text-base sm:text-lg font-bold text-emerald-600">{medicalProfile.weight_kg}<span className="text-xs">kg</span></div>
+                          <div className="text-[9px] sm:text-[10px] font-bold text-emerald-400 uppercase">Weight</div>
+                        </div>
+                      )}
+                    </div>
+                    {Array.isArray(medicalProfile.allergies) && medicalProfile.allergies.length > 0 && (
+                      <div>
+                        <div className="text-xs font-bold text-foreground/40 uppercase mb-2">Allergies</div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {medicalProfile.allergies.map((a, i) => (
+                            <span key={i} className="rounded-full bg-red-100 text-red-700 px-2.5 py-1 text-[11px] font-bold">{String(a)}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {Array.isArray(medicalProfile.chronic_conditions) && medicalProfile.chronic_conditions.length > 0 && (
+                      <div>
+                        <div className="text-xs font-bold text-foreground/40 uppercase mb-2">Chronic Conditions</div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {medicalProfile.chronic_conditions.map((c, i) => (
+                            <span key={i} className="rounded-full bg-amber-100 text-amber-700 px-2.5 py-1 text-[11px] font-bold">{String(c)}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {medicalProfile.emergency_contact && Object.keys(medicalProfile.emergency_contact).length > 0 && (
+                      <div className="rounded-xl bg-foreground/5 p-3">
+                        <div className="text-[10px] font-bold text-foreground/40 uppercase mb-1">Emergency Contact</div>
+                        <div className="text-sm font-bold text-foreground">
+                          {String(medicalProfile.emergency_contact.name || medicalProfile.emergency_contact.phone || "Set")}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-sm text-foreground/40 text-center py-6">No medical profile data yet</div>
+                )}
+              </motion.div>
+
+              {/* Active Medications */}
+              <motion.div variants={fadeUp} className="glass rounded-3xl p-6 shadow-premium">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Pill className="h-5 w-5 text-blue-500" />
+                    <h2 className="text-base font-bold">Active Medications</h2>
+                  </div>
+                  <Link href="/patient/medical-record" className="text-xs text-primary hover:underline flex items-center gap-1">
+                    View all <ArrowRight className="h-3 w-3" />
+                  </Link>
+                </div>
+                {medications.filter(m => m.status === "active").length === 0 ? (
+                  <p className="text-sm text-foreground/40 text-center py-6">No active medications</p>
+                ) : (
+                  <div className="space-y-2">
+                    {medications.filter(m => m.status === "active").slice(0, 5).map(med => (
+                      <div key={med.id} className="flex items-center gap-3 rounded-xl bg-blue-50/50 border border-blue-100 p-3">
+                        <div className="h-9 w-9 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
+                          <Pill className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-foreground truncate">{med.name}</p>
+                          <p className="text-xs text-foreground/50">{med.dosage} &middot; {med.frequency}</p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <div className="text-[10px] text-foreground/30">{format(new Date(med.started_at), "MMM d")}</div>
+                          {med.ends_at && <div className="text-[10px] text-foreground/30">&rarr; {format(new Date(med.ends_at), "MMM d")}</div>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            </div>
+
             {/* ── My Doctors & Profile ── */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
               <motion.div variants={fadeUp} className="lg:col-span-2">
@@ -366,6 +503,76 @@ export default function PatientDashboard() {
                 </div>
               </motion.div>
             </div>
+
+            {/* ── Health Timeline ── */}
+            <motion.div variants={fadeUp} className="glass rounded-3xl p-4 sm:p-6 lg:p-8 shadow-premium mt-6 sm:mt-8">
+              <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-5">
+                <Activity className="h-5 w-5 text-primary" />
+                <h2 className="text-base sm:text-lg font-bold text-foreground">Health Timeline</h2>
+              </div>
+              {(() => {
+                type TimelineItem = { id: string; date: string; type: "appointment" | "prescription" | "diagnosis"; label: string; detail: string; color: string; bgColor: string };
+                const items: TimelineItem[] = [
+                  ...myAppts.map(a => ({
+                    id: `a-${a.id}`,
+                    date: a.scheduledAt,
+                    type: "appointment" as const,
+                    label: `${a.status === "completed" ? "Visit completed" : a.status === "accepted" ? "Upcoming visit" : a.status === "pending" ? "Pending visit" : "Cancelled visit"}`,
+                    detail: `${getDoctor(a.doctorId)?.name || "Doctor"} · $${a.price}`,
+                    color: a.status === "completed" ? "text-blue-600" : a.status === "accepted" ? "text-emerald-600" : a.status === "pending" ? "text-amber-600" : "text-red-600",
+                    bgColor: a.status === "completed" ? "bg-blue-100" : a.status === "accepted" ? "bg-emerald-100" : a.status === "pending" ? "bg-amber-100" : "bg-red-100",
+                  })),
+                  ...prescriptions.map(rx => ({
+                    id: `rx-${rx.id}`,
+                    date: rx.issued_at,
+                    type: "prescription" as const,
+                    label: `Prescription: ${rx.medication_name}`,
+                    detail: `${rx.dosage} · ${rx.frequency}`,
+                    color: "text-rose-600",
+                    bgColor: "bg-rose-100",
+                  })),
+                  ...diagnoses.map(dx => ({
+                    id: `dx-${dx.id}`,
+                    date: dx.diagnosed_at,
+                    type: "diagnosis" as const,
+                    label: `Diagnosis: ${dx.description}`,
+                    detail: dx.icd_code ? `ICD: ${dx.icd_code} · ${dx.status}` : dx.status,
+                    color: "text-purple-600",
+                    bgColor: "bg-purple-100",
+                  })),
+                ];
+                items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+                if (items.length === 0) return (
+                  <div className="rounded-2xl border border-dashed border-foreground/10 p-10 text-center">
+                    <Activity className="h-8 w-8 text-foreground/20 mx-auto mb-3" />
+                    <div className="text-sm font-bold text-foreground/40">No health events recorded yet</div>
+                  </div>
+                );
+
+                return (
+                  <div className="relative">
+                    <div className="absolute left-4 sm:left-5 top-0 bottom-0 w-px bg-foreground/10" />
+                    <div className="space-y-2.5 sm:space-y-3">
+                      {items.slice(0, 15).map(item => (
+                        <div key={item.id} className="relative pl-10 sm:pl-12">
+                          <div className={`absolute left-1.5 sm:left-2.5 top-3 h-5 w-5 rounded-full ${item.bgColor} ${item.color} flex items-center justify-center z-10`}>
+                            {item.type === "appointment" ? <Calendar className="h-3 w-3" /> : item.type === "prescription" ? <Pill className="h-3 w-3" /> : <Stethoscope className="h-3 w-3" />}
+                          </div>
+                          <div className="rounded-xl border border-foreground/5 bg-white p-2.5 sm:p-3">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-0.5 sm:gap-0">
+                              <span className="text-xs sm:text-sm font-bold text-foreground">{item.label}</span>
+                              <span className="text-[10px] text-foreground/40 shrink-0">{format(new Date(item.date), "MMM d, yyyy")}</span>
+                            </div>
+                            <div className="text-xs text-foreground/50 mt-0.5">{item.detail}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+            </motion.div>
           </>
         )}
       </motion.div>

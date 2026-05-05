@@ -9,8 +9,10 @@ import { useClinicStore } from "@/store/clinicStore";
 import { api } from "@/lib/api";
 import {
   ArrowLeft, UserCircle, Mail, Phone, FileText,
-  Calendar, UserPlus, UserMinus, Loader2,
+  Calendar, UserPlus, UserMinus, Loader2, Clock,
+  CheckCircle2, XCircle, Video, CheckCheck,
 } from "lucide-react";
+import { format } from "date-fns";
 
 export default function DoctorPatientDetailsPage({
   params,
@@ -19,6 +21,7 @@ export default function DoctorPatientDetailsPage({
 }) {
   const { patientId } = use(params);
   const patients = useClinicStore((s) => s.patients);
+  const appointments = useClinicStore((s) => s.appointments);
   const refreshPatients = useClinicStore((s) => s.refreshPatients);
 
   const patient = useMemo(
@@ -64,6 +67,7 @@ export default function DoctorPatientDetailsPage({
         { label: "Dashboard", href: "/portal" },
         { label: "Appointments", href: "/portal/appointments" },
         { label: "Patients", href: "/portal/patients" },
+        { label: "Schedule", href: "/portal/schedule" },
       ]}
     >
       <AutoSeed />
@@ -137,6 +141,68 @@ export default function DoctorPatientDetailsPage({
               </div>
 
               <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/3 w-[300px] h-[300px] bg-primary/5 rounded-full blur-[80px] pointer-events-none" />
+            </div>
+
+            {/* Patient Timeline */}
+            <div className="glass rounded-4xl p-4 sm:p-6 lg:p-8 shadow-premium">
+              <h2 className="text-base sm:text-lg font-bold text-foreground flex items-center gap-2 mb-4 sm:mb-5">
+                <Clock className="h-5 w-5 text-primary" /> Appointment Timeline
+              </h2>
+              {(() => {
+                const patAppts = appointments
+                  .filter(a => a.patientId === patientId)
+                  .sort((a, b) => new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime());
+                if (patAppts.length === 0) return (
+                  <div className="rounded-2xl border border-dashed border-foreground/10 p-10 text-center">
+                    <Calendar className="h-8 w-8 text-foreground/20 mx-auto mb-3" />
+                    <div className="text-sm font-bold text-foreground/40">No appointments with this patient yet</div>
+                  </div>
+                );
+                return (
+                  <div className="relative">
+                    <div className="absolute left-4 sm:left-5 top-0 bottom-0 w-px bg-foreground/10" />
+                    <div className="space-y-3 sm:space-y-4">
+                      {patAppts.map(a => {
+                        const statusCfg: Record<string, { icon: typeof Clock; bg: string; text: string }> = {
+                          pending:   { icon: Clock, bg: "bg-amber-100", text: "text-amber-600" },
+                          accepted:  { icon: CheckCircle2, bg: "bg-emerald-100", text: "text-emerald-600" },
+                          completed: { icon: CheckCheck, bg: "bg-blue-100", text: "text-blue-600" },
+                          rejected:  { icon: XCircle, bg: "bg-red-100", text: "text-red-600" },
+                        };
+                        const cfg = statusCfg[a.status] ?? statusCfg.pending;
+                        const Icon = cfg.icon;
+                        return (
+                          <div key={a.id} className="relative pl-10 sm:pl-12">
+                            <div className={`absolute left-1.5 sm:left-2.5 top-3 h-5 w-5 rounded-full ${cfg.bg} ${cfg.text} flex items-center justify-center z-10`}>
+                              <Icon className="h-3 w-3" />
+                            </div>
+                            <div className="rounded-xl sm:rounded-2xl border border-foreground/5 bg-white p-3 sm:p-4 hover:border-primary/10 transition-colors">
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-0">
+                                <div className="text-xs sm:text-sm font-bold text-foreground">
+                                  {format(new Date(a.scheduledAt), "MMM d, yyyy")}
+                                  <span className="text-foreground/40 font-normal"> at </span>
+                                  {format(new Date(a.scheduledAt), "h:mm a")}
+                                </div>
+                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase w-fit ${cfg.bg} ${cfg.text}`}>
+                                  {a.status}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-3 mt-1.5 sm:mt-2 text-xs text-foreground/50">
+                                <span>${a.price}</span>
+                                {a.status === "accepted" && (
+                                  <Link href={`/meet/${a.id}?role=doctor`} className="flex items-center gap-1 text-emerald-600 font-bold hover:underline">
+                                    <Video className="h-3 w-3" /> Join meeting
+                                  </Link>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
 
           </motion.div>

@@ -74,6 +74,7 @@ export default function DoctorFinancesPage() {
       { label: "Dashboard",    href: "/portal" },
       { label: "Appointments", href: "/portal/appointments" },
       { label: "Patients",     href: "/portal/patients" },
+      { label: "Schedule",     href: "/portal/schedule" },
     ]}>
       <RequireRole role="doctor">
         <DataLoader role="doctor" />

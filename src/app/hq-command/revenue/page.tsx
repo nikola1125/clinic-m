@@ -35,6 +35,8 @@ export default function AdminRevenuePage() {
       nav={[
         { label: "Overview", href: "/hq-command" },
         { label: "Doctors", href: "/hq-command/doctors" },
+        { label: "Patients", href: "/hq-command/patients" },
+        { label: "Appointments", href: "/hq-command/appointments" },
         { label: "Revenue", href: "/hq-command/revenue" },
       ]}
     >
@@ -96,33 +98,60 @@ export default function AdminRevenuePage() {
               <Calendar className="h-5 w-5 text-primary" /> Monthly Breakdown
             </div>
             
-            <div className="grid gap-3">
-              {months.length === 0 ? (
-                <div className="rounded-2xl border border-foreground/5 bg-white/50 p-8 text-center text-sm text-foreground">
-                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-foreground/5 mb-3">
-                    <DollarSign className="h-5 w-5 text-foreground" />
-                  </div>
-                  No completed revenue yet.
+            {months.length === 0 ? (
+              <div className="rounded-2xl border border-foreground/5 bg-white/50 p-8 text-center text-sm text-foreground">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-foreground/5 mb-3">
+                  <DollarSign className="h-5 w-5 text-foreground" />
                 </div>
-              ) : (
-                months.map(([k, v]) => (
-                  <div
-                    key={k}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between rounded-2xl border border-foreground/5 bg-white p-5 transition-colors hover:border-primary/20 hover:shadow-sm gap-4"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-foreground/5 text-foreground">
-                        <Calendar className="h-5 w-5" />
+                No completed revenue yet.
+              </div>
+            ) : (
+              <>
+                {/* Bar Chart */}
+                <div className="flex items-end gap-3 h-56 px-2">
+                  {months.map(([k, v]) => {
+                    const maxVal = Math.max(...months.map(([, val]) => val));
+                    const pct = maxVal > 0 ? (v / maxVal) * 100 : 0;
+                    return (
+                      <div key={k} className="flex-1 flex flex-col items-center gap-2 group">
+                        <div className="text-xs font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity bg-primary/10 px-2 py-1 rounded-lg whitespace-nowrap">
+                          ${v.toLocaleString()}
+                        </div>
+                        <div className="w-full flex justify-center">
+                          <div
+                            className="w-full max-w-[48px] rounded-t-xl bg-gradient-to-t from-primary to-primary/60 transition-all duration-500 group-hover:from-primary group-hover:to-primary/80 group-hover:shadow-lg"
+                            style={{ height: `${Math.max(pct, 4)}%`, minHeight: 8 }}
+                          />
+                        </div>
+                        <div className="text-[10px] font-bold text-foreground/50 whitespace-nowrap">
+                          {k.split("-")[1]}/{k.split("-")[0]?.slice(2)}
+                        </div>
                       </div>
-                      <div className="text-lg font-bold text-foreground">{k}</div>
+                    );
+                  })}
+                </div>
+
+                {/* Detail list below chart */}
+                <div className="grid gap-3 mt-6">
+                  {months.map(([k, v]) => (
+                    <div
+                      key={k}
+                      className="flex flex-col sm:flex-row sm:items-center justify-between rounded-2xl border border-foreground/5 bg-white p-5 transition-colors hover:border-primary/20 hover:shadow-sm gap-4"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-foreground/5 text-foreground">
+                          <Calendar className="h-5 w-5" />
+                        </div>
+                        <div className="text-lg font-bold text-foreground">{k}</div>
+                      </div>
+                      <div className="text-2xl font-bold text-primary px-4 py-2 bg-primary/5 rounded-xl self-start sm:self-auto">
+                        ${v.toLocaleString()}
+                      </div>
                     </div>
-                    <div className="text-2xl font-bold text-primary px-4 py-2 bg-primary/5 rounded-xl self-start sm:self-auto">
-                      ${v.toLocaleString()}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </RequireRole>

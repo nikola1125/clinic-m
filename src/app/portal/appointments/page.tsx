@@ -61,6 +61,7 @@ export default function DoctorAppointmentsPage() {
         { label: "Dashboard", href: "/portal" },
         { label: "Appointments", href: "/portal/appointments" },
         { label: "Patients", href: "/portal/patients" },
+        { label: "Schedule", href: "/portal/schedule" },
       ]}
     >
       <AutoSeed />

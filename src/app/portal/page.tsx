@@ -7,7 +7,7 @@ import { AppShell } from "@/components/AppShell";
 import { RequireRole, DataLoader } from "@/components/RequireRole";
 import { formatDateTime } from "@/lib/format";
 import { useClinicStore } from "@/store/clinicStore";
-import { format, isToday, isTomorrow, startOfMonth, isAfter, isBefore } from "date-fns";
+import { format, isToday, isTomorrow, startOfMonth, startOfWeek, addDays, isSameDay, isAfter, isBefore } from "date-fns";
 import {
   UserCircle, Calendar, CalendarCheck, Clock, Users, ArrowRight, Video,
   CheckCircle2, XCircle, TrendingUp, Activity, Stethoscope, Bell,
@@ -93,6 +93,7 @@ export default function DoctorHomePage() {
 
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<"pending" | "upcoming" | "history">("pending");
+  const [selectedDay, setSelectedDay] = useState<Date | null>(null);
 
   const doctorId = session?.role === "doctor" ? session.doctorId : null;
   const doctor = doctors.find((d) => d.id === doctorId) ?? null;
@@ -142,6 +143,7 @@ export default function DoctorHomePage() {
       { label: "Dashboard",     href: "/portal" },
       { label: "Appointments",  href: "/portal/appointments" },
       { label: "Patients",      href: "/portal/patients" },
+      { label: "Schedule",      href: "/portal/schedule" },
     ]}>
       <RequireRole role="doctor">
         <DataLoader role="doctor" />
@@ -214,6 +216,83 @@ export default function DoctorHomePage() {
                 <div className="text-xs font-bold uppercase tracking-wider text-foreground/40 mt-1">{stat.label}</div>
               </motion.div>
             ))}
+          </motion.div>
+
+          {/* ── Weekly Mini-Calendar ── */}
+          <motion.div variants={fadeUp} className="glass rounded-3xl p-3 sm:p-5 shadow-premium">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-bold text-foreground/50 uppercase tracking-wider">This Week</h3>
+              {selectedDay && (
+                <button onClick={() => setSelectedDay(null)} className="text-[10px] font-bold text-primary hover:underline">
+                  Clear filter
+                </button>
+              )}
+            </div>
+            <div className="grid grid-cols-7 gap-1 sm:gap-2">
+              {Array.from({ length: 7 }).map((_, i) => {
+                const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
+                const day = addDays(weekStart, i);
+                const dayAppts = myAppointments.filter(a => isSameDay(new Date(a.scheduledAt), day));
+                const isSelected = selectedDay ? isSameDay(day, selectedDay) : false;
+                const today = isToday(day);
+                return (
+                  <button
+                    key={i}
+                    onClick={() => setSelectedDay(isSelected ? null : day)}
+                    className={`flex flex-col items-center gap-0.5 sm:gap-1 rounded-xl sm:rounded-2xl p-1.5 sm:p-3 transition-all ${
+                      isSelected
+                        ? "bg-primary text-white shadow-sm"
+                        : today
+                          ? "bg-primary/10 text-primary"
+                          : "hover:bg-foreground/5"
+                    }`}
+                  >
+                    <span className={`text-[10px] font-bold uppercase ${isSelected ? "text-white/70" : "text-foreground/40"}`}>
+                      {format(day, "EEE")}
+                    </span>
+                    <span className={`text-sm sm:text-lg font-bold ${isSelected ? "text-white" : today ? "text-primary" : "text-foreground"}`}>
+                      {format(day, "d")}
+                    </span>
+                    {dayAppts.length > 0 && (
+                      <div className="flex gap-0.5">
+                        {dayAppts.slice(0, 3).map((a, j) => (
+                          <div
+                            key={j}
+                            className={`h-1.5 w-1.5 rounded-full ${
+                              isSelected ? "bg-white/60" :
+                              a.status === "pending" ? "bg-amber-400" :
+                              a.status === "accepted" ? "bg-emerald-400" : "bg-blue-400"
+                            }`}
+                          />
+                        ))}
+                        {dayAppts.length > 3 && (
+                          <span className={`text-[8px] font-bold ${isSelected ? "text-white/60" : "text-foreground/30"}`}>+{dayAppts.length - 3}</span>
+                        )}
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+            {selectedDay && (() => {
+              const dayAppts = myAppointments.filter(a => isSameDay(new Date(a.scheduledAt), selectedDay));
+              return dayAppts.length > 0 ? (
+                <div className="mt-4 grid gap-2">
+                  {dayAppts.map(a => {
+                    const pat = patients.find(p => p.id === a.patientId);
+                    return (
+                      <div key={a.id} className="flex items-center gap-2 sm:gap-3 rounded-xl bg-white border border-foreground/5 p-2.5 sm:p-3">
+                        <div className="text-[10px] sm:text-xs font-bold text-foreground/50 w-14 sm:w-16 text-center shrink-0">{format(new Date(a.scheduledAt), "h:mm a")}</div>
+                        <div className="flex-1 text-xs sm:text-sm font-bold text-foreground truncate">{pat?.fullName || "Patient"}</div>
+                        <span className={`text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-full font-bold uppercase shrink-0 ${a.status === "pending" ? "bg-amber-100 text-amber-700" : a.status === "accepted" ? "bg-emerald-100 text-emerald-700" : a.status === "completed" ? "bg-blue-100 text-blue-700" : "bg-red-100 text-red-700"}`}>{a.status}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="mt-4 text-center text-sm text-foreground/30 py-3">No appointments on {format(selectedDay, "EEEE")}</div>
+              );
+            })()}
           </motion.div>
 
           {/* ── Today's Schedule ── */}

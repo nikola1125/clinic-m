@@ -37,6 +37,8 @@ export default function AdminHomePage() {
       nav={[
         { label: "Overview", href: "/hq-command" },
         { label: "Doctors", href: "/hq-command/doctors" },
+        { label: "Patients", href: "/hq-command/patients" },
+        { label: "Appointments", href: "/hq-command/appointments" },
         { label: "Revenue", href: "/hq-command/revenue" },
       ]}
     >
@@ -75,31 +77,74 @@ export default function AdminHomePage() {
             ))}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Doctors list */}
-            <div className="glass rounded-4xl p-6 shadow-premium">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="font-bold text-foreground flex items-center gap-2"><Stethoscope className="h-5 w-5 text-primary" /> Doctors ({doctors.length})</h3>
-                <Link href="/hq-command/doctors" className="text-xs font-bold text-primary flex items-center gap-1 hover:underline">Manage <ArrowRight className="h-3 w-3" /></Link>
-              </div>
-              <div className="grid gap-3">
-                {doctors.slice(0, 5).map(doc => (
-                  <div key={doc.id} className="flex items-center gap-4 rounded-2xl border border-foreground/5 bg-white p-4">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center">{doc.name.charAt(0)}</div>
-                    <div className="flex-1 min-w-0">
-                      <div className="font-bold text-foreground truncate">{doc.name}</div>
-                      <div className="text-xs text-foreground/50">{doc.specialty}</div>
-                    </div>
-                    <div className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">Active</div>
-                  </div>
-                ))}
-                {doctors.length === 0 && <div className="text-sm text-foreground/40 py-4 text-center">No doctors yet</div>}
-              </div>
+          {/* Doctor Performance */}
+          <div className="glass rounded-4xl p-4 sm:p-6 shadow-premium">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <h3 className="text-sm sm:text-base font-bold text-foreground flex items-center gap-2"><Stethoscope className="h-5 w-5 text-primary" /> Doctor Performance</h3>
+              <Link href="/hq-command/doctors" className="text-xs font-bold text-primary flex items-center gap-1 hover:underline">Manage <ArrowRight className="h-3 w-3" /></Link>
             </div>
+            {doctors.length === 0 ? (
+              <div className="text-sm text-foreground/40 py-4 text-center">No doctors yet</div>
+            ) : (
+              <div className="overflow-x-auto -mx-4 sm:-mx-6 px-4 sm:px-6">
+                <table className="w-full text-sm min-w-[500px]">
+                  <thead>
+                    <tr className="border-b border-foreground/5">
+                      <th className="text-left py-3 px-2 text-xs font-bold uppercase tracking-wider text-foreground/40">Doctor</th>
+                      <th className="text-center py-3 px-2 text-xs font-bold uppercase tracking-wider text-foreground/40">Appts</th>
+                      <th className="text-center py-3 px-2 text-xs font-bold uppercase tracking-wider text-foreground/40">Revenue</th>
+                      <th className="text-center py-3 px-2 text-xs font-bold uppercase tracking-wider text-foreground/40">Rate</th>
+                      <th className="text-center py-3 px-2 text-xs font-bold uppercase tracking-wider text-foreground/40">Pending</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {doctors.map(doc => {
+                      const docAppts = appointments.filter(a => a.doctorId === doc.id);
+                      const completed = docAppts.filter(a => a.status === "completed");
+                      const pending = docAppts.filter(a => a.status === "pending").length;
+                      const rev = completed.reduce((s, a) => s + a.price, 0);
+                      const rate = docAppts.length > 0 ? Math.round((completed.length / docAppts.length) * 100) : 0;
+                      return (
+                        <tr key={doc.id} className="border-b border-foreground/5 last:border-0 hover:bg-foreground/[0.02] transition-colors">
+                          <td className="py-3 px-2">
+                            <div className="flex items-center gap-3">
+                              <div className="h-8 w-8 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-xs">{doc.name.charAt(0)}</div>
+                              <div>
+                                <div className="font-bold text-foreground">{doc.name}</div>
+                                <div className="text-[11px] text-foreground/40">{doc.specialty}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-3 px-2 text-center font-bold text-foreground">{docAppts.length}</td>
+                          <td className="py-3 px-2 text-center font-bold text-emerald-600">${rev}</td>
+                          <td className="py-3 px-2 text-center">
+                            <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold ${rate >= 70 ? "bg-emerald-50 text-emerald-700" : rate >= 40 ? "bg-amber-50 text-amber-700" : "bg-red-50 text-red-700"}`}>
+                              {rate}%
+                            </span>
+                          </td>
+                          <td className="py-3 px-2 text-center">
+                            {pending > 0 ? (
+                              <span className="inline-block rounded-full bg-amber-50 text-amber-700 px-2 py-0.5 text-[10px] font-bold">{pending}</span>
+                            ) : (
+                              <span className="text-foreground/20 text-xs">—</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
 
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Recent Appointments */}
             <div className="glass rounded-4xl p-6 shadow-premium">
-              <h3 className="font-bold text-foreground flex items-center gap-2 mb-4"><Calendar className="h-5 w-5 text-primary" /> Recent Appointments</h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-bold text-foreground flex items-center gap-2"><Calendar className="h-5 w-5 text-primary" /> Recent Appointments</h3>
+                <Link href="/hq-command/appointments" className="text-xs font-bold text-primary flex items-center gap-1 hover:underline">View All <ArrowRight className="h-3 w-3" /></Link>
+              </div>
               <div className="space-y-3">
                 {recentAppts.length === 0 ? (
                   <div className="text-sm text-foreground/40 py-6 text-center">No appointments yet</div>
@@ -119,6 +164,27 @@ export default function AdminHomePage() {
                     </div>
                   );
                 })}
+              </div>
+            </div>
+
+            {/* Quick Links */}
+            <div className="glass rounded-4xl p-6 shadow-premium">
+              <h3 className="font-bold text-foreground flex items-center gap-2 mb-4"><Users className="h-5 w-5 text-primary" /> Quick Links</h3>
+              <div className="grid gap-3">
+                {[
+                  { label: "Manage Patients", desc: `${patients.length} registered`, href: "/hq-command/patients", bg: "bg-emerald-50", color: "text-emerald-600", icon: Users },
+                  { label: "View All Appointments", desc: `${stats.pending} pending`, href: "/hq-command/appointments", bg: "bg-amber-50", color: "text-amber-600", icon: Calendar },
+                  { label: "Revenue Details", desc: `$${stats.revenue} total`, href: "/hq-command/revenue", bg: "bg-rose-50", color: "text-rose-600", icon: DollarSign },
+                ].map(link => (
+                  <Link key={link.href} href={link.href} className="flex items-center gap-4 rounded-2xl border border-foreground/5 bg-white p-4 hover:border-primary/20 hover:shadow-sm transition-all group">
+                    <div className={`h-10 w-10 rounded-xl ${link.bg} ${link.color} flex items-center justify-center`}><link.icon className="h-5 w-5" /></div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-bold text-foreground group-hover:text-primary transition-colors">{link.label}</div>
+                      <div className="text-xs text-foreground/50">{link.desc}</div>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-foreground/20 group-hover:text-primary transition-colors" />
+                  </Link>
+                ))}
               </div>
             </div>
           </div>
