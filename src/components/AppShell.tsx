@@ -1,10 +1,13 @@
 "use client";
 
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useClinicStore } from "@/store/clinicStore";
-import { LogOut, LayoutDashboard, UserCircle, Briefcase, Activity } from "lucide-react";
+import { api, type Notification } from "@/lib/api";
+import { LogOut, LayoutDashboard, UserCircle, Briefcase, Activity, Bell, Check } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
 
 type NavItem = {
   label: string;
@@ -36,6 +39,44 @@ export function AppShell({
 
   const logout = () => logoutFn(currentRole);
 
+  /* ── Notifications (patient only) ── */
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [bellOpen, setBellOpen] = useState(false);
+  const bellRef = useRef<HTMLDivElement>(null);
+
+  const fetchNotifications = useCallback(async () => {
+    if (!patientSession) return;
+    try {
+      api.setRole("patient");
+      const data = await api.getMyNotifications();
+      setNotifications(data ?? []);
+    } catch { /* silent */ }
+  }, [patientSession]);
+
+  useEffect(() => {
+    fetchNotifications();
+    const id = setInterval(fetchNotifications, 60_000);
+    return () => clearInterval(id);
+  }, [fetchNotifications]);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (bellRef.current && !bellRef.current.contains(e.target as Node)) setBellOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const markRead = async (id: string) => {
+    try {
+      api.setRole("patient");
+      await api.markNotificationRead(id);
+      setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+    } catch { /* silent */ }
+  };
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
   return (
     <div className="min-h-screen bg-background flex flex-col transition-colors duration-300">
       {/* Top Header */}
@@ -55,6 +96,60 @@ export function AppShell({
           </div>
           
           <div className="flex items-center gap-3">
+            {/* Notifications Bell */}
+            {isPatient && patientSession && (
+              <div ref={bellRef} className="relative">
+                <button
+                  onClick={() => setBellOpen((o) => !o)}
+                  className="relative flex h-10 w-10 items-center justify-center rounded-full bg-foreground/5 text-foreground transition-colors hover:bg-foreground/10"
+                >
+                  <Bell className="h-5 w-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white animate-pulse">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
+                </button>
+                {bellOpen && (
+                  <div className="absolute right-0 top-12 z-50 w-[calc(100vw-2rem)] sm:w-80 max-w-sm rounded-2xl border border-foreground/10 bg-white shadow-2xl overflow-hidden">
+                    <div className="flex items-center justify-between border-b border-foreground/5 px-4 py-3">
+                      <span className="text-sm font-bold text-foreground">Notifications</span>
+                      {unreadCount > 0 && <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">{unreadCount} new</span>}
+                    </div>
+                    <div className="max-h-80 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <div className="p-6 text-center text-sm text-foreground/40">No notifications yet</div>
+                      ) : (
+                        notifications.slice(0, 20).map((n) => (
+                          <div
+                            key={n.id}
+                            className={cn(
+                              "flex items-start gap-3 px-4 py-3 border-b border-foreground/5 last:border-0 transition-colors",
+                              n.read ? "bg-white" : "bg-primary/5"
+                            )}
+                          >
+                            <div className="flex-1 min-w-0">
+                              <div className="text-xs font-bold text-foreground truncate">{n.title}</div>
+                              <div className="text-[11px] text-foreground/60 mt-0.5 line-clamp-2">{n.body}</div>
+                              <div className="text-[10px] text-foreground/30 mt-1">{formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}</div>
+                            </div>
+                            {!n.read && (
+                              <button
+                                onClick={() => markRead(n.id)}
+                                className="shrink-0 mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                                title="Mark as read"
+                              >
+                                <Check className="h-3 w-3" />
+                              </button>
+                            )}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
             {session?.role === "doctor" && (
               <Link
                 href="/portal"

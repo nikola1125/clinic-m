@@ -5,11 +5,11 @@ import { format } from "date-fns";
 import {
   User, Pill, FileText, Stethoscope, Activity,
   AlertCircle, Heart, Shield, Phone, ClipboardList,
-  ChevronRight, Loader2,
+  ChevronRight, Loader2, FolderOpen, Upload, ExternalLink,
 } from "lucide-react";
-import { api, MedicalProfile, MedicalNote, Prescription, ActiveMedication, Diagnosis } from "@/lib/api";
+import { api, MedicalProfile, MedicalNote, Prescription, ActiveMedication, Diagnosis, PatientDocument } from "@/lib/api";
 
-type Tab = "profile" | "notes" | "prescriptions" | "medications" | "diagnoses";
+type Tab = "profile" | "notes" | "prescriptions" | "medications" | "diagnoses" | "documents";
 
 const TABS: { id: Tab; label: string; icon: React.FC<any> }[] = [
   { id: "profile", label: "Profile", icon: User },
@@ -17,6 +17,7 @@ const TABS: { id: Tab; label: string; icon: React.FC<any> }[] = [
   { id: "prescriptions", label: "Prescriptions", icon: ClipboardList },
   { id: "medications", label: "Medications", icon: Pill },
   { id: "diagnoses", label: "Diagnoses", icon: Stethoscope },
+  { id: "documents", label: "Documents", icon: FolderOpen },
 ];
 
 const SEVERITY_COLOR: Record<string, string> = {
@@ -41,6 +42,7 @@ export default function PatientMedicalRecordPage() {
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [medications, setMedications] = useState<ActiveMedication[]>([]);
   const [diagnoses, setDiagnoses] = useState<Diagnosis[]>([]);
+  const [documents, setDocuments] = useState<PatientDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,12 +54,14 @@ export default function PatientMedicalRecordPage() {
       api.getMyPrescriptions().catch(() => []),
       api.getMyMedications().catch(() => []),
       api.getMyDiagnoses().catch(() => []),
-    ]).then(([p, n, rx, meds, dx]) => {
+      api.getMyDocuments().catch(() => []),
+    ]).then(([p, n, rx, meds, dx, docs]) => {
       setProfile(p);
       setNotes(n as MedicalNote[]);
       setPrescriptions(rx as Prescription[]);
       setMedications(meds as ActiveMedication[]);
       setDiagnoses(dx as Diagnosis[]);
+      setDocuments((docs ?? []) as PatientDocument[]);
     }).catch((e) => setError(e.message)).finally(() => setLoading(false));
   }, []);
 
@@ -261,7 +265,122 @@ export default function PatientMedicalRecordPage() {
             )}
           </div>
         )}
+        {/* Documents Tab */}
+        {activeTab === "documents" && (
+          <DocumentsTab documents={documents} onUpload={(doc) => setDocuments((prev) => [doc, ...prev])} />
+        )}
       </div>
+    </div>
+  );
+}
+
+function DocumentsTab({ documents, onUpload }: { documents: PatientDocument[]; onUpload: (doc: PatientDocument) => void }) {
+  const [showForm, setShowForm] = useState(false);
+  const [title, setTitle] = useState("");
+  const [fileUrl, setFileUrl] = useState("");
+  const [category, setCategory] = useState<"lab" | "imaging" | "report" | "prescription" | "other">("lab");
+  const [uploading, setUploading] = useState(false);
+
+  const CAT_COLORS: Record<string, string> = {
+    lab: "bg-blue-100 text-blue-700",
+    imaging: "bg-purple-100 text-purple-700",
+    report: "bg-amber-100 text-amber-700",
+    prescription: "bg-rose-100 text-rose-700",
+    other: "bg-gray-100 text-gray-600",
+  };
+
+  const handleSubmit = async () => {
+    if (!title.trim() || !fileUrl.trim()) return;
+    setUploading(true);
+    try {
+      api.setRole("patient");
+      const doc = await api.uploadMyDocument({ title, file_url: fileUrl, file_type: "application/pdf", category });
+      onUpload(doc);
+      setTitle(""); setFileUrl(""); setCategory("lab"); setShowForm(false);
+    } catch (e) {
+      console.error("Upload failed", e);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-foreground/50">{documents.length} document{documents.length !== 1 ? "s" : ""}</p>
+        <button
+          onClick={() => setShowForm((v) => !v)}
+          className="flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white hover:bg-primary/90 transition-colors"
+        >
+          <Upload className="h-3.5 w-3.5" /> Upload
+        </button>
+      </div>
+
+      {showForm && (
+        <div className="bg-white border border-foreground/10 rounded-xl p-3 sm:p-4 space-y-3">
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Document title"
+            className="w-full rounded-lg bg-foreground/5 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+          />
+          <input
+            value={fileUrl}
+            onChange={(e) => setFileUrl(e.target.value)}
+            placeholder="File URL (e.g. https://...)"
+            className="w-full rounded-lg bg-foreground/5 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+          />
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value as typeof category)}
+              className="rounded-lg bg-foreground/5 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="lab">Lab Result</option>
+              <option value="imaging">Imaging</option>
+              <option value="report">Report</option>
+              <option value="prescription">Prescription</option>
+              <option value="other">Other</option>
+            </select>
+            <button
+              onClick={handleSubmit}
+              disabled={uploading || !title.trim() || !fileUrl.trim()}
+              className="flex items-center justify-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-bold text-white hover:bg-primary/90 transition-colors disabled:opacity-50"
+            >
+              {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+              Save
+            </button>
+          </div>
+        </div>
+      )}
+
+      {documents.length === 0 ? (
+        <EmptyState icon={FolderOpen} message="No documents uploaded yet" />
+      ) : (
+        documents.map((doc) => (
+          <div key={doc.id} className="bg-white border border-foreground/10 rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="h-10 w-10 rounded-xl bg-foreground/5 flex items-center justify-center shrink-0">
+                <FileText className="h-5 w-5 text-foreground/40" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-foreground truncate">{doc.title}</p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className={`px-2 py-0.5 text-[10px] rounded-full font-bold uppercase ${CAT_COLORS[doc.category] ?? CAT_COLORS.other}`}>
+                    {doc.category}
+                  </span>
+                  <span className="text-xs text-foreground/40">{format(new Date(doc.uploaded_at), "PP")}</span>
+                </div>
+              </div>
+            </div>
+            {doc.file_url && (
+              <a href={doc.file_url} target="_blank" rel="noopener noreferrer" className="shrink-0 rounded-lg bg-primary/10 text-primary px-3 py-1.5 text-xs font-bold hover:bg-primary/20 transition-colors flex items-center gap-1 w-fit">
+                <ExternalLink className="h-3 w-3" /> Open
+              </a>
+            )}
+          </div>
+        ))
+      )}
     </div>
   );
 }

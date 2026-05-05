@@ -150,6 +150,8 @@ export default function AdminDoctorsPage() {
       nav={[
         { label: "Overview", href: "/hq-command" },
         { label: "Doctors", href: "/hq-command/doctors" },
+        { label: "Patients", href: "/hq-command/patients" },
+        { label: "Appointments", href: "/hq-command/appointments" },
         { label: "Revenue", href: "/hq-command/revenue" },
       ]}
     >
